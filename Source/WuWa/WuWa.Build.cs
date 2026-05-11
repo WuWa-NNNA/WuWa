@@ -10,7 +10,7 @@ public class WuWa : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "WuWa" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MotionWarping" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
