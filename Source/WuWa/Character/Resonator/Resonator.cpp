@@ -17,6 +17,7 @@ AResonator::AResonator()
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	GetCharacterMovement()->GravityScale = 1.5f;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 
@@ -77,6 +78,6 @@ void AResonator::Jump()
 	}
 	else
 	{
-		PlayAnimMontage(JumpMontage);
+		PlayAnimMontage(JumpMontage, 1.5f);
 	}
 }

@@ -7,13 +7,6 @@
 
 class UInputAction;
 
-UENUM(BlueprintType)
-enum class ELocomotionGait : uint8
-{
-	Run,
-	Sprint
-};
-
 UCLASS()
 class WUWA_API AResonator : public AWWCharacter
 {
