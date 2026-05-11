@@ -14,4 +14,6 @@ class WUWA_API AWWCharacterSigillum : public AWWCharacterMonster
 {
 	GENERATED_BODY()
 	
+public:
+	AWWCharacterSigillum();
 };
