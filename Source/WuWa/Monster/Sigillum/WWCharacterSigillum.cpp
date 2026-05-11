@@ -2,4 +2,9 @@
 
 
 #include "Monster/Sigillum/WWCharacterSigillum.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
+AWWCharacterSigillum::AWWCharacterSigillum()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 100.f;
+}
