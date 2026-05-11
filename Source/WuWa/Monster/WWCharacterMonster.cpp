@@ -3,3 +3,6 @@
 
 #include "WWCharacterMonster.h"
 
+AWWCharacterMonster::AWWCharacterMonster()
+{
+}

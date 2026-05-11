@@ -13,5 +13,8 @@ UCLASS()
 class WUWA_API AWWCharacterMonster : public AResonator
 {
 	GENERATED_BODY()
+
+public:
+	AWWCharacterMonster();
 	
 };
