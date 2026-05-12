@@ -6,6 +6,7 @@
 #include "Resonator.generated.h"
 
 class UInputAction;
+class USkeletalMeshComponent;
 
 UENUM(BlueprintType)
 enum class EResonatorState : uint8
@@ -47,31 +48,32 @@ private:
 	void Look(const FInputActionValue& Value);
 	void Jump();
 	void Dash();
-
-private:
-	void CancelAttackByNewInput();
-	void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-private:
 	void Attack();
+	void Skill();
+
+private:
+	void SetRotationByMoveInput();
+	void TryCancelAttackByNewInput();
 	void BeginComboAttack();
-	void EndComboAttack(UAnimMontage* TargetMontage, bool bInterrupted);
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
 private:
-	void SetRotationByMoveInput();
+	void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
+	void OnSkillMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 public:
 	FORCEINLINE EResonatorState GetCurrentState() const { return CurrentState; }
 	FORCEINLINE ELocomotionGait GetCurrentLocomotionGait() const { return CurrentLocomotionGait; }
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMeshComponent() const { return Weapon; }
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resonator", meta = (AllowPrivateAccess = "true"))
 	EResonatorState CurrentState;
 
 private:
-	UPROPERTY(BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FVector CurrentMoveInputDirection;
 	ELocomotionGait CurrentLocomotionGait;
 
@@ -89,9 +91,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> Camera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	bool bApplyZMotionToCamera = false;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USkeletalMeshComponent> Weapon;
+	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
@@ -109,6 +114,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AttackAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> SkillAction;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> JumpMontage;
@@ -124,6 +132,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> SkillMontage;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))

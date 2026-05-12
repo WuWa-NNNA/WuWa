@@ -25,6 +25,7 @@ AResonator::AResonator()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 600.0f;
+	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->bEnableCameraRotationLag = true;
@@ -71,12 +72,23 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AResonator::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AResonator::Attack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
+		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
 	}
 }
 
 void AResonator::Tick(float DeltaSeconds)
 {
+	if (bApplyZMotionToCamera)
+	{
+		float ZOffset = GetMesh()->GetSocketLocation(TEXT("Bip001")).Z - GetActorLocation().Z - 50.0f;
+		SpringArm->SocketOffset = FVector(0.0f, 0.0f, ZOffset);
+	}
+	else
+	{
+		SpringArm->SocketOffset = FVector::Zero();
+	}
+
 	TickLocomotionGait(DeltaSeconds);
 }
 
@@ -110,9 +122,14 @@ void AResonator::Move(const FInputActionValue& Value)
 	}
 
 	CurrentMoveInputDirection = NewMoveInputDirection.GetSafeNormal();
-	AddMovementInput(CurrentMoveInputDirection);
 
-	CancelAttackByNewInput();
+	if (CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	TryCancelAttackByNewInput();
+	AddMovementInput(CurrentMoveInputDirection);
 }
 
 void AResonator::Look(const FInputActionValue& Value)
@@ -135,10 +152,11 @@ void AResonator::Jump()
 		return;
 	}
 
-	CancelAttackByNewInput();
+	TryCancelAttackByNewInput();
 
 	if (GetVelocity().Length() > 50.0f)
 	{
+		SetRotationByMoveInput();
 		PlayAnimMontage(JumpRunMontage);
 	}
 	else
@@ -159,16 +177,12 @@ void AResonator::Dash()
 		return;
 	}
 
-	CancelAttackByNewInput();
+	TryCancelAttackByNewInput();
 
 	SetCurrentLocomotionGait(ELocomotionGait::Dash);
 	SetRotationByMoveInput();
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
@@ -190,33 +204,24 @@ void AResonator::Dash()
 	}
 }
 
-void AResonator::CancelAttackByNewInput()
-{
-	if (!bCanCancelAttack)
-	{
-		return;
-	}
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	AnimInstance->StopAllMontages(0.15f);
-}
-
-void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	SetCurrentLocomotionGait(ELocomotionGait::Sprint);
-}
-
 void AResonator::Attack()
 {
-	CancelAttackByNewInput();
+	if (CurrentAttackCombo == 0 && CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	if (bCanCancelAttack)
+	{
+		CurrentAttackCombo = 0;
+		bHasNextComboCommand = true;
+		CheckAttackComboInput();
+		return;
+	}
 
 	if (CurrentAttackCombo == 0)
 	{
+		bCanCancelAttack = false;
 		BeginComboAttack();
 		return;
 	}
@@ -231,32 +236,54 @@ void AResonator::Attack()
 	}
 }
 
+void AResonator::Skill()
+{
+	if (CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	TryCancelAttackByNewInput();
+
+	SetCurrentState(EResonatorState::Attack);
+	SetRotationByMoveInput();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnSkillMontageEnded);
+	PlayAnimMontage(SkillMontage, 1.5f);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
+}
+
+void AResonator::SetRotationByMoveInput()
+{
+	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	SetActorRotation(CurrentMoveInputDirection.Rotation());
+	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+}
+
+void AResonator::TryCancelAttackByNewInput()
+{
+	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
+	{
+		return;
+	}
+
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.0f);
+}
+
 void AResonator::BeginComboAttack()
 {
 	CurrentAttackCombo = 1;
 	SetCurrentState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	const float AttackSpeedRate = 1.5f;
-	AnimInstance->Montage_Play(AttackMontage, AttackSpeedRate);
-
 	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AResonator::EndComboAttack);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, AttackMontage);
+	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
+	const float AttackSpeedRate = 1.5f;
+	PlayAnimMontage(AttackMontage, AttackSpeedRate);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
-}
-
-void AResonator::EndComboAttack(UAnimMontage* TargetMontage, bool bInterrupted)
-{
-	CurrentAttackCombo = 0;
-	SetCurrentState(EResonatorState::Normal);
 }
 
 void AResonator::SetAttackComboTimer()
@@ -282,28 +309,32 @@ void AResonator::CheckAttackComboInput()
 		return;
 	}
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (!AnimInstance)
+	if (++CurrentAttackCombo > AttackComboData->MaxComboCount)
 	{
-		return;
+		CurrentAttackCombo = 1;
 	}
 
-	CurrentAttackCombo = FMath::Clamp(CurrentAttackCombo + 1, 1, AttackComboData->MaxComboCount);
 	SetCurrentState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *AttackComboData->MontageSectionNamePrefix, CurrentAttackCombo);
-
-	AnimInstance->Montage_JumpToSection(NextSection, AttackMontage);
+	GetMesh()->GetAnimInstance()->Montage_JumpToSection(NextSection, AttackMontage);
 
 	SetAttackComboTimer();
 
 	bHasNextComboCommand = false;
 }
 
-void AResonator::SetRotationByMoveInput()
+void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	SetActorRotation(CurrentMoveInputDirection.Rotation());
-	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+	SetCurrentLocomotionGait(ELocomotionGait::Sprint);
+}
+
+void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
+{
+	CurrentAttackCombo = 0;
+}
+
+void AResonator::OnSkillMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
 }
