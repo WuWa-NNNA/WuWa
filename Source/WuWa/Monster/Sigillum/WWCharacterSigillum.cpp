@@ -21,7 +21,7 @@ void AWWCharacterSigillum::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (EnhancedInputComponent)
 	{
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWWCharacterSigillum::Attack);
+		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWWCharacterSigillum::Attack);
 	}
 }
 

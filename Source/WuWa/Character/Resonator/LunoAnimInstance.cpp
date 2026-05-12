@@ -12,13 +12,21 @@ void ULunoAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         return;
     }
 
+    Speed = Pawn->GetVelocity().Length();
+
     ACharacter* Character = Cast<ACharacter>(Pawn);
     if (!Character)
     {
         return;
     }
 
-    Speed = Pawn->GetVelocity().Length();
-
     bIsInAir = Character->GetMovementComponent()->IsFalling() || Character->GetMovementComponent()->IsFlying();
+
+    AResonator* Resonator = Cast<AResonator>(Character);
+    if (!Resonator)
+    {
+        return;
+    }
+
+    CurrentLocomotionGait = Resonator->GetCurrentLocomotionGait();
 }
