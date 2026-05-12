@@ -3,33 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Monster/WWCharacterMonster.h"
+#include "Monster/Monster.h"
 
-#include "WWCharacterSigillum.generated.h"
+#include "Sigillum.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WUWA_API AWWCharacterSigillum : public AWWCharacterMonster
+class WUWA_API ASigillum : public AMonster
 {
 	GENERATED_BODY()
 	
 public:
-	AWWCharacterSigillum();
+	ASigillum();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void Attack();
-
-	//UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<class UInputAction> AttackAction;
+	virtual void Attack() override;
 
 	// combo action section
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
-
-	void ProcessComboCommand();
 };

@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Monster/Sigillum/WWSigillumAnimInstance.h"
+#include "Monster/Sigillum/SigillumAnimInstance.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-UWWSigillumAnimInstance::UWWSigillumAnimInstance()
+USigillumAnimInstance::USigillumAnimInstance()
 {
 	MovingThreshould = 3.f;
 	JumpingThreshould = 100.f;
 }
 
-void UWWSigillumAnimInstance::NativeInitializeAnimation()
+void USigillumAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
@@ -24,7 +24,7 @@ void UWWSigillumAnimInstance::NativeInitializeAnimation()
 	}
 }
 
-void UWWSigillumAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void USigillumAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
