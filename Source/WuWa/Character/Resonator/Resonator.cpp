@@ -19,7 +19,6 @@ AResonator::AResonator()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
-	GetCharacterMovement()->GravityScale = 1.5f;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 
@@ -51,7 +50,6 @@ void AResonator::SetCurrentLocomotionGait(const ELocomotionGait NextLocomotionGa
 	switch (NextLocomotionGait)
 	{
 	case ELocomotionGait::Run:
-		GetCharacterMovement()->GravityScale = 2.5f;
 		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 		break;
 	case ELocomotionGait::Sprint:
