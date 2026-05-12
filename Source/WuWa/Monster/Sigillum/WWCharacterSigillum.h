@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Monster/WWCharacterMonster.h"
-#include "MotionWarpingComponent.h"
 
 #include "WWCharacterSigillum.generated.h"
 
@@ -28,8 +27,6 @@ protected:
 
 	// combo action section
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation)
-	UMotionWarpingComponent* MotionWarpingComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
