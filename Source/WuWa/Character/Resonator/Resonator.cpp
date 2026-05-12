@@ -302,17 +302,7 @@ void AResonator::CheckAttackComboInput()
 
 void AResonator::SetRotationByMoveInput()
 {
-	const FVector PrevCamLoc = Camera->GetComponentLocation();
-	const FRotator PrevCamRot = Camera->GetComponentRotation();
-
+	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	SetActorRotation(CurrentMoveInputDirection.Rotation());
-
-	//const FVector NewCamLoc = Camera->GetComponentLocation();
-	//const FVector Delta = PrevCamLoc - NewCamLoc;
-	//SpringArm->SocketOffset += SpringArm->GetComponentTransform().InverseTransformVectorNoScale(Delta);
-	//
-	//if (Controller)
-	//{
-	//	Controller->SetControlRotation(PrevCamRot);
-	//}
+	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
