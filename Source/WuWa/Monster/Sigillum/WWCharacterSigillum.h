@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Monster/WWCharacterMonster.h"
+
 #include "WWCharacterSigillum.generated.h"
 
 /**
@@ -16,4 +17,19 @@ class WUWA_API AWWCharacterSigillum : public AWWCharacterMonster
 	
 public:
 	AWWCharacterSigillum();
+
+protected:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void Attack();
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
+
+	// combo action section
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> ComboActionMontage;
+
+	void ProcessComboCommand();
 };
