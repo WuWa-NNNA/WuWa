@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
+#include "Stat/PlayerStatComponent.h"
 
 AResonator::AResonator()
 {
@@ -39,6 +40,13 @@ AResonator::AResonator()
 
 	SetCurrentState(EResonatorState::Normal);
 	SetCurrentLocomotionGait(ELocomotionGait::Run);
+
+	Stat = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStat"));
+	if (Stat)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SUCCED Stat"));
+	}
+
 }
 
 void AResonator::SetCurrentState(const EResonatorState NextState)

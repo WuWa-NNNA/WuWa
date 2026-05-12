@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "WWStatComponent.h"
 #include "PlayerStatComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnHPZeroDelegate);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*currentHP*/);
+
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDashChangedDelegate, float /*currentDash*/);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class WUWA_API UPlayerStatComponent : public UActorComponent
+class WUWA_API UPlayerStatComponent : public UWWStatComponent
 {
 	GENERATED_BODY()
 
@@ -26,22 +26,15 @@ protected:
 	virtual void BeginPlay() override;
 
 public :
-	FOnHPZeroDelegate OnHpZero;
-	FOnHpChangedDelegate OnHpChagned;
-	
 	FOnDashChangedDelegate OnDashChanged;
 
-	FORCEINLINE float GetMaxHP() { return MaxHP; }
-	FORCEINLINE float GetCurrentHP() { return CurrentHP; }
-	float ApplyDamage(float Damage);
-
-	FORCEINLINE float GetMaxDash() { return MaxHP; }
-	FORCEINLINE float GetCurrentDash() { return CurrentHP; }
+	FORCEINLINE float GetMaxDash() { return MaxDash; }
+	FORCEINLINE float GetCurrentDash() { return CurrentDash; }
 	float ApplyDash();
 
 protected:	
 
-	void SetHp(float NewHp);
+	
 	void SetDash(float NewDash);
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
@@ -49,11 +42,5 @@ protected:
 	
 	UPROPERTY(Transient, VisibleAnywhere, Category = "Stat")
 	float CurrentDash;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
-	float MaxHP;
-
-	UPROPERTY(Transient, VisibleAnywhere, Category = "Stat")
-	float CurrentHP;
 
 };
