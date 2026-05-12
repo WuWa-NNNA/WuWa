@@ -24,20 +24,20 @@ public :
 	FORCEINLINE void SetMaxHp(float NewMaxHP) { MaxHp = NewMaxHP; }
 	void UpdateHpBar(float NewCurrentHp);
 
-	FORCEINLINE void SetMaxDash(float NewMaxDash) { MaxDash = NewMaxDash; }
-	void UpdateDashBar(float NewCurrentDash);
+
+
 
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
 
-	UPROPERTY()
-	TObjectPtr<class UProgressBar> DashProgressBar;
 
 	UPROPERTY()
 	float MaxHp;
 
 	UPROPERTY()
 	float MaxDash;
+
+
 
 };
