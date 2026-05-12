@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Monster/WWCharacterMonster.h"
-#include "MotionWarpingComponent.h"
 
 #include "WWCharacterSigillum.generated.h"
 
@@ -23,13 +22,11 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void Attack();
 
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> AttackAction;
+	//UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<class UInputAction> AttackAction;
 
 	// combo action section
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation)
-	UMotionWarpingComponent* MotionWarpingComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
