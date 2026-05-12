@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Monster/Sigillum/WWCharacterSigillum.h"
+#include "Monster/Sigillum/Sigillum.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
@@ -9,17 +9,17 @@
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
 
-AWWCharacterSigillum::AWWCharacterSigillum()
+ASigillum::ASigillum()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 }
 
-void AWWCharacterSigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AWWCharacterSigillum::Attack()
+void ASigillum::Attack()
 {
 	Super::Attack();
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();

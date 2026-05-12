@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "WWCharacterMonster.h"
+#include "Monster.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -11,7 +11,7 @@
 #include "InputTriggers.h"
 
 
-AWWCharacterMonster::AWWCharacterMonster()
+AMonster::AMonster()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -41,28 +41,28 @@ AWWCharacterMonster::AWWCharacterMonster()
 
 }
 
-void AWWCharacterMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (EnhancedInputComponent)
 	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AWWCharacterMonster::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AWWCharacterMonster::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AWWCharacterMonster::Jump);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWWCharacterMonster::Attack);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMonster::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMonster::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMonster::Jump);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMonster::Attack);
 	}
 
 }
 
-void AWWCharacterMonster::Tick(float DeltaSeconds)
+void AMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 }
 
 
-void AWWCharacterMonster::Move(const FInputActionValue& Value)
+void AMonster::Move(const FInputActionValue& Value)
 {
 	FVector2D Movement = Value.Get<FVector2D>();
 
@@ -83,7 +83,7 @@ void AWWCharacterMonster::Move(const FInputActionValue& Value)
 
 }
 
-void AWWCharacterMonster::Look(const FInputActionValue& Value)
+void AMonster::Look(const FInputActionValue& Value)
 {
 	FVector2D RotationValue = Value.Get<FVector2D>();
 
@@ -92,7 +92,7 @@ void AWWCharacterMonster::Look(const FInputActionValue& Value)
 }
 
 
-void AWWCharacterMonster::Jump()
+void AMonster::Jump()
 {
 
 	if (GetVelocity().Length() > 50.0f)
@@ -101,7 +101,7 @@ void AWWCharacterMonster::Jump()
 	}
 }
 
-void AWWCharacterMonster::Attack()
+void AMonster::Attack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Attack ½ÇÇàµÊ!"));
 

@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "WWSigillumAnimInstance.generated.h"
+#include "SigillumAnimInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WUWA_API UWWSigillumAnimInstance : public UAnimInstance
+class WUWA_API USigillumAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
 public:
-	UWWSigillumAnimInstance();
+	USigillumAnimInstance();
 
 protected:
 	virtual void NativeInitializeAnimation() override;

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/WWCharacter.h"
 #include "InputActionValue.h"
-#include "WWCharacterMonster.generated.h"
+#include "Monster.generated.h"
 
 
 class UInputAction;
@@ -14,12 +14,12 @@ class UInputAction;
  * 
  */
 UCLASS()
-class WUWA_API AWWCharacterMonster : public AWWCharacter
+class WUWA_API AMonster : public AWWCharacter
 {
 	GENERATED_BODY()
 
 public:
-	AWWCharacterMonster();
+	AMonster();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
