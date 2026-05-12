@@ -49,7 +49,7 @@ private:
 	void Dash();
 
 private:
-	void OnAnyGameplayInput();
+	void CancelAttackByNewInput();
 	void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 private:

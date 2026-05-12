@@ -51,6 +51,7 @@ void AResonator::SetCurrentLocomotionGait(const ELocomotionGait NextLocomotionGa
 	switch (NextLocomotionGait)
 	{
 	case ELocomotionGait::Run:
+		GetCharacterMovement()->GravityScale = 2.5f;
 		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 		break;
 	case ELocomotionGait::Sprint:
@@ -113,7 +114,7 @@ void AResonator::Move(const FInputActionValue& Value)
 	CurrentMoveInputDirection = NewMoveInputDirection.GetSafeNormal();
 	AddMovementInput(CurrentMoveInputDirection);
 
-	OnAnyGameplayInput();
+	CancelAttackByNewInput();
 }
 
 void AResonator::Look(const FInputActionValue& Value)
@@ -136,15 +137,15 @@ void AResonator::Jump()
 		return;
 	}
 
-	OnAnyGameplayInput();
+	CancelAttackByNewInput();
 
 	if (GetVelocity().Length() > 50.0f)
 	{
-		PlayAnimMontage(JumpRunMontage, 1.5f);
+		PlayAnimMontage(JumpRunMontage);
 	}
 	else
 	{
-		PlayAnimMontage(JumpMontage, 1.5f);
+		PlayAnimMontage(JumpMontage);
 	}
 }
 
@@ -160,7 +161,7 @@ void AResonator::Dash()
 		return;
 	}
 
-	OnAnyGameplayInput();
+	CancelAttackByNewInput();
 
 	SetCurrentLocomotionGait(ELocomotionGait::Dash);
 	SetRotationByMoveInput();
@@ -191,7 +192,7 @@ void AResonator::Dash()
 	}
 }
 
-void AResonator::OnAnyGameplayInput()
+void AResonator::CancelAttackByNewInput()
 {
 	if (!bCanCancelAttack)
 	{
@@ -199,10 +200,12 @@ void AResonator::OnAnyGameplayInput()
 	}
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage)
+	if (!AnimInstance)
 	{
-		AnimInstance->Montage_Stop(0.15f, AttackMontage);
+		return;
 	}
+
+	AnimInstance->StopAllMontages(0.15f);
 }
 
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -212,7 +215,7 @@ void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 
 void AResonator::Attack()
 {
-	OnAnyGameplayInput();
+	CancelAttackByNewInput();
 
 	if (CurrentAttackCombo == 0)
 	{
