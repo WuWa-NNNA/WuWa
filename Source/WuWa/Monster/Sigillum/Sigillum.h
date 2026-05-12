@@ -20,11 +20,27 @@ public:
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void Attack() override;
+	void EvadeAndAttack();
+	void DiveAttack();
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ResetDiveAttackMovement();
 
-	// combo action section
-protected:
+private: // dive
+	bool bIsDiveAttacking = false;
+	FTimerHandle TimerHandle_Dive;
+	void PlayAirMontage();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimMontage> ComboActionMontage;
+private: // inputaction
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EvadeAndAttackAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> DiveAttackAction;
+
+private: // montage;
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> EvadeAndAttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> DiveAttackMontage;
 };
