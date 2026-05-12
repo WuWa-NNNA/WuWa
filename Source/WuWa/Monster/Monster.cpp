@@ -103,8 +103,6 @@ void AMonster::Jump()
 
 void AMonster::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack ½ÇÇàµÊ!"));
-
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage)
 	{

@@ -17,14 +17,51 @@ ASigillum::ASigillum()
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (EnhancedInputComponent)
+	{
+		EnhancedInputComponent->BindAction(EvadeAndAttackAction, ETriggerEvent::Started, this, &ASigillum::EvadeAndAttack);
+		EnhancedInputComponent->BindAction(DiveAttackAction, ETriggerEvent::Started, this, &ASigillum::DiveAttack);
+	}
 }
 
-void ASigillum::Attack()
+void ASigillum::EvadeAndAttack()
 {
-	Super::Attack();
-    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (AnimInstance && ComboActionMontage)
-    {
-        AnimInstance->Montage_Play(ComboActionMontage);
-    }
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EvadeAndAttackMontage)
+	{
+		AnimInstance->Montage_Play(EvadeAndAttackMontage);
+	}
+}
+void ASigillum::DiveAttack()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+
+	if (bIsDiveAttacking) return;
+
+	if (AnimInstance && DiveAttackMontage && MovementComp)
+	{
+		bIsDiveAttacking = true; 
+		LaunchCharacter(FVector(0.f, 0.f, 5000.f), true, true);
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_Dive, this, &ASigillum::PlayAirMontage, 0.3f, false);
+	}
+}
+
+void ASigillum::PlayAirMontage()
+{
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	GetMesh()->GetAnimInstance()->Montage_Play(DiveAttackMontage);
+}
+
+void ASigillum::ResetDiveAttackMovement()
+{
+	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+	if (MovementComp)
+	{
+		bIsDiveAttacking = false; // 상태 잠금 해제
+		MovementComp->SetMovementMode(MOVE_Falling);
+	}
 }
