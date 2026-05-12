@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Character/WWCharacter.h"
@@ -128,4 +128,11 @@ private:
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAttackComboData> AttackComboData;
+
+protected :	// UI
+	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWWWidgetComponent> HpBar;
+
+	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWWWidgetComponent> DashBar;
 };

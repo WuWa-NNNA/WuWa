@@ -8,6 +8,11 @@
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
 
+// Stat/UI
+#include "Stat/PlayerStatComponent.h"
+#include "UI/WWWidgetComponent.h"
+#include "Components/WidgetComponent.h"
+
 AResonator::AResonator()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,6 +44,25 @@ AResonator::AResonator()
 
 	SetCurrentState(EResonatorState::Normal);
 	SetCurrentLocomotionGait(ELocomotionGait::Run);
+
+	Stat = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStat"));
+	if (Stat)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SUCCED Stat!"));
+	}
+	DashBar = CreateDefaultSubobject<UWWWidgetComponent>(TEXT("HPWidget"));
+	DashBar->SetupAttachment(GetMesh());
+
+	DashBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> DashWidgetRef(TEXT("/Game/PCH/UI/Blueprint/WBP_Dash.WBP_Dash_C"));
+	if (DashWidgetRef.Succeeded())
+	{
+		DashBar->SetWidgetClass(DashWidgetRef.Class);
+		DashBar->SetWidgetSpace(EWidgetSpace::Screen);
+		DashBar->SetDrawSize(FVector2D(150.0f, 15.0f));
+		DashBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);;
+	}
 }
 
 void AResonator::SetCurrentState(const EResonatorState NextState)
