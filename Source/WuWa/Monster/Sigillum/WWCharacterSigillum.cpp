@@ -17,23 +17,11 @@ AWWCharacterSigillum::AWWCharacterSigillum()
 void AWWCharacterSigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (EnhancedInputComponent)
-	{
-		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWWCharacterSigillum::Attack);
-	}
 }
 
 void AWWCharacterSigillum::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack 실행됨!"));
-	ProcessComboCommand();
-}
-
-void AWWCharacterSigillum::ProcessComboCommand()
-{
-    // 3. 몽타주 재생
+	Super::Attack();
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (AnimInstance && ComboActionMontage)
     {
