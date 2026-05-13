@@ -21,6 +21,27 @@ public:
 	ALuno();
 
 private:
+	virtual void BeginPlay() override;
+
+public:
+	void ChangeLunoState(ELunoState NextLunoState);
+
+protected:
+	virtual void SAttack() override;
+
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resonator", meta = (AllowPrivateAccess = "true"))
+	ELunoState CurrentLunoState;
+
+private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> WeaponTrail;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAnimMontage>> AttackMontages;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAttackComboData>> AttackComboDatas;
 };

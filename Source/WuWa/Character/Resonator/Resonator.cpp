@@ -36,29 +36,6 @@ AResonator::AResonator()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
-
-	SetCurrentState(EResonatorState::Normal);
-	SetCurrentLocomotionGait(ELocomotionGait::Run);
-}
-
-void AResonator::SetCurrentState(const EResonatorState NextState)
-{
-	CurrentState = NextState;
-}
-
-void AResonator::SetCurrentLocomotionGait(const ELocomotionGait NextLocomotionGait)
-{
-	switch (NextLocomotionGait)
-	{
-	case ELocomotionGait::Run:
-		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
-		break;
-	case ELocomotionGait::Sprint:
-		GetCharacterMovement()->MaxWalkSpeed = 750.0f;
-		break;
-	}
-
-	CurrentLocomotionGait = NextLocomotionGait;
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,8 +50,17 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
+		EnhancedInputComponent->BindAction(SAttackAction, ETriggerEvent::Started, this, &AResonator::SAttack);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
 	}
+}
+
+void AResonator::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ChangeState(EResonatorState::Normal);
+	ChangeLocomotionGait(ELocomotionGait::Run);
 }
 
 void AResonator::Tick(float DeltaSeconds)
@@ -99,10 +85,30 @@ void AResonator::TickLocomotionGait(float DeltaSeconds)
 	case ELocomotionGait::Sprint:
 		if (GetVelocity().Length() <= 50.0f)
 		{
-			SetCurrentLocomotionGait(ELocomotionGait::Run);
+			ChangeLocomotionGait(ELocomotionGait::Run);
 		}
 		break;
 	}
+}
+
+void AResonator::ChangeState(const EResonatorState NextState)
+{
+	CurrentState = NextState;
+}
+
+void AResonator::ChangeLocomotionGait(const ELocomotionGait NextLocomotionGait)
+{
+	switch (NextLocomotionGait)
+	{
+	case ELocomotionGait::Run:
+		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+		break;
+	case ELocomotionGait::Sprint:
+		GetCharacterMovement()->MaxWalkSpeed = 750.0f;
+		break;
+	}
+
+	CurrentLocomotionGait = NextLocomotionGait;
 }
 
 void AResonator::Move(const FInputActionValue& Value)
@@ -128,7 +134,8 @@ void AResonator::Move(const FInputActionValue& Value)
 		return;
 	}
 
-	TryCancelAttackByNewInput();
+	TryCancelAttackMontageByNewInput();
+
 	AddMovementInput(CurrentMoveInputDirection);
 }
 
@@ -152,7 +159,7 @@ void AResonator::Jump()
 		return;
 	}
 
-	TryCancelAttackByNewInput();
+	TryCancelAttackMontageByNewInput();
 
 	if (GetVelocity().Length() > 50.0f)
 	{
@@ -177,9 +184,9 @@ void AResonator::Dash()
 		return;
 	}
 
-	TryCancelAttackByNewInput();
+	TryCancelAttackMontageByNewInput();
 
-	SetCurrentLocomotionGait(ELocomotionGait::Dash);
+	ChangeLocomotionGait(ELocomotionGait::Dash);
 	SetRotationByMoveInput();
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -206,22 +213,13 @@ void AResonator::Dash()
 
 void AResonator::Attack()
 {
-	if (CurrentAttackCombo == 0 && CurrentState != EResonatorState::Normal)
-	{
-		return;
-	}
-
-	if (bCanCancelAttack)
-	{
-		CurrentAttackCombo = 0;
-		bHasNextComboCommand = true;
-		CheckAttackComboInput();
-		return;
-	}
-
 	if (CurrentAttackCombo == 0)
 	{
-		bCanCancelAttack = false;
+		if (CurrentState != EResonatorState::Normal)
+		{
+			return;
+		}
+
 		BeginComboAttack();
 		return;
 	}
@@ -234,6 +232,29 @@ void AResonator::Attack()
 	{
 		bHasNextComboCommand = false;
 	}
+
+	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
+	{
+		return;
+	}
+
+	bHasNextComboCommand = true;
+	CheckAttackComboInput();
+}
+
+void AResonator::SAttack()
+{
+	if (CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	TryCancelAttackMontageByNewInput();
+	
+	//ChangeState(EResonatorState::Attack);
+	//SetRotationByMoveInput();
+	//
+	//PlayAnimMontage(SAttackMontage, 1.5f);
 }
 
 void AResonator::Skill()
@@ -243,15 +264,12 @@ void AResonator::Skill()
 		return;
 	}
 
-	TryCancelAttackByNewInput();
+	TryCancelAttackMontageByNewInput();
 
-	SetCurrentState(EResonatorState::Attack);
+	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AResonator::OnSkillMontageEnded);
 	PlayAnimMontage(SkillMontage, 1.5f);
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
 }
 
 void AResonator::SetRotationByMoveInput()
@@ -261,7 +279,7 @@ void AResonator::SetRotationByMoveInput()
 	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
-void AResonator::TryCancelAttackByNewInput()
+void AResonator::TryCancelAttackMontageByNewInput()
 {
 	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
 	{
@@ -274,7 +292,7 @@ void AResonator::TryCancelAttackByNewInput()
 void AResonator::BeginComboAttack()
 {
 	CurrentAttackCombo = 1;
-	SetCurrentState(EResonatorState::Attack);
+	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
 	FOnMontageEnded EndDelegate;
@@ -314,7 +332,7 @@ void AResonator::CheckAttackComboInput()
 		CurrentAttackCombo = 1;
 	}
 
-	SetCurrentState(EResonatorState::Attack);
+	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *AttackComboData->MontageSectionNamePrefix, CurrentAttackCombo);
@@ -327,14 +345,10 @@ void AResonator::CheckAttackComboInput()
 
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	SetCurrentLocomotionGait(ELocomotionGait::Sprint);
+	ChangeLocomotionGait(ELocomotionGait::Sprint);
 }
 
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
 {
 	CurrentAttackCombo = 0;
-}
-
-void AResonator::OnSkillMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
 }
