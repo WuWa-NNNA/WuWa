@@ -18,7 +18,8 @@ public class WuWa : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"UMG",
-			"AIModule",
+            "Niagara",
+            "AIModule",
 			"NavigationSystem",
 			"GameplayTasks" 
 		});
