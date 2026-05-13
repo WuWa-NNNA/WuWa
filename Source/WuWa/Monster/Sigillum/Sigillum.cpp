@@ -23,6 +23,7 @@ void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnhancedInputComponent->BindAction(EvadeAndAttackAction, ETriggerEvent::Started, this, &ASigillum::EvadeAndAttack);
 		EnhancedInputComponent->BindAction(DiveAttackAction, ETriggerEvent::Started, this, &ASigillum::DiveAttack);
+		EnhancedInputComponent->BindAction(ParalysisAction, ETriggerEvent::Started, this, &ASigillum::ChangeToParalysis);
 	}
 }
 
@@ -50,6 +51,15 @@ void ASigillum::DiveAttack()
 	}
 }
 
+void ASigillum::ChangeToParalysis()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ParalysisMontage)
+	{
+		AnimInstance->Montage_Play(ParalysisMontage);
+	}
+}
+
 void ASigillum::PlayAirMontage()
 {
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
@@ -61,7 +71,7 @@ void ASigillum::ResetDiveAttackMovement()
 	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
 	if (MovementComp)
 	{
-		bIsDiveAttacking = false; // 상태 잠금 해제
+		bIsDiveAttacking = false; 
 		MovementComp->SetMovementMode(MOVE_Falling);
 	}
 }
