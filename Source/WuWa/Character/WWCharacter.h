@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Stat/WWStatComponent.h"
 #include "WWCharacter.generated.h"
 
 UCLASS()
@@ -11,4 +12,8 @@ class WUWA_API AWWCharacter : public ACharacter
 
 public:
 	AWWCharacter();
+
+protected :
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	TObjectPtr<class UWWStatComponent> Stat;
 };

@@ -4,25 +4,40 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "WWSigillumAnimInstance.generated.h"
+#include "SigillumAnimInstance.generated.h"
+
+USTRUCT(BlueprintType)
+struct FParalysisState
+{
+	GENERATED_BODY()
+	uint8 bIsParalysis : 1;
+	uint32 Cycle = 3;
+};
+
 
 /**
  * 
  */
 UCLASS()
-class WUWA_API UWWSigillumAnimInstance : public UAnimInstance
+class WUWA_API USigillumAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
 public:
-	UWWSigillumAnimInstance();
+	USigillumAnimInstance();
 
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	UFUNCTION()
+	void AnimNotify_AN_EndDiveAttack();
+
+	UFUNCTION()
+	void AnimNotify_AN_CheckParalysis();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
-	TObjectPtr<class ACharacter> Owner;
+	TObjectPtr<class ASigillum> Owner;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> Movement;
@@ -46,6 +61,12 @@ protected:
 	uint8 bIsJumping : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsDeath : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshould;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	FParalysisState ParalysisState;
 };
