@@ -50,3 +50,18 @@ void USigillumAnimInstance::AnimNotify_AN_EndDiveAttack()
 		Owner->ResetDiveAttackMovement();
 	}
 }
+
+void USigillumAnimInstance::AnimNotify_AN_CheckParalysis()
+{
+	if (ParalysisState.Cycle <= 0) return;
+
+	ParalysisState.Cycle--;
+
+	if (ParalysisState.Cycle == 0)
+	{
+		if (Owner && Owner->GetParalysisMontage())
+		{
+			Montage_SetNextSection(FName("ParalysisLoop"), FName("ParalysisEnd"), Owner->GetParalysisMontage());
+		}
+	}
+}

@@ -6,6 +6,15 @@
 #include "Animation/AnimInstance.h"
 #include "SigillumAnimInstance.generated.h"
 
+USTRUCT(BlueprintType)
+struct FParalysisState
+{
+	GENERATED_BODY()
+	uint8 bIsParalysis : 1;
+	uint32 Cycle = 3;
+};
+
+
 /**
  * 
  */
@@ -23,6 +32,9 @@ protected:
 
 	UFUNCTION()
 	void AnimNotify_AN_EndDiveAttack();
+
+	UFUNCTION()
+	void AnimNotify_AN_CheckParalysis();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class ASigillum> Owner;
@@ -49,6 +61,12 @@ protected:
 	uint8 bIsJumping : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsDeath : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshould;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	FParalysisState ParalysisState;
 };

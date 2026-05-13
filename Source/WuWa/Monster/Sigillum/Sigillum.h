@@ -18,13 +18,14 @@ class WUWA_API ASigillum : public AMonster
 public:
 	ASigillum();
 	void ResetDiveAttackMovement();
+	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void EvadeAndAttack();
 	void DiveAttack();
+	void ChangeToParalysis();
 
-	// 마비상태 테스트 함수 만들기.
 
 private: // dive
 	bool bIsDiveAttacking = false;
@@ -38,10 +39,17 @@ private: // inputaction
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> DiveAttackAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ParalysisAction;
+
 private: // montage;
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> EvadeAndAttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> DiveAttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> ParalysisMontage;
+
 };
