@@ -3,8 +3,8 @@
 
 #include "Monster/Sigillum/SigillumAnimInstance.h"
 
-#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Monster/Sigillum/Sigillum.h"
 
 USigillumAnimInstance::USigillumAnimInstance()
 {
@@ -16,7 +16,7 @@ void USigillumAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Owner = Cast<ACharacter>(GetOwningActor());
+	Owner = Cast<ASigillum>(GetOwningActor());
 
 	if (Owner)
 	{
@@ -35,5 +35,18 @@ void USigillumAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling;
+	}
+}
+
+void USigillumAnimInstance::AnimNotify_AN_EndDiveAttack()
+{
+	if (Movement)
+	{
+		Movement->SetMovementMode(MOVE_Falling);
+	}
+
+	if (Owner)
+	{
+		Owner->ResetDiveAttackMovement();
 	}
 }

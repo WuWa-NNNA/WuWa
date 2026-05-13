@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,13 +17,14 @@ class WUWA_API ASigillum : public AMonster
 	
 public:
 	ASigillum();
+	void ResetDiveAttackMovement();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void EvadeAndAttack();
 	void DiveAttack();
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ResetDiveAttackMovement();
+
+	// 마비상태 테스트 함수 만들기.
 
 private: // dive
 	bool bIsDiveAttacking = false;
