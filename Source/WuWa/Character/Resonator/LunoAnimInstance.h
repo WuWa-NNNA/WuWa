@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Character/Resonator/Resonator.h"
+#include "Character/Resonator/Luno.h"
 #include "LunoAnimInstance.generated.h"
 
 UCLASS()
@@ -20,7 +20,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
-
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	ELocomotionGait CurrentLocomotionGait;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	ELunoState CurrentLunoState;
 };

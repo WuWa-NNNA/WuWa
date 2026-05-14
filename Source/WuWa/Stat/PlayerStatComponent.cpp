@@ -8,7 +8,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	MaxDash = 100.f;
+	MaxDash = 10.f;
 	CurrentDash = MaxDash;
 }
 
@@ -22,24 +22,26 @@ void UPlayerStatComponent::BeginPlay()
 
 
 
-float UPlayerStatComponent::ApplyDash()
+void UPlayerStatComponent::ApplyDash()
 {
 	UE_LOG(LogTemp, Log, TEXT("ApplyDash"));
 
 	const float PrevHP = CurrentDash;
 	if (CurrentDash <= 0.9f)
 	{
-		return -1;
+		return;
 	}
 	CurrentDash--;
 	SetDash(CurrentDash);
-	return 1;
 }
 
 
 
 void UPlayerStatComponent::SetDash(float NewDash)
 {
+	UE_LOG(LogTemp, Log, TEXT("Dash Count : %f"), CurrentDash);
+
+
 	UE_LOG(LogTemp, Log, TEXT("BroadcastCurrentDash"));
 
 	CurrentDash = FMath::Clamp<float>(NewDash, 0.0f, MaxDash);

@@ -10,8 +10,9 @@
 
 // Stat/UI
 #include "Stat/PlayerStatComponent.h"
+//#include "Components/WidgetComponent.h"
 #include "UI/WWWidgetComponent.h"
-#include "Components/WidgetComponent.h"
+#include "UI/UWorldUserWidget.h"
 
 AResonator::AResonator()
 {
@@ -23,7 +24,7 @@ AResonator::AResonator()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	GetCharacterMovement()->MaxFlySpeed = 900.0f;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 
@@ -42,26 +43,29 @@ AResonator::AResonator()
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
 
-	SetCurrentState(EResonatorState::Normal);
-	SetCurrentLocomotionGait(ELocomotionGait::Run);
-
 	Stat = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStat"));
+	
 	if (Stat)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SUCCED Stat!"));
 	}
 	DashBar = CreateDefaultSubobject<UWWWidgetComponent>(TEXT("HPWidget"));
-	DashBar->SetupAttachment(GetMesh());
-
-	DashBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
-
+	if (DashBar)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SUCCED DashBar!"));
+	}
+	DashBar->SetupAttachment(RootComponent);
+	DashBar->SetRelativeLocation(FVector(0, 0.0f, 110.0f));
+	//UUWorldUserWidget
 	static ConstructorHelpers::FClassFinder<UUserWidget> DashWidgetRef(TEXT("/Game/PCH/UI/Blueprint/WBP_Dash.WBP_Dash_C"));
 	if (DashWidgetRef.Succeeded())
 	{
 		DashBar->SetWidgetClass(DashWidgetRef.Class);
 		DashBar->SetWidgetSpace(EWidgetSpace::Screen);
-		DashBar->SetDrawSize(FVector2D(150.0f, 15.0f));
+		DashBar->SetDrawSize(FVector2D(150.0f, 50.0f));
 		DashBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);;
+		UE_LOG(LogTemp, Log, TEXT("SUCCED DashBar! Draw"));
+
 	}
 }
 
@@ -77,7 +81,6 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
-		EnhancedInputComponent->BindAction(SAttackAction, ETriggerEvent::Started, this, &AResonator::SAttack);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
 	}
 }
@@ -211,6 +214,18 @@ void AResonator::Dash()
 		return;
 	}
 
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	if (!PlayerStat)
+	{
+		return;
+	}
+	if (PlayerStat->GetCurrentDash() <= 0)
+	{
+		return;
+	}
+
+	PlayerStat->ApplyDash();
+
 	TryCancelAttackMontageByNewInput();
 
 	ChangeLocomotionGait(ELocomotionGait::Dash);
@@ -236,6 +251,8 @@ void AResonator::Dash()
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
 		AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
 	}
+	
+
 }
 
 void AResonator::Attack()
@@ -267,21 +284,6 @@ void AResonator::Attack()
 
 	bHasNextComboCommand = true;
 	CheckAttackComboInput();
-}
-
-void AResonator::SAttack()
-{
-	if (CurrentState != EResonatorState::Normal)
-	{
-		return;
-	}
-
-	TryCancelAttackMontageByNewInput();
-	
-	//ChangeState(EResonatorState::Attack);
-	//SetRotationByMoveInput();
-	//
-	//PlayAnimMontage(SAttackMontage, 1.5f);
 }
 
 void AResonator::Skill()
@@ -378,4 +380,31 @@ void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
 {
 	CurrentAttackCombo = 0;
+}
+
+void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
+{
+	UE_LOG(LogTemp, Log, TEXT("SUCCED SetupCharacterWidget!"));
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
+
+	if (PlayerStat && MyWidget)
+	{
+		MyWidget->SetMaxHp(Stat->GetMaxHP());
+		MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
+
+		MyWidget->UpdateHpBar(Stat->GetCurrentHP());
+		MyWidget->UpdateDashBar(PlayerStat->GetCurrentDash());
+
+		// 2. 각각의 델리게이트에 전용 함수 구독
+		// HP가 변하면 UpdateHPBar 호출
+		PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
+
+		// Dash가 변하면 UpdateDashBar 호출
+		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateDashBar);
+
+		UE_LOG(LogTemp, Log, TEXT("HP and Dash Delegates Bound."));
+	}
+
 }
