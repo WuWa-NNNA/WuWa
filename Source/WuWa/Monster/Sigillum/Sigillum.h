@@ -18,10 +18,12 @@ class WUWA_API ASigillum : public AMonster
 public:
 	ASigillum();
 	void ResetDiveAttackMovement();
+	virtual void OnConstruction(const FTransform& Transform) override;
 	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void EvadeAndAttack();
 	void DiveAttack();
 	void ChangeToParalysis();

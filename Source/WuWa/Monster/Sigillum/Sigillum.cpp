@@ -8,11 +8,25 @@
 #include "InputTriggers.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
+#include "AIController.h" 
+#include "BehaviorTree/BlackboardComponent.h"
 
 ASigillum::ASigillum()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 }
+
+
+void ASigillum::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (Weapon && GetMesh())
+	{
+		Weapon->SetLeaderPoseComponent(GetMesh());
+	}
+}
+
 
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -25,6 +39,36 @@ void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(DiveAttackAction, ETriggerEvent::Started, this, &ASigillum::DiveAttack);
 		EnhancedInputComponent->BindAction(ParalysisAction, ETriggerEvent::Started, this, &ASigillum::ChangeToParalysis);
 	}
+}
+
+float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	AAIController* AICon = Cast<AAIController>(GetController());
+
+	if (AICon && AICon->GetBlackboardComponent())
+	{
+		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+	}
+
+	// TODO: DamageCauser와 논의해서 결정 필요
+
+	/*AAIController* AICon = Cast<AAIController>(GetController());
+	if (AICon && AICon->GetBlackboardComponent())
+	{
+		bool bIsHeavyOrParryAttack = CheckIfHeavyAttack(DamageEvent);
+
+		if (bIsHeavyOrParryAttack)
+		{
+			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+		}
+		else
+		{
+		}
+	}*/
+
+	return ActualDamage;
 }
 
 void ASigillum::EvadeAndAttack()
