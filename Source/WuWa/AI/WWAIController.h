@@ -22,8 +22,12 @@ public:
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void BeginPlay() override;
 
 private:
+	void FindPlayerAndSetTarget();
+	FTimerHandle TimerHandle_FindPlayer;
+
 	UPROPERTY(EditAnywhere, category = "Asset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBlackboardData> BBAsset;
 
