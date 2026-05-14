@@ -77,11 +77,13 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	if (EnhancedInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AResonator::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AResonator::StopMove);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AResonator::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
+		EnhancedInputComponent->BindAction(BurstAction, ETriggerEvent::Started, this, &AResonator::Burst);
 	}
 }
 
@@ -102,7 +104,7 @@ void AResonator::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		SpringArm->SocketOffset = FVector::Zero();
+		SpringArm->SocketOffset = FVector::ZeroVector;
 	}
 
 	TickLocomotionGait(DeltaSeconds);
@@ -157,6 +159,7 @@ void AResonator::Move(const FInputActionValue& Value)
 		return;
 	}
 
+	bHasCurrentMoveInput = true;
 	CurrentMoveInputDirection = NewMoveInputDirection.GetSafeNormal();
 
 	if (CurrentState != EResonatorState::Normal)
@@ -167,6 +170,11 @@ void AResonator::Move(const FInputActionValue& Value)
 	TryCancelAttackMontageByNewInput();
 
 	AddMovementInput(CurrentMoveInputDirection);
+}
+
+void AResonator::StopMove(const FInputActionValue& Value)
+{
+	bHasCurrentMoveInput = false;
 }
 
 void AResonator::Look(const FInputActionValue& Value)
@@ -191,7 +199,7 @@ void AResonator::Jump()
 
 	TryCancelAttackMontageByNewInput();
 
-	if (GetVelocity().Length() > 50.0f)
+	if (bHasCurrentMoveInput)
 	{
 		SetRotationByMoveInput();
 		PlayAnimMontage(JumpRunMontage);
@@ -231,28 +239,7 @@ void AResonator::Dash()
 	ChangeLocomotionGait(ELocomotionGait::Dash);
 	SetRotationByMoveInput();
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
-	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
-	{
-		PlayAnimMontage(JumpDashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
-	}
-	else if (GetVelocity().Length() > 50.0f)
-	{
-		PlayAnimMontage(DashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
-	}
-	else
-	{
-		PlayAnimMontage(DashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
-		AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
-	}
-	
-
+	PlayDashMontage();
 }
 
 void AResonator::Attack()
@@ -299,6 +286,57 @@ void AResonator::Skill()
 	SetRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
+}
+
+void AResonator::Burst()
+{
+	if (CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	TryCancelAttackMontageByNewInput();
+
+	ChangeState(EResonatorState::Attack);
+	SetRotationByMoveInput();
+
+	PlayAnimMontage(BurstMontage, 1.5f);
+}
+
+void AResonator::PlayDashMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
+	{
+		if (bHasCurrentMoveInput)
+		{
+			PlayAnimMontage(JumpDashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
+		}
+		else
+		{
+			PlayAnimMontage(JumpDashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("Back"), JumpDashMontage);
+		}
+	}
+	else
+	{
+		if (bHasCurrentMoveInput)
+		{
+			PlayAnimMontage(DashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
+		}
+		else
+		{
+			PlayAnimMontage(DashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
+		}
+	}
 }
 
 void AResonator::SetRotationByMoveInput()

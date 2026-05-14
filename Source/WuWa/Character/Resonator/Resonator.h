@@ -51,11 +51,16 @@ public:
 
 protected:
 	virtual void Move(const FInputActionValue& Value);
+	virtual void StopMove(const FInputActionValue& Value);
 	virtual void Look(const FInputActionValue& Value);
 	virtual void Jump();
 	virtual void Dash();
 	virtual void Attack();
 	virtual void Skill();
+	virtual void Burst();
+
+protected:
+	virtual void PlayDashMontage();
 
 private:
 	void SetRotationByMoveInput();
@@ -64,7 +69,7 @@ private:
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
-protected:
+public:
 	virtual void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	virtual void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
 
@@ -72,8 +77,12 @@ public:
 	FORCEINLINE EResonatorState GetCurrentState() const { return CurrentState; }
 	FORCEINLINE ELocomotionGait GetCurrentLocomotionGait() const { return CurrentLocomotionGait; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMeshComponent() const { return Weapon; }
+	FORCEINLINE UAnimMontage* GetDashMontage() const { return DashMontage; }
+	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
+	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
 
 public:
+	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
 	FORCEINLINE void SetAttackMontage(UAnimMontage* NewAttackMontage) { AttackMontage = NewAttackMontage; }
 	FORCEINLINE void SetAttackComboData(UAttackComboData* NewAttackComboData) { AttackComboData = NewAttackComboData; }
 
@@ -82,6 +91,7 @@ private:
 	EResonatorState CurrentState;
 
 private:
+	bool bHasCurrentMoveInput = false;
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FVector CurrentMoveInputDirection;
 	ELocomotionGait CurrentLocomotionGait;
@@ -125,10 +135,10 @@ private:
 	TObjectPtr<UInputAction> AttackAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> SAttackAction;
+	TObjectPtr<UInputAction> SkillAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> SkillAction;
+	TObjectPtr<UInputAction> BurstAction;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
@@ -147,10 +157,10 @@ private:
 	TObjectPtr<UAnimMontage> AttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAnimMontage> SAttackMontage;
+	TObjectPtr<UAnimMontage> SkillMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAnimMontage> SkillMontage;
+	TObjectPtr<UAnimMontage> BurstMontage;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
