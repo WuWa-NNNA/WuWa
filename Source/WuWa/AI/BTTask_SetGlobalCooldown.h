@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "BehaviorTree/Tasks/BTTask_Wait.h"
 #include "BTTask_SetGlobalCooldown.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WUWA_API UBTTask_SetGlobalCooldown : public UBTTaskNode
+class WUWA_API UBTTask_SetGlobalCooldown : public UBTTask_Wait
 {
 	GENERATED_BODY()
 public:

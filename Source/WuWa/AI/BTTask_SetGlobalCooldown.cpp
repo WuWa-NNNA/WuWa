@@ -8,17 +8,18 @@
 UBTTask_SetGlobalCooldown::UBTTask_SetGlobalCooldown()
 {
     NodeName = TEXT("Set Global Cooldown");
+    WaitTime = 0.0f;
 }
 
 EBTNodeResult::Type UBTTask_SetGlobalCooldown::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-    UWorld* World = OwnerComp.GetWorld();
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	UWorld* World = OwnerComp.GetWorld();
 
-    if (!BlackboardComp || !World) return EBTNodeResult::Failed;
+	if (!BlackboardComp || !World) return EBTNodeResult::Failed;
 
-    float NextTime = World->GetTimeSeconds() + CooldownTime;
-    BlackboardComp->SetValueAsFloat(NextAttackTimeKey.SelectedKeyName, NextTime);
+	float NextTime = World->GetTimeSeconds() + CooldownTime;
+	BlackboardComp->SetValueAsFloat(NextAttackTimeKey.SelectedKeyName, NextTime);
 
-    return EBTNodeResult::Succeeded;
+	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }

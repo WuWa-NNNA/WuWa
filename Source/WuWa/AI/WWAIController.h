@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "WWAIController.generated.h"
 
+class UBlackboardData;
 /**
  * 
  */
@@ -19,7 +20,7 @@ public:
 
 	void RunAI();
 	void StopAI();
-
+	FORCEINLINE UBlackboardData* GetBBAsset() { return BBAsset; }
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
@@ -29,7 +30,7 @@ private:
 	FTimerHandle TimerHandle_FindPlayer;
 
 	UPROPERTY(EditAnywhere, category = "Asset", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UBlackboardData> BBAsset;
+	TObjectPtr<UBlackboardData> BBAsset;
 
 	UPROPERTY(EditAnywhere, category = "Asset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBehaviorTree> BTAsset;
