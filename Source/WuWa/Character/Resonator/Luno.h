@@ -7,7 +7,6 @@
 UENUM(BlueprintType)
 enum class ELunoState : uint8
 {
-	Normal,
 	Half,
 	Crescent
 };
@@ -20,14 +19,21 @@ class WUWA_API ALuno : public AResonator
 public:
 	ALuno();
 
-private:
+protected:
 	virtual void BeginPlay() override;
+
+protected:
+	virtual void TickLocomotionGait(float DeltaSeconds) override;
 
 public:
 	void ChangeLunoState(ELunoState NextLunoState);
 
 protected:
-	virtual void SAttack() override;
+	virtual void Dash() override;
+	virtual void Skill() override;
+
+public:
+	FORCEINLINE ELunoState GetCurrentLunoState() const { return CurrentLunoState; }
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resonator", meta = (AllowPrivateAccess = "true"))

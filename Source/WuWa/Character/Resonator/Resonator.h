@@ -54,7 +54,6 @@ protected:
 	virtual void Jump();
 	virtual void Dash();
 	virtual void Attack();
-	virtual void SAttack();
 	virtual void Skill();
 
 private:
@@ -64,9 +63,9 @@ private:
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
-private:
-	void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
+protected:
+	virtual void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
 
 public:
 	FORCEINLINE EResonatorState GetCurrentState() const { return CurrentState; }

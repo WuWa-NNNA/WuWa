@@ -23,7 +23,7 @@ AResonator::AResonator()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	GetCharacterMovement()->MaxFlySpeed = 900.0f;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 
@@ -41,9 +41,6 @@ AResonator::AResonator()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
-
-	SetCurrentState(EResonatorState::Normal);
-	SetCurrentLocomotionGait(ELocomotionGait::Run);
 
 	Stat = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStat"));
 	if (Stat)
@@ -77,7 +74,6 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
-		EnhancedInputComponent->BindAction(SAttackAction, ETriggerEvent::Started, this, &AResonator::SAttack);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
 	}
 }
@@ -267,21 +263,6 @@ void AResonator::Attack()
 
 	bHasNextComboCommand = true;
 	CheckAttackComboInput();
-}
-
-void AResonator::SAttack()
-{
-	if (CurrentState != EResonatorState::Normal)
-	{
-		return;
-	}
-
-	TryCancelAttackMontageByNewInput();
-	
-	//ChangeState(EResonatorState::Attack);
-	//SetRotationByMoveInput();
-	//
-	//PlayAnimMontage(SAttackMontage, 1.5f);
 }
 
 void AResonator::Skill()
