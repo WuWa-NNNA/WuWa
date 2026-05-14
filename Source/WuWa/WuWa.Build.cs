@@ -10,7 +10,19 @@ public class WuWa : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "WuWa" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Niagara" });
+
+        PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"EnhancedInput",
+			"UMG",
+            "Niagara",
+            "AIModule",
+			"NavigationSystem",
+			"GameplayTasks" 
+		});
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
