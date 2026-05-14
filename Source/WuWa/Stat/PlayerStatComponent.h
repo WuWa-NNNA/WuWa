@@ -30,7 +30,7 @@ public :
 
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
 	FORCEINLINE float GetCurrentDash() { return CurrentDash; }
-	float ApplyDash();
+	void ApplyDash();
 
 protected:	
 

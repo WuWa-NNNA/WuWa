@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Character/WWCharacter.h"
 #include "InputActionValue.h"
+#include "Interface/WWCharacterWidgetInterface.h"
 #include "Resonator.generated.h"
 
 class UInputAction;
@@ -23,7 +24,7 @@ enum class ELocomotionGait : uint8
 };
 
 UCLASS()
-class WUWA_API AResonator : public AWWCharacter
+class WUWA_API AResonator : public AWWCharacter, public IWWCharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -129,10 +130,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAttackComboData> AttackComboData;
 
-protected :	// UI
+protected :	// UI + Stat
+	/*UPROPERTY(VisibleAnywhere, Category = "Stat", Meta = (AllowPrivateAcess = "true"))
+	TObjectPtr<class UPlayerStatComponent> ResonatorStat;*/
+	// -> 자식에서 stat을 다시 선언하지 않고 부모에 WWStat을 PlayerStat으로 다운캐스팅하여 사용
+
 	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UWWWidgetComponent> HpBar;
 
 	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UWWWidgetComponent> DashBar;
+
+	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
 };
