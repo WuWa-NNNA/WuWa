@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,13 +17,15 @@ class WUWA_API ASigillum : public AMonster
 	
 public:
 	ASigillum();
+	void ResetDiveAttackMovement();
+	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void EvadeAndAttack();
 	void DiveAttack();
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ResetDiveAttackMovement();
+	void ChangeToParalysis();
+
 
 private: // dive
 	bool bIsDiveAttacking = false;
@@ -37,10 +39,17 @@ private: // inputaction
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> DiveAttackAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ParalysisAction;
+
 private: // montage;
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> EvadeAndAttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> DiveAttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> ParalysisMontage;
+
 };

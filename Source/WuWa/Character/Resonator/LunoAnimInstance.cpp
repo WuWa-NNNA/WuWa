@@ -29,4 +29,12 @@ void ULunoAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     }
 
     CurrentLocomotionGait = Resonator->GetCurrentLocomotionGait();
+
+    ALuno* Luno = Cast<ALuno>(Resonator);
+    if (!Luno)
+    {
+        return;
+    }
+
+    CurrentLunoState = Luno->GetCurrentLunoState();
 }
