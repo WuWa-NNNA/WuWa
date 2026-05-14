@@ -286,6 +286,8 @@ void AResonator::Skill()
 	SetRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
+	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+	//Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 }
 
 void AResonator::Burst()
@@ -301,6 +303,7 @@ void AResonator::Burst()
 	SetRotationByMoveInput();
 
 	PlayAnimMontage(BurstMontage, 1.5f);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.5f);
 }
 
 void AResonator::PlayDashMontage()
@@ -366,6 +369,7 @@ void AResonator::BeginComboAttack()
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
 	const float AttackSpeedRate = 1.5f;
 	PlayAnimMontage(AttackMontage, AttackSpeedRate);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponAttackMontage, AttackSpeedRate);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
@@ -404,6 +408,7 @@ void AResonator::CheckAttackComboInput()
 
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *AttackComboData->MontageSectionNamePrefix, CurrentAttackCombo);
 	GetMesh()->GetAnimInstance()->Montage_JumpToSection(NextSection, AttackMontage);
+	Weapon->GetAnimInstance()->Montage_JumpToSection(NextSection, WeaponAttackMontage);
 
 	SetAttackComboTimer();
 

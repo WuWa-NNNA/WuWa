@@ -78,12 +78,14 @@ public:
 	FORCEINLINE ELocomotionGait GetCurrentLocomotionGait() const { return CurrentLocomotionGait; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMeshComponent() const { return Weapon; }
 	FORCEINLINE UAnimMontage* GetDashMontage() const { return DashMontage; }
+	FORCEINLINE UAnimMontage* GetWeaponDashMontage() const { return WeaponDashMontage; }
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
 	FORCEINLINE void SetAttackMontage(UAnimMontage* NewAttackMontage) { AttackMontage = NewAttackMontage; }
+	FORCEINLINE void SetWeaponAttackMontage(UAnimMontage* NewWeaponAttackMontage) { WeaponAttackMontage = NewWeaponAttackMontage; }
 	FORCEINLINE void SetAttackComboData(UAttackComboData* NewAttackComboData) { AttackComboData = NewAttackComboData; }
 
 private:
@@ -161,6 +163,19 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> BurstMontage;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> WeaponDashMontage;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> WeaponAttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> WeaponSkillMontage;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> WeaponBurstMontage;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))

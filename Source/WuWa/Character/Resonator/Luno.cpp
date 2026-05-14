@@ -55,8 +55,10 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 		break;
 	}
 
+	SetWeaponMaterial(NextLunoState);
 	SetDashMontage(DashMontages[NextLunoState]);
 	SetAttackMontage(AttackMontages[NextLunoState]);
+	SetWeaponAttackMontage(WeaponAttackMontages[NextLunoState]);
 	SetAttackComboData(AttackComboDatas[NextLunoState]);
 
 	CurrentLunoState = NextLunoState;
@@ -86,7 +88,10 @@ void ALuno::PlayDashMontage()
 	}
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UAnimInstance* WeaponAnimInstance = GetWeaponMeshComponent()->GetAnimInstance();
+
 	UAnimMontage* Motage = GetDashMontage();
+	UAnimMontage* WeaponMotage = GetWeaponDashMontage();
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
@@ -94,11 +99,13 @@ void ALuno::PlayDashMontage()
 	{
 		PlayAnimMontage(Motage, 1.5f);
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, Motage);
+		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
 	}
 	else
 	{
 		PlayAnimMontage(Motage, 1.5f);
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, Motage);
 		AnimInstance->Montage_JumpToSection(TEXT("Back"), Motage);
+		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
 	}
 }

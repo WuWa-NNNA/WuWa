@@ -56,6 +56,10 @@ private:
 	TMap<ELunoState, TObjectPtr<class UAnimMontage>> AttackMontages;
 
 private:
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAnimMontage>> WeaponAttackMontages;
+
+private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, TObjectPtr<class UAttackComboData>> AttackComboDatas;
 
