@@ -26,7 +26,8 @@ public:
 
 protected:
 
-	// Called when the game starts
+	// Called when the game starts¤Ñ,.
+	
 	virtual void BeginPlay() override;
 
 	void SetHp(float NewHp);
