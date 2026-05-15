@@ -9,7 +9,7 @@
 
 
 class UInputAction;
-
+class USkeletalMeshComponent;
 /**
  * 
  */
@@ -20,6 +20,7 @@ class WUWA_API AMonster : public AWWCharacter
 
 public:
 	AMonster();
+	USkeletalMeshComponent* GetWeapon() { return Weapon; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -59,7 +60,7 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USkeletalMeshComponent> Weapon;
+	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))

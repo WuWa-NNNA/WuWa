@@ -29,6 +29,10 @@ protected:
 	void ChangeToParalysis();
 
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	class UMaterialInterface* HiddenMaterial;
+
 private: // dive
 	bool bIsDiveAttacking = false;
 	FTimerHandle TimerHandle_Dive;

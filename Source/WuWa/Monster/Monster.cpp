@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
+#include "Stat/MonsterStatComponent.h"
 
 
 AMonster::AMonster()
@@ -29,6 +30,8 @@ AMonster::AMonster()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 
+	Stat = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("MonsterStat"));
+	
 }
 
 void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

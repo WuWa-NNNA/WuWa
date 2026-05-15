@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Monster/Sigillum/Sigillum.h"
 
 UBTTask_Phase2Transition::UBTTask_Phase2Transition()
 {
@@ -19,8 +20,13 @@ EBTNodeResult::Type UBTTask_Phase2Transition::ExecuteTask(UBehaviorTreeComponent
 
     if (!AIController || !BlackboardComp) return EBTNodeResult::Failed;
 
-    ACharacter* BossCharacter = Cast<ACharacter>(AIController->GetPawn());
+    ASigillum* BossCharacter = Cast<ASigillum>(AIController->GetPawn());
     if (!BossCharacter || !TransitionMontage) return EBTNodeResult::Failed;
+
+    if (BossCharacter && BossCharacter->GetWeapon())
+    {
+        BossCharacter->GetWeapon()->EmptyOverrideMaterials();
+    }
 
     // BossCharacter 무기 mesh에 모든 엘리먼트 보이도록 해야함.
 
