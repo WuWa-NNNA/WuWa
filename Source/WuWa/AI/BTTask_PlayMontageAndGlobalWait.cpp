@@ -19,7 +19,31 @@ EBTNodeResult::Type UBTTask_PlayMontageAndGlobalWait::ExecuteTask(UBehaviorTreeC
     ACharacter* BossCharacter = Cast<ACharacter>(AIController->GetPawn());
     if (!BossCharacter || !MontageToPlay) return EBTNodeResult::Failed;
 
-    BossCharacter->PlayAnimMontage(MontageToPlay);
+    FName TargetSection = NAME_None;
+    int32 ArraySize = SectionNames.Num();
+
+    if (ArraySize == 0)
+    {
+        TArray<FName> ExtractedSectionNames;
+        if (MontageToPlay)
+        {
+            for (const FCompositeSection& Section : MontageToPlay->CompositeSections)
+            {
+                ExtractedSectionNames.Add(Section.SectionName);
+            }
+        }
+        TargetSection = ExtractedSectionNames[FMath::RandRange(0, ExtractedSectionNames.Num() - 1)];
+    } 
+    else if (ArraySize == 1)
+    {
+        TargetSection = SectionNames[0];
+    }
+    else if (ArraySize >= 2)
+    {
+        TargetSection = SectionNames[FMath::RandRange(0, ArraySize - 1)];
+    }
+
+    BossCharacter->PlayAnimMontage(MontageToPlay, 1.0f, TargetSection);
 
     return EBTNodeResult::InProgress;
 }

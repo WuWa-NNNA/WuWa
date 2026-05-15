@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AI/BTTask_Phase2Transition.h"
@@ -21,6 +21,8 @@ EBTNodeResult::Type UBTTask_Phase2Transition::ExecuteTask(UBehaviorTreeComponent
 
     ACharacter* BossCharacter = Cast<ACharacter>(AIController->GetPawn());
     if (!BossCharacter || !TransitionMontage) return EBTNodeResult::Failed;
+
+    // BossCharacter 무기 mesh에 모든 엘리먼트 보이도록 해야함.
 
     BlackboardComp->SetValueAsBool(IsPhase2Key.SelectedKeyName, true);
     BlackboardComp->SetValueAsFloat(HealthRatioKey.SelectedKeyName, 1.0f);
