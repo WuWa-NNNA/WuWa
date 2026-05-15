@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AI/BTTask_Phase2Transition.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Monster/Sigillum/Sigillum.h"
 
 UBTTask_Phase2Transition::UBTTask_Phase2Transition()
 {
@@ -19,8 +20,15 @@ EBTNodeResult::Type UBTTask_Phase2Transition::ExecuteTask(UBehaviorTreeComponent
 
     if (!AIController || !BlackboardComp) return EBTNodeResult::Failed;
 
-    ACharacter* BossCharacter = Cast<ACharacter>(AIController->GetPawn());
+    ASigillum* BossCharacter = Cast<ASigillum>(AIController->GetPawn());
     if (!BossCharacter || !TransitionMontage) return EBTNodeResult::Failed;
+
+    if (BossCharacter && BossCharacter->GetWeapon())
+    {
+        BossCharacter->GetWeapon()->EmptyOverrideMaterials();
+    }
+
+    // BossCharacter 무기 mesh에 모든 엘리먼트 보이도록 해야함.
 
     BlackboardComp->SetValueAsBool(IsPhase2Key.SelectedKeyName, true);
     BlackboardComp->SetValueAsFloat(HealthRatioKey.SelectedKeyName, 1.0f);

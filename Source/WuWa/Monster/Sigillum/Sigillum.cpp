@@ -13,7 +13,7 @@
 
 ASigillum::ASigillum()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 100.f;
+	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 }
 
 
@@ -24,6 +24,13 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 	if (Weapon && GetMesh())
 	{
 		Weapon->SetLeaderPoseComponent(GetMesh());
+	}
+
+	if (HiddenMaterial && Weapon)
+	{
+		Weapon->SetMaterial(2, HiddenMaterial);
+		Weapon->SetMaterial(3, HiddenMaterial);
+		Weapon->SetMaterial(4, HiddenMaterial);
 	}
 }
 

@@ -23,4 +23,7 @@ protected:
 public:
     UPROPERTY(EditAnywhere, Category = "Montage")
     UAnimMontage* MontageToPlay;
+
+    UPROPERTY(EditAnywhere, Category = "Montage")
+    TArray<FName> SectionNames;
 };
