@@ -2,4 +2,5 @@
 
 
 #include "AI/SigillumAIController.h"
+#include "AI/EDistanceRange.h"
 
