@@ -156,16 +156,18 @@ private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAttackComboData> AttackComboData;
 
-protected :	// UI + Stat
-	/*UPROPERTY(VisibleAnywhere, Category = "Stat", Meta = (AllowPrivateAcess = "true"))
-	TObjectPtr<class UPlayerStatComponent> ResonatorStat;*/
-	// -> 자식에서 stat을 다시 선언하지 않고 부모에 WWStat을 PlayerStat으로 다운캐스팅하여 사용
+protected :
 
 	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UWWWidgetComponent> HpBar;
+	TObjectPtr<class UUWorldUserWidget> MainHUD;
 
-	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UWWWidgetComponent> DashBar;
+	TSubclassOf<UUserWidget> HUDWidgetClass;
 
 	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
+
+public :
+	UFUNCTION(BlueprintCallable)
+	void DamagedTest();
+	UFUNCTION(BlueprintCallable)
+	void BurstTest();
 };

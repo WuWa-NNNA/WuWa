@@ -3,6 +3,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NiagaraComponent.h"
 
+#include "Stat/LunoStatComponent.h"
+
 ALuno::ALuno()
 {
 	WeaponTrail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponTrail"));
@@ -11,6 +13,9 @@ ALuno::ALuno()
 	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
 	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 	WeaponTrail->SetVisibility(false);
+
+	Stat = CreateDefaultSubobject<ULunoStatComponent>(TEXT("LunoStat"));
+
 }
 
 void ALuno::BeginPlay()
@@ -59,6 +64,9 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	SetAttackComboData(AttackComboDatas[NextLunoState]);
 
 	CurrentLunoState = NextLunoState;
+
+	//ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Stat);
+	//LunoStat->ChangeAttackMode(NextLunoState);
 }
 
 void ALuno::Dash()

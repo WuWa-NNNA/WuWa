@@ -6,10 +6,11 @@
 UWWStatComponent::UWWStatComponent()
 {
 
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	MaxHP = 100.f;
 	CurrentHP = MaxHP;
+	SetLevel(90);
 }
 
 
@@ -25,7 +26,7 @@ void UWWStatComponent::BeginPlay()
 
 float UWWStatComponent::ApplyDamage(float Damage)
 {
-	UE_LOG(LogTemp, Log, TEXT("ApplyDamage"));
+	//UE_LOG(LogTemp, Log, TEXT("ApplyDamage"));
 	const float PrevHP = CurrentHP;
 	const float ActualDamage = FMath::Clamp<float>(Damage, 0, Damage);
 	SetHp(FMath::Clamp<float>(PrevHP - ActualDamage, 0.0f, MaxHP));
@@ -39,7 +40,7 @@ float UWWStatComponent::ApplyDamage(float Damage)
 
 void UWWStatComponent::SetHp(float NewHp)
 {
-	UE_LOG(LogTemp, Log, TEXT("BroadcastCurrentHP"));
+	//UE_LOG(LogTemp, Log, TEXT("BroadcastCurrentHP"));
 
 	CurrentHP = FMath::Clamp<float>(NewHp, 0.0f, MaxHP);
 	OnHpChagned.Broadcast(CurrentHP);
