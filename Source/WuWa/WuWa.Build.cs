@@ -21,8 +21,9 @@ public class WuWa : ModuleRules
             "Niagara",
             "AIModule",
 			"NavigationSystem",
-			"GameplayTasks" 
-		});
+			"GameplayTasks" ,
+            "Paper2D"
+        });
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
