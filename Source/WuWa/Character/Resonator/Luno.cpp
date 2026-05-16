@@ -13,7 +13,7 @@ ALuno::ALuno()
 
 	BeadLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("BeadLight"));
 	BeadLight->SetupAttachment(Bead);
-	BeadLight->SetIntensity(50.0f);
+	BeadLight->SetIntensity(35.0f);
 	BeadLight->SetAttenuationRadius(200.0f);
 	BeadLight->SetVisibility(false);
 

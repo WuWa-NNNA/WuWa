@@ -103,13 +103,22 @@ void AResonator::BeginPlay()
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSequenceActor::StaticClass(), FoundActors);
-	SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+	}
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACineCameraActor::StaticClass(), FoundActors);
-	CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
+	}
 	
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("CineLookAtActor"), FoundActors);
-	CineLookAtActor = Cast<AActor>(FoundActors[0]);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		CineLookAtActor = Cast<AActor>(FoundActors[0]);
+	}
 
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
@@ -312,7 +321,6 @@ void AResonator::Skill()
 
 	PlayAnimMontage(SkillMontage, 1.5f);
 	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
-	//Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 }
 
 void AResonator::Burst()
@@ -322,11 +330,15 @@ void AResonator::Burst()
 		return;
 	}
 
+	if (!SequenceActor || !CineCameraActor || !CineLookAtActor)
+	{
+		return;
+	}
+
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);
-	SetActorRotation(CurrentMoveInputDirection.Rotation());
-	//SetRotationByMoveInput();
+	SetRotationByMoveInput();
 
 	PlayAnimMontage(BurstMontage, 1.0f);
 	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
@@ -376,7 +388,6 @@ void AResonator::PlayBurstCinematic()
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(CineCameraActor, 0.0f);
 
 	SequenceActor->SetSequence(BurstSequence);
-	//SequenceActor->SetBindingByTag(FName("Player"), { this }, true);
 	SequenceActor->SetBindingByTag(FName("CineCameraActor"), { CineCameraActor }, true);
 	SequenceActor->SetBindingByTag(FName("CineLookAtActor"), { CineLookAtActor }, true);
 
@@ -388,6 +399,11 @@ void AResonator::PlayBurstCinematic()
 
 void AResonator::SetRotationByMoveInput()
 {
+	if (!bHasCurrentMoveInput)
+	{
+		return;
+	}
+
 	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	SetActorRotation(CurrentMoveInputDirection.Rotation());
 	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
@@ -471,9 +487,7 @@ void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterru
 
 void AResonator::OnBurstCinematicEnded()
 {
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	//PC->SetControlRotation(CineCameraActor->GetActorRotation());
-	PC->SetViewTargetWithBlend(this, 0.3f);
+	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
 }
 
 void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)

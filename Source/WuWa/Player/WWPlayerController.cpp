@@ -10,6 +10,9 @@ void AWWPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FInputModeGameOnly GameOnlyInputMode;
+	SetInputMode(GameOnlyInputMode);
+
 	SetInputMappingContext(CurrentInputType);
 }
 
