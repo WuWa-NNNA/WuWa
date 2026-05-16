@@ -7,6 +7,11 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
+#include "LevelSequenceActor.h"
+#include "CineCameraActor.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 // Stat/UI
 #include "Stat/PlayerStatComponent.h"
@@ -38,6 +43,11 @@ AResonator::AResonator()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	CineRoot = CreateDefaultSubobject<USceneComponent>(TEXT("CineRoot"));
+	CineRoot->SetupAttachment(RootComponent);
+	CineRoot->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	CineRoot->SetRelativeRotation(FRotator::ZeroRotator);
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
@@ -91,6 +101,16 @@ void AResonator::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSequenceActor::StaticClass(), FoundActors);
+	SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACineCameraActor::StaticClass(), FoundActors);
+	CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
+	
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("CineLookAtActor"), FoundActors);
+	CineLookAtActor = Cast<AActor>(FoundActors[0]);
+
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
 }
@@ -115,7 +135,7 @@ void AResonator::TickLocomotionGait(float DeltaSeconds)
 	switch (CurrentLocomotionGait)
 	{
 	case ELocomotionGait::Sprint:
-		if (GetVelocity().Length() <= 50.0f)
+		if (!bHasCurrentMoveInput)
 		{
 			ChangeLocomotionGait(ELocomotionGait::Run);
 		}
@@ -280,6 +300,11 @@ void AResonator::Skill()
 		return;
 	}
 
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
+	{
+		return;
+	}
+
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);
@@ -300,10 +325,12 @@ void AResonator::Burst()
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);
-	SetRotationByMoveInput();
+	SetActorRotation(CurrentMoveInputDirection.Rotation());
+	//SetRotationByMoveInput();
 
-	PlayAnimMontage(BurstMontage, 1.5f);
-	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.5f);
+	PlayAnimMontage(BurstMontage, 1.0f);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
+	PlayBurstCinematic();
 }
 
 void AResonator::PlayDashMontage()
@@ -340,6 +367,23 @@ void AResonator::PlayDashMontage()
 			AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
 		}
 	}
+}
+
+void AResonator::PlayBurstCinematic()
+{
+	CineCameraActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	CineLookAtActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(CineCameraActor, 0.0f);
+
+	SequenceActor->SetSequence(BurstSequence);
+	//SequenceActor->SetBindingByTag(FName("Player"), { this }, true);
+	SequenceActor->SetBindingByTag(FName("CineCameraActor"), { CineCameraActor }, true);
+	SequenceActor->SetBindingByTag(FName("CineLookAtActor"), { CineLookAtActor }, true);
+
+	ULevelSequencePlayer* SequencePlayer = SequenceActor->GetSequencePlayer();
+	SequencePlayer->OnFinished.AddUniqueDynamic(this, &AResonator::OnBurstCinematicEnded);
+	SequencePlayer->SetPlayRate(1.0f);
+	SequencePlayer->Play();
 }
 
 void AResonator::SetRotationByMoveInput()
@@ -423,6 +467,13 @@ void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
 {
 	CurrentAttackCombo = 0;
+}
+
+void AResonator::OnBurstCinematicEnded()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	//PC->SetControlRotation(CineCameraActor->GetActorRotation());
+	PC->SetViewTargetWithBlend(this, 0.3f);
 }
 
 void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)

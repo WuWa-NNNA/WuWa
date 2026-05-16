@@ -61,6 +61,7 @@ protected:
 
 protected:
 	virtual void PlayDashMontage();
+	virtual void PlayBurstCinematic();
 
 private:
 	void SetRotationByMoveInput();
@@ -72,6 +73,8 @@ private:
 public:
 	virtual void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	virtual void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
+	UFUNCTION()
+	virtual void OnBurstCinematicEnded();
 
 public:
 	FORCEINLINE EResonatorState GetCurrentState() const { return CurrentState; }
@@ -115,6 +118,22 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bApplyZMotionToCamera = false;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USceneComponent> CineRoot;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ALevelSequenceActor> SequenceActor;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ACineCameraActor> CineCameraActor;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<AActor> CineLookAtActor;
+
+	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ULevelSequence> BurstSequence;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
