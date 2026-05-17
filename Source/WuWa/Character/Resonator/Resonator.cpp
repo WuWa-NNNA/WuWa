@@ -21,6 +21,8 @@
 
 AResonator::AResonator()
 {
+	TeamType = ETeamType::Resonator;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;

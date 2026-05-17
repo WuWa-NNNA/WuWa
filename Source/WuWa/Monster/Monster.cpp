@@ -13,6 +13,8 @@
 
 AMonster::AMonster()
 {
+	TeamType = ETeamType::Monster;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
