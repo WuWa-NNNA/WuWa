@@ -16,7 +16,7 @@ class WUWA_API ASigillum : public AMonster
 	GENERATED_BODY()
 	
 public:
-	ASigillum();
+	ASigillum(const FObjectInitializer& ObjectInitializer);
 	void ResetDiveAttackMovement();
 	virtual void OnConstruction(const FTransform& Transform) override;
 	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }

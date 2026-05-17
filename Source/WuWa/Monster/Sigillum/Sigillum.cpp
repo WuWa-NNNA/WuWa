@@ -11,7 +11,7 @@
 #include "AIController.h" 
 #include "BehaviorTree/BlackboardComponent.h"
 
-ASigillum::ASigillum()
+ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 }

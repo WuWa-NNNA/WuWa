@@ -5,7 +5,7 @@
 
 #include "Stat/LunoStatComponent.h"
 
-ALuno::ALuno()
+ALuno::ALuno(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<ULunoStatComponent>(TEXT("Stat")))
 {
 	WeaponTrail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponTrail"));
 	WeaponTrail->SetupAttachment(GetWeaponMeshComponent());
@@ -13,8 +13,6 @@ ALuno::ALuno()
 	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
 	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 	WeaponTrail->SetVisibility(false);
-
-	Stat = CreateDefaultSubobject<ULunoStatComponent>(TEXT("LunoStat"));
 
 }
 
@@ -65,8 +63,15 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 
 	CurrentLunoState = NextLunoState;
 
-	//ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Stat);
-	//LunoStat->ChangeAttackMode(NextLunoState);
+	if (ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Stat))
+	{
+		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState succes"));
+		LunoStat->ChangeAttackMode(NextLunoState);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState failed"));
+	}
 }
 
 void ALuno::Dash()

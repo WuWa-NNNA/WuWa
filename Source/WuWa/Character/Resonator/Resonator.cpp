@@ -16,7 +16,7 @@
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
 
-AResonator::AResonator()
+AResonator::AResonator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -51,7 +51,7 @@ AResonator::AResonator()
 	{
 		UE_LOG(LogTemp, Log, TEXT("Fail MainHUD"));
 	}
-	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));	//MainHUD->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
 	if (HUDWidgetAsset.Succeeded())
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
@@ -95,19 +95,21 @@ void AResonator::BeginPlay()
 
 				if (Stat)
 				{
-					UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+					UPlayerStatComponent* PlayerStat123Wideget = Cast<UPlayerStatComponent>(Stat);
 
-					PlayerStat->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
-					PlayerStat->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
+					PlayerStat123Wideget->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
+					PlayerStat123Wideget->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
 
 					MainHUD->UpdateHpBar(Stat->GetCurrentHP());
-					MainHUD->UpdateMainHUD(PlayerStat->GetCurrentDash());
+					MainHUD->UpdateMainHUD(PlayerStat123Wideget->GetCurrentDash());
 					MainHUD->UpdateLevel(Stat->GetLevel());
+
+					PlayerStat123Wideget->ChangeSkillIcon(CurrentAttackCombo);
 				}
 			}
 		}
 	}
-
+	  
 }
 
 void AResonator::Tick(float DeltaSeconds)
@@ -361,7 +363,7 @@ void AResonator::BeginComboAttack()
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	UE_LOG(LogTemp, Log, TEXT("%d"), CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("BeginComboAttack : %d"), CurrentAttackCombo);
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
@@ -401,7 +403,7 @@ void AResonator::CheckAttackComboInput()
 	}
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	UE_LOG(LogTemp, Log, TEXT("%d"), CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
 
 	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
@@ -441,7 +443,8 @@ void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
 
 		PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
 		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
-		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolE);
+		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
+
 		PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
 		PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
 

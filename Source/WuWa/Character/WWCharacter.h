@@ -11,7 +11,7 @@ class WUWA_API AWWCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	AWWCharacter();
+	AWWCharacter(const FObjectInitializer& ObjectInitializer);
 
 protected :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))

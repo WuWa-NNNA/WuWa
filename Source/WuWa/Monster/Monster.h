@@ -19,7 +19,7 @@ class WUWA_API AMonster : public AWWCharacter
 	GENERATED_BODY()
 
 public:
-	AMonster();
+	AMonster(const FObjectInitializer& ObjectInitializer);
 	USkeletalMeshComponent* GetWeapon() { return Weapon; }
 
 protected:

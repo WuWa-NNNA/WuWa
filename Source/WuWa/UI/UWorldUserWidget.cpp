@@ -44,10 +44,6 @@ void UUWorldUserWidget::NativeConstruct()
 			CharacterWidget->SetupCharacterWidget(this);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("No Valid Target Actor found!"));
-	}
 
 	
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
@@ -59,20 +55,20 @@ void UUWorldUserWidget::NativeConstruct()
 	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	ensure(SkillImage);
 
+	Skill_E_Active_Image = Cast<UImage>(GetWidgetFromName(TEXT("Skill_E_Active_Image")));
+	ensure(Skill_E_Active_Image);
+
 	UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
 
 	if (BaseMaterial)
 	{
-		// 직접 다이나믹 인스턴스 생성
+		// 다이나믹 인스턴스 생성
 		ProgressDynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
 		// 생성된 다이나믹 머터리얼을 다시 이미지의 브러시에 할당
 		DashBarImage->SetBrushFromMaterial(ProgressDynamicMaterial);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("ProgressBarImage has NO Base Material!"));
-	}
-	
+
+	SkillCoolEDisable();
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -130,15 +126,22 @@ void UUWorldUserWidget::UpdateLevel(int Level)
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
-	changeIconsprite = NewIcon;
-	UE_LOG(LogTemp, Log, TEXT("icon : %s"), *changeIconsprite->GetFName().ToString());
+	ChangeIconSprite = NewIcon;
 }
 
-void UUWorldUserWidget::UpdateSkillCoolE(float coolTime)
+void UUWorldUserWidget::SkillCoolEActive(float a)
 {
-	UE_LOG(LogTemp, Log, TEXT("UpdateSkillCoolE"));
-
+	UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
+	Skill_E_Active_Image->SetVisibility(ESlateVisibility::Visible);
 }
+
+void UUWorldUserWidget::SkillCoolEDisable()
+{
+	UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
+	Skill_E_Active_Image->SetVisibility(ESlateVisibility::Hidden);
+}
+
+
 
 void UUWorldUserWidget::UpdateSkillCoolR(float coolTime)
 {
