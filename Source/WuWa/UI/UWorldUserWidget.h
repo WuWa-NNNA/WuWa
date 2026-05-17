@@ -57,10 +57,10 @@ protected :
 	TObjectPtr<class UMaterialInstanceDynamic> ProgressDynamicMaterial;
 	
 	UPROPERTY()
-	TObjectPtr<class UTextBlock>  LevelText;
+	TObjectPtr<class UTextBlock> LevelText;
 
 	UPROPERTY()
-	TObjectPtr<class UImage>  SkillImage;
+	TObjectPtr<class UImage> SkillImage;
 
 	UPROPERTY()
 	float MaxHp;
