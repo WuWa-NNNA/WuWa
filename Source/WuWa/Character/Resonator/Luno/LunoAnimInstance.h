@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Character/Resonator/Luno.h"
+#include "Character/Resonator/Luno/Luno.h"
 #include "LunoAnimInstance.generated.h"
 
 UCLASS()

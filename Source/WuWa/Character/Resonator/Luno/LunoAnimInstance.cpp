@@ -1,5 +1,5 @@
-#include "Character/Resonator/LunoAnimInstance.h"
-#include "Character/Resonator/Luno.h"
+#include "Character/Resonator/Luno/LunoAnimInstance.h"
+#include "Character/Resonator/Luno/Luno.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
