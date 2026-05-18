@@ -5,7 +5,7 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Monster/Sigillum/Sigillum.h"
+#include "Character/Monster/Sigillum/Sigillum.h"
 
 UBTTask_Phase2Transition::UBTTask_Phase2Transition()
 {
