@@ -9,9 +9,10 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
+#include "Stat/MonsterStatComponent.h"
 
 
-AMonster::AMonster()
+AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	TeamType = ETeamType::Monster;
 
@@ -21,26 +22,18 @@ AMonster::AMonster()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
 	GetCharacterMovement()->GravityScale = 1.5f;
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 600.0f;
-	SpringArm->bUsePawnControlRotation = true;
-	SpringArm->bEnableCameraLag = true;
-	SpringArm->bEnableCameraRotationLag = true;
-
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(SpringArm);
-
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 
+	//Stat = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("MonsterStat"));
+	
 }
 
 void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

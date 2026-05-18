@@ -17,7 +17,7 @@ class WUWA_API ALuno : public AResonator
 	GENERATED_BODY()
 	
 public:
-	ALuno();
+	ALuno(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void BeginPlay() override;

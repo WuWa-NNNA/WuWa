@@ -9,6 +9,7 @@
 DECLARE_MULTICAST_DELEGATE(FOnHPZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*currentHP*/);
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class WUWA_API UWWStatComponent : public UActorComponent
 {
@@ -24,6 +25,9 @@ public:
 	FORCEINLINE float GetCurrentHP() { return CurrentHP; }
 	float ApplyDamage(float Damage);
 
+	FORCEINLINE float GetLevel() { return Level; }
+	FORCEINLINE float SetLevel(float levelup) { return Level = levelup; }
+
 protected:
 
 	// Called when the game starts¤Ñ,.
@@ -37,5 +41,9 @@ protected:
 
 	UPROPERTY(Transient, VisibleAnywhere, Category = "Stat")
 	float CurrentHP;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
+	float Level;
+
 
 };

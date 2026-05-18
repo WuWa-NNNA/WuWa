@@ -21,18 +21,46 @@ protected :
 
 public :
 	FORCEINLINE void SetMaxHp(float NewMaxHP) { MaxHp = NewMaxHP; }
+
+	UFUNCTION()
 	void UpdateHpBar(float NewCurrentHp);
 
 	FORCEINLINE void SetMaxDash(float NewMaxDash) { MaxDash = NewMaxDash; }
-	void UpdateDashBar(float NewCurrentDash);
+	UFUNCTION()
+	void UpdateMainHUD(float NewCurrentDash);
 
+	UFUNCTION()
+	void UpdateLevel(int Level);
+
+
+
+	UFUNCTION()
+	void UpdateSkillIcon(class UPaperSprite* NewIcon);
+
+	UFUNCTION()
+	void SkillCoolEActive(float a);
+
+	UFUNCTION()
+	void SkillCoolEDisable();
+	
+	UFUNCTION()
+	void UpdateSkillCoolR(float coolTime);
 
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> DashBarImage;
+
 	UPROPERTY()
-	TObjectPtr<class UProgressBar> DashProgressBar;
+	TObjectPtr<class UMaterialInstanceDynamic> ProgressDynamicMaterial;
+	
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> LevelText;
+
+	UPROPERTY()
+	TObjectPtr<class UImage> SkillImage;
 
 	UPROPERTY()
 	float MaxHp;
@@ -40,6 +68,11 @@ protected :
 	UPROPERTY()
 	float MaxDash;
 
+	UPROPERTY()
+	TObjectPtr<class UImage> Skill_E_Active_Image;
 
+public :
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<class UPaperSprite> ChangeIconSprite;
 
 };

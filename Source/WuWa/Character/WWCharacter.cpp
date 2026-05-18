@@ -1,10 +1,12 @@
 #include "Character/WWCharacter.h"
+#include "Stat/WWStatComponent.h"
 #include "Physics/WWCollision.h"
+
 #include "Engine/DamageEvents.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 
-AWWCharacter::AWWCharacter()
+AWWCharacter::AWWCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 }
 

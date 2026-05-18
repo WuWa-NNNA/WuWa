@@ -5,7 +5,9 @@
 #include "Components/PointLightComponent.h"
 #include "NiagaraComponent.h"
 
-ALuno::ALuno()
+#include "Stat/LunoStatComponent.h"
+
+ALuno::ALuno(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<ULunoStatComponent>(TEXT("Stat")))
 {
 	Bead = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bead"));
 	Bead->SetupAttachment(GetMesh(), TEXT("WeaponProp07"));
@@ -39,6 +41,7 @@ ALuno::ALuno()
 	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
 	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 	WeaponTrail->SetVisibility(false);
+
 }
 
 void ALuno::BeginPlay()
@@ -78,6 +81,16 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	SetAttackComboData(AttackComboDatas[NextLunoState]);
 
 	CurrentLunoState = NextLunoState;
+
+	if (ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Stat))
+	{
+		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState succes"));
+		LunoStat->ChangeAttackMode(NextLunoState);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState failed"));
+	}
 }
 
 void ALuno::SetWeaponMaterial(ELunoState NextLunoState)

@@ -13,7 +13,7 @@ class WUWA_API AWWCharacter : public ACharacter, public ICombatTeamInterface, pu
 	GENERATED_BODY()
 
 public:
-	AWWCharacter();
+	AWWCharacter(const FObjectInitializer& ObjectInitializer);
 
 public:
 	FORCEINLINE virtual ETeamType GetTeamType() const override { return TeamType; }

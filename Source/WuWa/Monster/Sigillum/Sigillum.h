@@ -16,16 +16,22 @@ class WUWA_API ASigillum : public AMonster
 	GENERATED_BODY()
 	
 public:
-	ASigillum();
+	ASigillum(const FObjectInitializer& ObjectInitializer);
 	void ResetDiveAttackMovement();
+	virtual void OnConstruction(const FTransform& Transform) override;
 	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void EvadeAndAttack();
 	void DiveAttack();
 	void ChangeToParalysis();
 
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	class UMaterialInterface* HiddenMaterial;
 
 private: // dive
 	bool bIsDiveAttacking = false;

@@ -9,7 +9,7 @@
 
 
 class UInputAction;
-
+class USkeletalMeshComponent;
 /**
  * 
  */
@@ -19,7 +19,8 @@ class WUWA_API AMonster : public AWWCharacter
 	GENERATED_BODY()
 
 public:
-	AMonster();
+	AMonster(const FObjectInitializer& ObjectInitializer);
+	USkeletalMeshComponent* GetWeapon() { return Weapon; }
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -57,16 +58,9 @@ private:
 	bool bCanCancelAttack = false;
 	FTimerHandle AttackComboTimer;
 
-private:
-	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UCameraComponent> Camera;
-
-private:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USkeletalMeshComponent> Weapon;
+	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
@@ -87,4 +81,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage;
+
+
+protected : 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	TObjectPtr<class UWWStatComponent> MonsterStat;
 };

@@ -15,11 +15,13 @@
 
 // Stat/UI
 #include "Stat/PlayerStatComponent.h"
+#include "Stat/LunoStatComponent.h"
 //#include "Components/WidgetComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"
+#include "PaperSprite.h"
 
-AResonator::AResonator()
+AResonator::AResonator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	TeamType = ETeamType::Resonator;
 
@@ -55,30 +57,18 @@ AResonator::AResonator()
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
 
-	Stat = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("PlayerStat"));
-	
-	if (Stat)
-	{
-		UE_LOG(LogTemp, Log, TEXT("SUCCED Stat!"));
-	}
-	DashBar = CreateDefaultSubobject<UWWWidgetComponent>(TEXT("HPWidget"));
-	if (DashBar)
-	{
-		UE_LOG(LogTemp, Log, TEXT("SUCCED DashBar!"));
-	}
-	DashBar->SetupAttachment(RootComponent);
-	DashBar->SetRelativeLocation(FVector(0, 0.0f, 110.0f));
-	//UUWorldUserWidget
-	static ConstructorHelpers::FClassFinder<UUserWidget> DashWidgetRef(TEXT("/Game/PCH/UI/Blueprint/WBP_Dash.WBP_Dash_C"));
-	if (DashWidgetRef.Succeeded())
-	{
-		DashBar->SetWidgetClass(DashWidgetRef.Class);
-		DashBar->SetWidgetSpace(EWidgetSpace::Screen);
-		DashBar->SetDrawSize(FVector2D(150.0f, 50.0f));
-		DashBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);;
-		UE_LOG(LogTemp, Log, TEXT("SUCCED DashBar! Draw"));
+	MainHUD = CreateDefaultSubobject<UUWorldUserWidget>(TEXT("MainHUD"));
 
+	if (!MainHUD)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Fail MainHUD"));
 	}
+	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
+	if (HUDWidgetAsset.Succeeded())
+	{
+		HUDWidgetClass = HUDWidgetAsset.Class;
+	}
+
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -124,6 +114,35 @@ void AResonator::BeginPlay()
 
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
+
+	if (HUDWidgetClass)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			MainHUD = CreateWidget<UUWorldUserWidget>(PC, HUDWidgetClass);
+			if (MainHUD)
+			{
+				MainHUD->AddToViewport();
+				MainHUD->SetOwningActor(this);
+
+				if (Stat)
+				{
+					UPlayerStatComponent* PlayerStat123Wideget = Cast<UPlayerStatComponent>(Stat);
+
+					PlayerStat123Wideget->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
+					PlayerStat123Wideget->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
+
+					MainHUD->UpdateHpBar(Stat->GetCurrentHP());
+					MainHUD->UpdateMainHUD(PlayerStat123Wideget->GetCurrentDash());
+					MainHUD->UpdateLevel(Stat->GetLevel());
+
+					PlayerStat123Wideget->ChangeSkillIcon(CurrentAttackCombo);
+				}
+			}
+		}
+	}
+	  
 }
 
 void AResonator::Tick(float DeltaSeconds)
@@ -258,7 +277,7 @@ void AResonator::Dash()
 	{
 		return;
 	}
-	if (PlayerStat->GetCurrentDash() <= 0)
+	if (PlayerStat->GetCurrentDash() <= 1.f)
 	{
 		return;
 	}
@@ -273,10 +292,22 @@ void AResonator::Dash()
 	PlayDashMontage();
 }
 
+void AResonator::DamagedTest()
+{
+	Stat->ApplyDamage(2);
+}
+
+void AResonator::BurstTest()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->SkillR();
+}
+
 void AResonator::Attack()
 {
 	if (CurrentAttackCombo == 0)
 	{
+
 		if (CurrentState != EResonatorState::Normal)
 		{
 			return;
@@ -318,11 +349,14 @@ void AResonator::Skill()
 
 	TryCancelAttackMontageByNewInput();
 
-	ChangeState(EResonatorState::Attack);
+	ChangeState(EResonatorState::Attack);	
 	SetRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
 	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->SkillE();
 }
 
 void AResonator::Burst()
@@ -427,6 +461,10 @@ void AResonator::BeginComboAttack()
 	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("BeginComboAttack : %d"), CurrentAttackCombo);
+
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
 	const float AttackSpeedRate = 1.5f;
@@ -464,6 +502,9 @@ void AResonator::CheckAttackComboInput()
 	{
 		CurrentAttackCombo = 1;
 	}
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
 
 	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
@@ -494,7 +535,7 @@ void AResonator::OnBurstCinematicEnded()
 
 void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
 {
-	UE_LOG(LogTemp, Log, TEXT("SUCCED SetupCharacterWidget!"));
+	//UE_LOG(LogTemp, Log, TEXT("SUCCED SetupCharacterWidget!"));
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
@@ -505,16 +546,15 @@ void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
 		MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
 
 		MyWidget->UpdateHpBar(Stat->GetCurrentHP());
-		MyWidget->UpdateDashBar(PlayerStat->GetCurrentDash());
+		MyWidget->UpdateMainHUD(PlayerStat->GetCurrentDash());
 
-		// 2. 각각의 델리게이트에 전용 함수 구독
-		// HP가 변하면 UpdateHPBar 호출
 		PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
+		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
+		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
 
-		// Dash가 변하면 UpdateDashBar 호출
-		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateDashBar);
+		PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
+		PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
 
-		UE_LOG(LogTemp, Log, TEXT("HP and Dash Delegates Bound."));
 	}
 
 }

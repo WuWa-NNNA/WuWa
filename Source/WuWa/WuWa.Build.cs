@@ -23,7 +23,8 @@ public class WuWa : ModuleRules
 			"GameplayTasks",
             "CinematicCamera",
 			"LevelSequence",
-            "MovieScene"
+            "MovieScene",
+            "Paper2D"
         });
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
