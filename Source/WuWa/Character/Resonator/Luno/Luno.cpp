@@ -5,7 +5,7 @@
 #include "Components/PointLightComponent.h"
 #include "NiagaraComponent.h"
 
-#include "Stat/LunoStatComponent.h"
+#include "Stat/Player/LunoStatComponent.h"
 
 ALuno::ALuno(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULunoStatComponent>(TEXT("Stat")))

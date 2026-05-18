@@ -14,4 +14,13 @@ class WUWA_API UWWMonsterWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public :
+	void BindStatComponent(UWWMonsterWidget* statComponent);
+
+	void UpdateHpBar(float CurrentHp);
+
+protected :
+	//UPROPERTY()
+	//class UPRogressBar* MonsterHpBar;
+
 };
