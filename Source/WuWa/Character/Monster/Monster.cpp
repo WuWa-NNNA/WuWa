@@ -9,7 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
-#include "Stat/MonsterStatComponent.h"
+#include "Stat/Monster/MonsterStatComponent.h"
 
 
 AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -31,8 +31,6 @@ AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectIn
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
-
-	//Stat = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("MonsterStat"));
 	
 }
 

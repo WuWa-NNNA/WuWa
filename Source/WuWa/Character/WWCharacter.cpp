@@ -8,6 +8,7 @@
 
 AWWCharacter::AWWCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	Stat = ObjectInitializer.CreateDefaultSubobject<UWWStatComponent>(this, TEXT("Stat"));
 }
 
 void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObjectPtr<AActor>>& DamagedActors)

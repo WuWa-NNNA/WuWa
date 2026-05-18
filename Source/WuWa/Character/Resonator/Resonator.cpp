@@ -14,8 +14,8 @@
 #include "Kismet/GameplayStatics.h"
 
 // Stat/UI
-#include "Stat/PlayerStatComponent.h"
-#include "Stat/LunoStatComponent.h"
+#include "Stat/Player/PlayerStatComponent.h"
+#include "Stat/Player/LunoStatComponent.h"
 //#include "Components/WidgetComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"

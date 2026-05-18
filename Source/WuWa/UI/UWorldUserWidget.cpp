@@ -10,8 +10,9 @@
 #include "Interface/WWCharacterWidgetInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
-#include "Stat/PlayerStatComponent.h"
+#include "Stat/Player/PlayerStatComponent.h"
 #include "PaperSprite.h"
+#include "WWMonsterWidget.h"
 
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

@@ -11,9 +11,9 @@
 #include "AIController.h" 
 #include "BehaviorTree/BlackboardComponent.h"
 
-#include "Stat/MonsterStatComponent.h"
+#include "Stat/Monster/SigillumStatComponent.h"
 
-ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UMonsterStatComponent>(TEXT("MonsterStat")))
+ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 }
