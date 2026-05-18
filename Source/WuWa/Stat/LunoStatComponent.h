@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Stat/PlayerStatComponent.h"
-#include "Character/Resonator/Luno.h"
+#include "Character/Resonator/Luno/Luno.h"
 #include "LunoStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnBaseAttackDelegate);
