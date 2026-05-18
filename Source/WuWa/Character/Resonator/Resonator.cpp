@@ -15,13 +15,13 @@
 
 // Stat/UI
 #include "Stat/PlayerStatComponent.h"
-#include "Stat/LunoStatComponent.h"
 //#include "Components/WidgetComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
 
-AResonator::AResonator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
 {
 	TeamType = ETeamType::Resonator;
 
@@ -68,7 +68,6 @@ AResonator::AResonator(const FObjectInitializer& ObjectInitializer) : Super(Obje
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
 	}
-
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

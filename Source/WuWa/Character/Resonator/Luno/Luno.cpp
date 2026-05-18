@@ -1,4 +1,4 @@
-#include "Character/Resonator/Luno.h"
+#include "Character/Resonator/Luno/Luno.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -7,7 +7,8 @@
 
 #include "Stat/LunoStatComponent.h"
 
-ALuno::ALuno(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<ULunoStatComponent>(TEXT("Stat")))
+ALuno::ALuno(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULunoStatComponent>(TEXT("Stat")))
 {
 	Bead = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bead"));
 	Bead->SetupAttachment(GetMesh(), TEXT("WeaponProp07"));
@@ -41,7 +42,6 @@ ALuno::ALuno(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitiali
 	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
 	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 	WeaponTrail->SetVisibility(false);
-
 }
 
 void ALuno::BeginPlay()
