@@ -1,5 +1,6 @@
 #include "Character/Resonator/Resonator.h"
 #include "DataAsset/AttackComboData.h"
+#include "Physics/WWCollision.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -80,6 +81,7 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AResonator::Move);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AResonator::StopMove);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AResonator::Look);
+		EnhancedInputComponent->BindAction(LockAction, ETriggerEvent::Started, this, &AResonator::Lock);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
@@ -146,6 +148,25 @@ void AResonator::BeginPlay()
 
 void AResonator::Tick(float DeltaSeconds)
 {
+	TickCamera(DeltaSeconds);
+	TickLocomotionGait(DeltaSeconds);
+}
+
+void AResonator::TickCamera(float DeltaSeconds)
+{
+	if (bIsLockOn && LockOnTarget)
+	{
+		FVector ToTarget = LockOnTarget->GetActorLocation() - GetActorLocation();
+		FRotator TargetRot = ToTarget.Rotation();
+		TargetRot.Roll = 0.0f;
+		TargetRot.Pitch = FMath::Clamp(TargetRot.Pitch, 0.0f, 15.0f) - 20.0f;
+
+		FRotator CurrentRot = GetController()->GetControlRotation();
+		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
+
+		GetController()->SetControlRotation(NewRot);
+	}
+
 	if (bApplyZMotionToCamera)
 	{
 		float ZOffset = GetMesh()->GetSocketLocation(TEXT("Bip001")).Z - GetActorLocation().Z - 50.0f;
@@ -155,8 +176,6 @@ void AResonator::Tick(float DeltaSeconds)
 	{
 		SpringArm->SocketOffset = FVector::ZeroVector;
 	}
-
-	TickLocomotionGait(DeltaSeconds);
 }
 
 void AResonator::TickLocomotionGait(float DeltaSeconds)
@@ -228,10 +247,39 @@ void AResonator::StopMove(const FInputActionValue& Value)
 
 void AResonator::Look(const FInputActionValue& Value)
 {
+	if (bIsLockOn)
+	{
+		return;
+	}
+
 	FVector2D RotationValue = Value.Get<FVector2D>();
 
 	AddControllerYawInput(RotationValue.X);
 	AddControllerPitchInput(-RotationValue.Y);
+}
+
+void AResonator::Lock()
+{
+	bIsLockOn = !bIsLockOn;
+
+	TArray<FHitResult> OutHitResults;
+
+	const float AttackRange = 0.0f;
+	const float AttackRadius = 1000.0f;
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	FVector Start = GetActorLocation();
+	FVector End = Start;
+
+	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	if (!bHitDetected)
+	{
+		return;
+	}
+
+	LockOnTarget = OutHitResults[0].GetActor();
 }
 
 void AResonator::Jump()
@@ -349,7 +397,7 @@ void AResonator::Skill()
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);	
-	SetRotationByMoveInput();
+	SetAttackRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
 	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
@@ -373,7 +421,7 @@ void AResonator::Burst()
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);
-	SetRotationByMoveInput();
+	SetAttackRotationByMoveInput();
 
 	PlayAnimMontage(BurstMontage, 1.0f);
 	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
@@ -444,6 +492,24 @@ void AResonator::SetRotationByMoveInput()
 	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
+void AResonator::SetAttackRotationByMoveInput()
+{
+	if (!bIsLockOn || !LockOnTarget)
+	{
+		SetRotationByMoveInput();
+		return;
+	}
+
+	FVector ToTarget = LockOnTarget->GetActorLocation() - GetActorLocation();
+	FRotator TargetRot = ToTarget.Rotation();
+	TargetRot.Roll = 0.0f;
+	TargetRot.Pitch = 0.0f;
+
+	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	SetActorRotation(TargetRot);
+	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+}
+
 void AResonator::TryCancelAttackMontageByNewInput()
 {
 	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
@@ -458,7 +524,7 @@ void AResonator::BeginComboAttack()
 {
 	CurrentAttackCombo = 1;
 	ChangeState(EResonatorState::Attack);
-	SetRotationByMoveInput();
+	SetAttackRotationByMoveInput();
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
@@ -506,7 +572,7 @@ void AResonator::CheckAttackComboInput()
 	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
 
 	ChangeState(EResonatorState::Attack);
-	SetRotationByMoveInput();
+	SetAttackRotationByMoveInput();
 
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *AttackComboData->MontageSectionNamePrefix, CurrentAttackCombo);
 	GetMesh()->GetAnimInstance()->Montage_JumpToSection(NextSection, AttackMontage);
