@@ -39,7 +39,6 @@ private:
 
 private:
 	void BeginComboAttack();
-	void EndComboAttack(UAnimMontage* TargetMontage, bool bInterrupted);
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
@@ -86,4 +85,5 @@ private:
 protected : 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
 	TObjectPtr<class UWWStatComponent> MonsterStat;
+
 };
