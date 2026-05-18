@@ -32,7 +32,7 @@ class WUWA_API AResonator : public AWWCharacter, public IWWCharacterWidgetInterf
 	GENERATED_BODY()
 
 public:
-	AResonator();
+	AResonator(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

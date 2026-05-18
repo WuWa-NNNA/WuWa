@@ -38,11 +38,13 @@ public :
 	void UpdateSkillIcon(class UPaperSprite* NewIcon);
 
 	UFUNCTION()
-	void UpdateSkillCoolE(float coolTime);
+	void SkillCoolEActive(float a);
 
 	UFUNCTION()
+	void SkillCoolEDisable();
+	
+	UFUNCTION()
 	void UpdateSkillCoolR(float coolTime);
-
 
 protected :
 	UPROPERTY()
@@ -55,10 +57,10 @@ protected :
 	TObjectPtr<class UMaterialInstanceDynamic> ProgressDynamicMaterial;
 	
 	UPROPERTY()
-	TObjectPtr<class UTextBlock>  LevelText;
+	TObjectPtr<class UTextBlock> LevelText;
 
 	UPROPERTY()
-	TObjectPtr<class UImage>  SkillImage;
+	TObjectPtr<class UImage> SkillImage;
 
 	UPROPERTY()
 	float MaxHp;
@@ -66,8 +68,11 @@ protected :
 	UPROPERTY()
 	float MaxDash;
 
+	UPROPERTY()
+	TObjectPtr<class UImage> Skill_E_Active_Image;
+
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<class UPaperSprite> changeIconsprite;
+	TObjectPtr<class UPaperSprite> ChangeIconSprite;
 
 };
