@@ -10,7 +10,6 @@ public class WuWa : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "WuWa" });
 
-
         PublicDependencyModuleNames.AddRange(new string[] { 
 			"Core",
 			"CoreUObject",
@@ -21,7 +20,10 @@ public class WuWa : ModuleRules
             "Niagara",
             "AIModule",
 			"NavigationSystem",
-			"GameplayTasks" ,
+			"GameplayTasks",
+            "CinematicCamera",
+			"LevelSequence",
+            "MovieScene",
             "Paper2D"
         });
         PrivateDependencyModuleNames.AddRange(new string[] {  });

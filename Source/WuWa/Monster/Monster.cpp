@@ -12,8 +12,10 @@
 #include "Stat/MonsterStatComponent.h"
 
 
-AMonster::AMonster()
+AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	TeamType = ETeamType::Monster;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -30,7 +32,7 @@ AMonster::AMonster()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 
-	Stat = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("MonsterStat"));
+	//Stat = CreateDefaultSubobject<UMonsterStatComponent>(TEXT("MonsterStat"));
 	
 }
 

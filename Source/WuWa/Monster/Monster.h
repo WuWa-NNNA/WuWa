@@ -19,7 +19,7 @@ class WUWA_API AMonster : public AWWCharacter
 	GENERATED_BODY()
 
 public:
-	AMonster();
+	AMonster(const FObjectInitializer& ObjectInitializer);
 	USkeletalMeshComponent* GetWeapon() { return Weapon; }
 
 protected:
@@ -81,4 +81,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage;
+
+
+protected : 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	TObjectPtr<class UWWStatComponent> MonsterStat;
 };

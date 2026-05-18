@@ -51,7 +51,7 @@ public :
 	void ApplyDash();
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	void ChangeSkillIcon(float attacknumber);
+	void ChangeSkillIcon(int attacknumber);
 
 	FORCEINLINE float GetRecoveryDash() { return RecoveryRate; }
 

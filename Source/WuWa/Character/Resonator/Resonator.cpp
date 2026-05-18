@@ -7,6 +7,11 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
+#include "LevelSequenceActor.h"
+#include "CineCameraActor.h"
+#include "LevelSequence.h"
+#include "LevelSequencePlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 // Stat/UI
 #include "Stat/PlayerStatComponent.h"
@@ -16,8 +21,10 @@
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
 
-AResonator::AResonator()
+AResonator::AResonator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	TeamType = ETeamType::Resonator;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -41,6 +48,11 @@ AResonator::AResonator()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	CineRoot = CreateDefaultSubobject<USceneComponent>(TEXT("CineRoot"));
+	CineRoot->SetupAttachment(RootComponent);
+	CineRoot->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
+	CineRoot->SetRelativeRotation(FRotator::ZeroRotator);
+
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
@@ -51,7 +63,7 @@ AResonator::AResonator()
 	{
 		UE_LOG(LogTemp, Log, TEXT("Fail MainHUD"));
 	}
-	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));	//MainHUD->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
 	if (HUDWidgetAsset.Succeeded())
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
@@ -67,17 +79,38 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	if (EnhancedInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AResonator::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AResonator::StopMove);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AResonator::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AResonator::Jump);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AResonator::Dash);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AResonator::Attack);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AResonator::Skill);
+		EnhancedInputComponent->BindAction(BurstAction, ETriggerEvent::Started, this, &AResonator::Burst);
 	}
 }
 
 void AResonator::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSequenceActor::StaticClass(), FoundActors);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+	}
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACineCameraActor::StaticClass(), FoundActors);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
+	}
+	
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("CineLookAtActor"), FoundActors);
+	if (!FoundActors.IsEmpty() && FoundActors[0])
+	{
+		CineLookAtActor = Cast<AActor>(FoundActors[0]);
+	}
 
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
@@ -95,19 +128,21 @@ void AResonator::BeginPlay()
 
 				if (Stat)
 				{
-					UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+					UPlayerStatComponent* PlayerStat123Wideget = Cast<UPlayerStatComponent>(Stat);
 
-					PlayerStat->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
-					PlayerStat->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
+					PlayerStat123Wideget->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
+					PlayerStat123Wideget->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
 
 					MainHUD->UpdateHpBar(Stat->GetCurrentHP());
-					MainHUD->UpdateMainHUD(PlayerStat->GetCurrentDash());
+					MainHUD->UpdateMainHUD(PlayerStat123Wideget->GetCurrentDash());
 					MainHUD->UpdateLevel(Stat->GetLevel());
+
+					PlayerStat123Wideget->ChangeSkillIcon(CurrentAttackCombo);
 				}
 			}
 		}
 	}
-
+	  
 }
 
 void AResonator::Tick(float DeltaSeconds)
@@ -119,7 +154,7 @@ void AResonator::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		SpringArm->SocketOffset = FVector::Zero();
+		SpringArm->SocketOffset = FVector::ZeroVector;
 	}
 
 	TickLocomotionGait(DeltaSeconds);
@@ -130,7 +165,7 @@ void AResonator::TickLocomotionGait(float DeltaSeconds)
 	switch (CurrentLocomotionGait)
 	{
 	case ELocomotionGait::Sprint:
-		if (GetVelocity().Length() <= 50.0f)
+		if (!bHasCurrentMoveInput)
 		{
 			ChangeLocomotionGait(ELocomotionGait::Run);
 		}
@@ -174,6 +209,7 @@ void AResonator::Move(const FInputActionValue& Value)
 		return;
 	}
 
+	bHasCurrentMoveInput = true;
 	CurrentMoveInputDirection = NewMoveInputDirection.GetSafeNormal();
 
 	if (CurrentState != EResonatorState::Normal)
@@ -184,6 +220,11 @@ void AResonator::Move(const FInputActionValue& Value)
 	TryCancelAttackMontageByNewInput();
 
 	AddMovementInput(CurrentMoveInputDirection);
+}
+
+void AResonator::StopMove(const FInputActionValue& Value)
+{
+	bHasCurrentMoveInput = false;
 }
 
 void AResonator::Look(const FInputActionValue& Value)
@@ -208,7 +249,7 @@ void AResonator::Jump()
 
 	TryCancelAttackMontageByNewInput();
 
-	if (GetVelocity().Length() > 50.0f)
+	if (bHasCurrentMoveInput)
 	{
 		SetRotationByMoveInput();
 		PlayAnimMontage(JumpRunMontage);
@@ -241,7 +282,6 @@ void AResonator::Dash()
 		return;
 	}
 
-
 	PlayerStat->ApplyDash();
 
 	TryCancelAttackMontageByNewInput();
@@ -249,28 +289,7 @@ void AResonator::Dash()
 	ChangeLocomotionGait(ELocomotionGait::Dash);
 	SetRotationByMoveInput();
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
-	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
-	{
-		PlayAnimMontage(JumpDashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
-	}
-	else if (GetVelocity().Length() > 50.0f)
-	{
-		PlayAnimMontage(DashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
-	}
-	else
-	{
-		PlayAnimMontage(DashMontage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
-		AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
-	}
-	
-
+	PlayDashMontage();
 }
 
 void AResonator::DamagedTest()
@@ -282,7 +301,6 @@ void AResonator::BurstTest()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->SkillR();
-
 }
 
 void AResonator::Attack()
@@ -324,20 +342,104 @@ void AResonator::Skill()
 		return;
 	}
 
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
+	{
+		return;
+	}
+
 	TryCancelAttackMontageByNewInput();
 
 	ChangeState(EResonatorState::Attack);	
 	SetRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
+	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
 
-	
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->SkillE();
 }
 
+void AResonator::Burst()
+{
+	if (CurrentState != EResonatorState::Normal)
+	{
+		return;
+	}
+
+	if (!SequenceActor || !CineCameraActor || !CineLookAtActor)
+	{
+		return;
+	}
+
+	TryCancelAttackMontageByNewInput();
+
+	ChangeState(EResonatorState::Attack);
+	SetRotationByMoveInput();
+
+	PlayAnimMontage(BurstMontage, 1.0f);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
+	PlayBurstCinematic();
+}
+
+void AResonator::PlayDashMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
+	{
+		if (bHasCurrentMoveInput)
+		{
+			PlayAnimMontage(JumpDashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
+		}
+		else
+		{
+			PlayAnimMontage(JumpDashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, JumpDashMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("Back"), JumpDashMontage);
+		}
+	}
+	else
+	{
+		if (bHasCurrentMoveInput)
+		{
+			PlayAnimMontage(DashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
+		}
+		else
+		{
+			PlayAnimMontage(DashMontage, 1.5f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, DashMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("Back"), DashMontage);
+		}
+	}
+}
+
+void AResonator::PlayBurstCinematic()
+{
+	CineCameraActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	CineLookAtActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(CineCameraActor, 0.0f);
+
+	SequenceActor->SetSequence(BurstSequence);
+	SequenceActor->SetBindingByTag(FName("CineCameraActor"), { CineCameraActor }, true);
+	SequenceActor->SetBindingByTag(FName("CineLookAtActor"), { CineLookAtActor }, true);
+
+	ULevelSequencePlayer* SequencePlayer = SequenceActor->GetSequencePlayer();
+	SequencePlayer->OnFinished.AddUniqueDynamic(this, &AResonator::OnBurstCinematicEnded);
+	SequencePlayer->SetPlayRate(1.0f);
+	SequencePlayer->Play();
+}
+
 void AResonator::SetRotationByMoveInput()
 {
+	if (!bHasCurrentMoveInput)
+	{
+		return;
+	}
+
 	SpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	SetActorRotation(CurrentMoveInputDirection.Rotation());
 	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
@@ -361,12 +463,13 @@ void AResonator::BeginComboAttack()
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	UE_LOG(LogTemp, Log, TEXT("%d"), CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("BeginComboAttack : %d"), CurrentAttackCombo);
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
 	const float AttackSpeedRate = 1.5f;
 	PlayAnimMontage(AttackMontage, AttackSpeedRate);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponAttackMontage, AttackSpeedRate);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
@@ -401,13 +504,14 @@ void AResonator::CheckAttackComboInput()
 	}
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	UE_LOG(LogTemp, Log, TEXT("%d"), CurrentAttackCombo);
+	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
 
 	ChangeState(EResonatorState::Attack);
 	SetRotationByMoveInput();
 
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *AttackComboData->MontageSectionNamePrefix, CurrentAttackCombo);
 	GetMesh()->GetAnimInstance()->Montage_JumpToSection(NextSection, AttackMontage);
+	Weapon->GetAnimInstance()->Montage_JumpToSection(NextSection, WeaponAttackMontage);
 
 	SetAttackComboTimer();
 
@@ -422,6 +526,11 @@ void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
 {
 	CurrentAttackCombo = 0;
+}
+
+void AResonator::OnBurstCinematicEnded()
+{
+	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
 }
 
 void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
@@ -441,7 +550,8 @@ void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
 
 		PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
 		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
-		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolE);
+		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
+
 		PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
 		PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
 
