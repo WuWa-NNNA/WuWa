@@ -26,12 +26,6 @@ struct FAttackHitData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UNiagaraSystem> HitEffect = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector HitEffectScale = FVector(1.0f, 1.0f, 1.0f);
 };
 
 class WUWA_API IAttackAnimNotifyInterface

@@ -124,14 +124,14 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> Camera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	bool bApplyZMotionToCamera = false;
+
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bIsLockOn = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AActor> LockOnTarget = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	bool bApplyZMotionToCamera = false;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))

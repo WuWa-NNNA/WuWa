@@ -154,19 +154,6 @@ void AResonator::Tick(float DeltaSeconds)
 
 void AResonator::TickCamera(float DeltaSeconds)
 {
-	if (bIsLockOn && LockOnTarget)
-	{
-		FVector ToTarget = LockOnTarget->GetActorLocation() - GetActorLocation();
-		FRotator TargetRot = ToTarget.Rotation();
-		TargetRot.Roll = 0.0f;
-		TargetRot.Pitch = FMath::Clamp(TargetRot.Pitch, 0.0f, 15.0f) - 20.0f;
-
-		FRotator CurrentRot = GetController()->GetControlRotation();
-		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
-
-		GetController()->SetControlRotation(NewRot);
-	}
-
 	if (bApplyZMotionToCamera)
 	{
 		float ZOffset = GetMesh()->GetSocketLocation(TEXT("Bip001")).Z - GetActorLocation().Z - 50.0f;
@@ -175,6 +162,19 @@ void AResonator::TickCamera(float DeltaSeconds)
 	else
 	{
 		SpringArm->SocketOffset = FVector::ZeroVector;
+	}
+
+	if (bIsLockOn && LockOnTarget)
+	{
+		FVector ToTarget = LockOnTarget->GetActorLocation() - GetActorLocation();
+		FRotator TargetRot = ToTarget.Rotation();
+		TargetRot.Roll = 0.0f;
+		TargetRot.Pitch = FMath::Clamp(TargetRot.Pitch, 0.0f, 20.0f) - 20.0f;
+
+		FRotator CurrentRot = GetController()->GetControlRotation();
+		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
+
+		GetController()->SetControlRotation(NewRot);
 	}
 }
 
@@ -260,12 +260,10 @@ void AResonator::Look(const FInputActionValue& Value)
 
 void AResonator::Lock()
 {
-	bIsLockOn = !bIsLockOn;
-
 	TArray<FHitResult> OutHitResults;
 
 	const float AttackRange = 0.0f;
-	const float AttackRadius = 1000.0f;
+	const float AttackRadius = 2000.0f;
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
@@ -279,7 +277,15 @@ void AResonator::Lock()
 		return;
 	}
 
-	LockOnTarget = OutHitResults[0].GetActor();
+	bIsLockOn = !bIsLockOn;
+	if (bIsLockOn)
+	{
+		LockOnTarget = OutHitResults[0].GetActor();
+	}
+	else
+	{
+		LockOnTarget = nullptr;
+	}
 }
 
 void AResonator::Jump()
