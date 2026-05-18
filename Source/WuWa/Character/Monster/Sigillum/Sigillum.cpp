@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Monster/Sigillum/Sigillum.h"
+#include "Character/Monster/Sigillum/Sigillum.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"

@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Monster/Sigillum/SigillumAnimInstance.h"
+#include "Character/Monster/Sigillum/SigillumAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Monster/Sigillum/Sigillum.h"
+#include "Character/Monster/Sigillum/Sigillum.h"
 
 USigillumAnimInstance::USigillumAnimInstance()
 {

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Monster/Monster.h"
+#include "Character/Monster/Monster.h"
 
 #include "Sigillum.generated.h"
 
