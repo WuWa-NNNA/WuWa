@@ -25,6 +25,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	ETeamType TeamType = ETeamType::Neutral;
 
+	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
 	TObjectPtr<class UWWStatComponent> Stat;
