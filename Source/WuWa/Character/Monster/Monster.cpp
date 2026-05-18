@@ -11,8 +11,8 @@
 #include "InputTriggers.h"
 #include "Stat/Monster/MonsterStatComponent.h"
 
-
-AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+AMonster::AMonster(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UMonsterStatComponent>(TEXT("Stat")))
 {
 	TeamType = ETeamType::Monster;
 
@@ -31,7 +31,6 @@ AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectIn
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
-	
 }
 
 void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
