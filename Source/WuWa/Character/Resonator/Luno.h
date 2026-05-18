@@ -22,15 +22,17 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-protected:
-	virtual void TickLocomotionGait(float DeltaSeconds) override;
-
 public:
+	UFUNCTION(BlueprintCallable)
 	void ChangeLunoState(ELunoState NextLunoState);
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponMaterial(ELunoState NextLunoState);
 
 protected:
-	virtual void Dash() override;
 	virtual void Skill() override;
+
+protected:
+	virtual void PlayDashMontage() override;
 
 public:
 	FORCEINLINE ELunoState GetCurrentLunoState() const { return CurrentLunoState; }
@@ -41,13 +43,39 @@ private:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UStaticMeshComponent> Bead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UPointLightComponent> BeadLight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> ArrowStartEffect1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> ArrowStartEffect2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> WeaponTrail;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAnimMontage>> DashMontages;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, TObjectPtr<class UAnimMontage>> AttackMontages;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAnimMontage>> WeaponAttackMontages;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, TObjectPtr<class UAttackComboData>> AttackComboDatas;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Material", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UMaterialInterface>> ShoesMaterials;
+
+	UPROPERTY(EditAnywhere, Category = "Material", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UMaterialInterface>> WeaponMaterials;
 };

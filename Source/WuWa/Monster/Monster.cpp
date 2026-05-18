@@ -14,6 +14,8 @@
 
 AMonster::AMonster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	TeamType = ETeamType::Monster;
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
