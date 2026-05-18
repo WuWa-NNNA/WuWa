@@ -81,4 +81,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage;
+
+
+protected : 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	TObjectPtr<class UWWStatComponent> MonsterStat;
 };
