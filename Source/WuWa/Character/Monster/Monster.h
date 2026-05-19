@@ -39,7 +39,6 @@ private:
 
 private:
 	void BeginComboAttack();
-	void EndComboAttack(UAnimMontage* TargetMontage, bool bInterrupted);
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
