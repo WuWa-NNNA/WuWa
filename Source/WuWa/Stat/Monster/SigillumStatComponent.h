@@ -16,4 +16,6 @@ class WUWA_API USigillumStatComponent : public UMonsterStatComponent
 public :
 	USigillumStatComponent();
 
+	virtual void BeginPlay() override;
+
 };

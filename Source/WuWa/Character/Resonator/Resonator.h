@@ -218,12 +218,6 @@ private:
 	TObjectPtr<UAttackComboData> AttackComboData;
 
 protected :
-
-	UPROPERTY(VisibleAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UUWorldUserWidget> MainHUD;
-
-	TSubclassOf<UUserWidget> HUDWidgetClass;
-
 	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
 
 public :
@@ -231,4 +225,8 @@ public :
 	void DamagedTest();
 	UFUNCTION(BlueprintCallable)
 	void BurstTest();
+
+	UFUNCTION(BlueprintCallable)
+	void RGaugeUp();
+
 };
