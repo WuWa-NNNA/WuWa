@@ -23,9 +23,15 @@ public:
 	FORCEINLINE UBlackboardData* GetBBAsset() { return BBAsset; }
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	virtual void BeginPlay() override;
 
 private:
+	void HandleHPChanged(float CurrentHP);
+
+	UPROPERTY()
+	TObjectPtr<class UMonsterStatComponent> CachedStatComp;
+
 	void FindPlayerAndSetTarget();
 	FTimerHandle TimerHandle_FindPlayer;
 
