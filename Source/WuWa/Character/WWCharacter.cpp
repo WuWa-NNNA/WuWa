@@ -91,7 +91,7 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 			}
 		}
 
-		const float AttackDamage = 0.0f;
+		const float AttackDamage = 100.0f;
 
 		FDamageEvent DamageEvent;
 		HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);

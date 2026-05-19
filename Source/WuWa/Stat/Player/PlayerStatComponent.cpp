@@ -60,6 +60,17 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 
 
+void UPlayerStatComponent::SetRGauge(float guage)
+{
+	RGauge = guage;
+	OnRGaugaChanged.Broadcast(guage);
+}
+
+bool UPlayerStatComponent::IsRPossible()
+{
+	return (RGauge >= 1.0f);
+}
+
 void UPlayerStatComponent::ApplyDash()
 {
 	const float PrevHP = CurrentDash;
@@ -74,8 +85,8 @@ void UPlayerStatComponent::ApplyDash()
 void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)
 {
 	uint32 tempattacknumber = 0;
-	UE_LOG(LogTemp, Log, TEXT("컴포넌트 이름: %s | 배열 내부 개수: %d"), *GetName(), NormalAttackIcons.Num());
-	UE_LOG(LogTemp, Log, TEXT("ChangeSkillIcon: %d"), attacknumber);
+	//UE_LOG(LogTemp, Log, TEXT("컴포넌트 이름: %s | 배열 내부 개수: %d"), *GetName(), NormalAttackIcons.Num());
+	//UE_LOG(LogTemp, Log, TEXT("ChangeSkillIcon: %d"), attacknumber);
 	if (attacknumber >= 3)
 	{
 		tempattacknumber = 0;

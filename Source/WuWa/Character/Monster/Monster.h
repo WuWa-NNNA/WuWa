@@ -58,6 +58,9 @@ private:
 	FTimerHandle AttackComboTimer;
 
 protected:
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
@@ -82,5 +85,8 @@ private:
 	TObjectPtr<class UAnimMontage> AttackMontage;
 
 
-protected : 
+public :
+	UFUNCTION(BlueprintCallable)
+	void DamagedTestBoss();
+
 };

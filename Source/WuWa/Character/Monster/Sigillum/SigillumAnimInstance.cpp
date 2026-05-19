@@ -35,6 +35,7 @@ void USigillumAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling;
+		bIsDeath = Owner->bIsDead;
 	}
 }
 

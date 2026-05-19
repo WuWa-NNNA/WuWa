@@ -4,19 +4,20 @@
 #include "Character/Monster/Sigillum/Sigillum.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
-#include "AIController.h" 
-#include "BehaviorTree/BlackboardComponent.h"
 
 #include "Stat/Monster/SigillumStatComponent.h"
+#include "UI/UWorldUserWidget.h"
 
-ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer) 
+ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+	Stat->SetMaxHP(1000);
 }
 
 
@@ -38,6 +39,24 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 }
 
 
+void ASigillum::SetDead()
+{
+	bIsDead = true;
+
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->Montage_Stop(0.0f);
+	}
+
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->StopMovementImmediately();
+		MoveComp->DisableMovement();
+	}
+
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
+
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -51,35 +70,6 @@ void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	AAIController* AICon = Cast<AAIController>(GetController());
-
-	if (AICon && AICon->GetBlackboardComponent())
-	{
-		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
-	}
-
-	// TODO: DamageCauser와 논의해서 결정 필요
-
-	/*AAIController* AICon = Cast<AAIController>(GetController());
-	if (AICon && AICon->GetBlackboardComponent())
-	{
-		bool bIsHeavyOrParryAttack = CheckIfHeavyAttack(DamageEvent);
-
-		if (bIsHeavyOrParryAttack)
-		{
-			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
-		}
-		else
-		{
-		}
-	}*/
-
-	return ActualDamage;
-}
 
 void ASigillum::EvadeAndAttack()
 {

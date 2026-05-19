@@ -40,8 +40,6 @@ float UWWStatComponent::ApplyDamage(float Damage)
 
 void UWWStatComponent::SetHp(float NewHp)
 {
-	//UE_LOG(LogTemp, Log, TEXT("BroadcastCurrentHP"));
-
 	CurrentHP = FMath::Clamp<float>(NewHp, 0.0f, MaxHP);
 	OnHpChagned.Broadcast(CurrentHP);
 }

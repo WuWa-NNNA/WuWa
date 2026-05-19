@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -32,7 +32,8 @@ public :
 	UFUNCTION()
 	void UpdateLevel(int Level);
 
-
+	UFUNCTION()
+	void UpdateRGauge(float currenGauge);
 
 	UFUNCTION()
 	void UpdateSkillIcon(class UPaperSprite* NewIcon);
@@ -45,7 +46,15 @@ public :
 	
 	UFUNCTION()
 	void UpdateSkillCoolR(float coolTime);
+	
+	UFUNCTION()
+	void HideBossUI();
 
+	UFUNCTION()
+	void UpdateBossHpBar(float currentHp, float currentParry);
+
+	UFUNCTION()
+	void Damaged(float damaged);
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
@@ -53,8 +62,14 @@ protected :
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> DashBarImage;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> RBarImage;
+
 	UPROPERTY()
-	TObjectPtr<class UMaterialInstanceDynamic> ProgressDynamicMaterial;
+	TObjectPtr<class UMaterialInstanceDynamic> DashGaugeMaterial;
+
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> RGaugeMaterial;
 	
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> LevelText;
@@ -69,7 +84,28 @@ protected :
 	float MaxDash;
 
 	UPROPERTY()
-	TObjectPtr<class UImage> Skill_E_Active_Image;
+	float BossMaxHp;
+
+	UPROPERTY()
+	TObjectPtr<class UImage> EHideImage;
+
+	UPROPERTY()
+	TObjectPtr<class UImage> RHideImage;
+
+protected : // 보스
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> BossName;
+
+	UPROPERTY()
+	TObjectPtr<class UProgressBar> BossHpBar;
+
+	UPROPERTY()
+	TObjectPtr<class UProgressBar> BossParryBar;
+
+public :
+	void UpdateAllVisuals(class UPlayerStatComponent* Stat);
+
+	void InitializeBossUISetting(class USigillumStatComponent* BossStat);
 
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")

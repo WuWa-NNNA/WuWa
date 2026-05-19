@@ -5,5 +5,18 @@
 
 USigillumStatComponent::USigillumStatComponent()
 {
-	UE_LOG(LogTemp, Log, TEXT("현재 HP : %f"), CurrentHP);
+	SetParryGauge(1.0f);
 }
+
+void USigillumStatComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	UE_LOG(LogTemp, Log, TEXT("현재 HP : %f"), CurrentHP);
+
+}
+
+void USigillumStatComponent::SetParryGauge(float ApplyParryGauge)
+{
+	ParryGauge = ApplyParryGauge;
+}
+

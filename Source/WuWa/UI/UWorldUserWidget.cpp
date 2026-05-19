@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/UWorldUserWidget.h"
@@ -13,6 +13,7 @@
 #include "Stat/Player/PlayerStatComponent.h"
 #include "PaperSprite.h"
 #include "WWMonsterWidget.h"
+#include "Stat/Monster/SigillumStatComponent.h"
 
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -24,11 +25,45 @@ void UUWorldUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	AActor* TargetActor = OwningActor;
-	if (TargetActor == nullptr)
+	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
+	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
+	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
+	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
+	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
+	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
+	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
+	BossParryBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossParryBar")));
+
+	ensure(HPProgressBar);
+	ensure(LevelText);
+	ensure(SkillImage);
+	ensure(EHideImage);
+	ensure(RHideImage);
+	ensure(BossName);
+	ensure(BossHpBar);
+	ensure(BossParryBar);
+
+	if (DashBarImage)
 	{
-		TargetActor = GetOwningPlayerPawn();
+		UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
+		if (BaseMaterial)
+		{
+			// ë‹¤ì´ë‚˜ë¯¹ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
+			DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+			// ìƒì„±ëœ ë‹¤ì´ë‚˜ë¯¹ ë¨¸í„°ë¦¬ì–¼ì„ ë‹¤ì‹œ ì´ë¯¸ì§€ì˜ ë¸ŒëŸ¬ì‹œì— í• ë‹¹
+			DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
+		}
 	}
+	if (RBarImage)
+	{
+		UMaterialInterface* BaseMaterial = RBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(RBarImage->GetBrush().GetResourceObject()) : nullptr;
+		if (BaseMaterial)
+		{
+			RGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+			RBarImage->SetBrushFromMaterial(RGaugeMaterial);
+		}
+	}
+	AActor* TargetActor = OwningActor ? OwningActor : GetOwningPlayerPawn();
 	if (TargetActor)
 	{
 		UPlayerStatComponent* PlayerStatComp = TargetActor->FindComponentByClass<UPlayerStatComponent>();
@@ -36,40 +71,21 @@ void UUWorldUserWidget::NativeConstruct()
 		{
 			MaxHp = PlayerStatComp->GetMaxHP();
 			MaxDash = PlayerStatComp->GetMaxDash();
-			SetMaxDash(MaxDash);
-			SetMaxHp(MaxHp);
+			UpdateHpBar(PlayerStatComp->GetCurrentHP());
+			UpdateMainHUD(PlayerStatComp->GetCurrentDash());
+			UpdateLevel(PlayerStatComp->GetLevel());
 		}
+	}
 		IWWCharacterWidgetInterface* CharacterWidget = Cast<IWWCharacterWidgetInterface>(TargetActor);
 		if (CharacterWidget)
 		{
 			CharacterWidget->SetupCharacterWidget(this);
+			UE_LOG(LogTemp, Log, TEXT("ê°±ì‹  ì™„ë£Œ"));
 		}
-	}
-
-	
-	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
-	ensure(HPProgressBar);
-
-	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
-	ensure(LevelText);
-
-	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
-	ensure(SkillImage);
-
-	Skill_E_Active_Image = Cast<UImage>(GetWidgetFromName(TEXT("Skill_E_Active_Image")));
-	ensure(Skill_E_Active_Image);
-
-	UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
-
-	if (BaseMaterial)
-	{
-		// ´ÙÀÌ³ª¹Í ÀÎ½ºÅÏ½º »ý¼º
-		ProgressDynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-		// »ý¼ºµÈ ´ÙÀÌ³ª¹Í ¸ÓÅÍ¸®¾óÀ» ´Ù½Ã ÀÌ¹ÌÁöÀÇ ºê·¯½Ã¿¡ ÇÒ´ç
-		DashBarImage->SetBrushFromMaterial(ProgressDynamicMaterial);
-	}
 
 	SkillCoolEDisable();
+	HideBossUI();
+
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -86,12 +102,11 @@ void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
 {
 	ensure(MaxDash > 0.0f);
 
-	if (ProgressDynamicMaterial)
+	if (DashGaugeMaterial)
 	{
 		float DashPercent = NewCurrentDash / MaxDash;
 
-		ProgressDynamicMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
-
+		DashGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
 		if (DashPercent >= 1)
 		{
 			DashBarImage->SetVisibility(ESlateVisibility::Collapsed);
@@ -103,11 +118,11 @@ void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
 
 		if (DashPercent < 0.4)
 		{
-			ProgressDynamicMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FVector3d(0.5f,0.0f, 0.f));
+			DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FVector3d(0.5f,0.0f, 0.f));
 		}
 		else //(R=0.381326,G=0.327778,B=0.102242,A=1.000000)
 		{
-			ProgressDynamicMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
+			DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
 		}
 
 	}
@@ -117,12 +132,28 @@ void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
 
 void UUWorldUserWidget::UpdateLevel(int Level)
 {
-	UPlayerStatComponent* PlayerStatComp = OwningActor->FindComponentByClass<UPlayerStatComponent>();
-	if (PlayerStatComp)
-	if (PlayerStatComp)
+	LevelText->SetText(FText::Format(FText::FromString("LV. {0}"), FText::AsNumber(Level)));
+}
+
+void UUWorldUserWidget::UpdateRGauge(float currenGauge)
+{
+	
+	if (currenGauge >= 1)
 	{
-		LevelText->SetText(FText::Format(FText::FromString("LV. {0}"), FText::AsNumber(Level)));
+		RHideImage->SetVisibility(ESlateVisibility::Hidden);
+		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1);
+		return;
 	}
+	else
+	{
+		RHideImage->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (RGaugeMaterial)
+	{
+		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), currenGauge);
+		//UE_LOG(LogTemp, Log, TEXT("R ++"));
+	}
+	
 }
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
@@ -132,14 +163,14 @@ void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
 {
-	UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
-	Skill_E_Active_Image->SetVisibility(ESlateVisibility::Visible);
+	//UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
+	EHideImage->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUWorldUserWidget::SkillCoolEDisable()
 {
-	UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
-	Skill_E_Active_Image->SetVisibility(ESlateVisibility::Hidden);
+	//UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
+	EHideImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 
@@ -148,4 +179,48 @@ void UUWorldUserWidget::UpdateSkillCoolR(float coolTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("UpdateSkillCoolR"));
 
+}
+
+void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
+{
+	if (!Stat) return;
+
+	UpdateHpBar(Stat->GetCurrentHP());
+	UpdateMainHUD(Stat->GetCurrentDash());
+}
+
+void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat)
+{
+
+	BossHpBar->SetVisibility(ESlateVisibility::Visible);
+	BossName->SetVisibility(ESlateVisibility::Visible);
+	BossParryBar->SetVisibility(ESlateVisibility::Visible);
+
+
+	BossMaxHp = BossStat->GetMaxHP();
+	BossHpBar->SetPercent(BossStat->GetCurrentHP() / BossMaxHp);
+	BossParryBar->SetPercent(BossStat->GetParryGauge());
+
+	BossStat->OnHpChagned.Clear();
+	BossStat->OnHpChagned.AddUObject(this, &UUWorldUserWidget::Damaged);
+	UE_LOG(LogTemp, Log, TEXT("Succed InitializeBossUISetting"));
+}
+
+
+void UUWorldUserWidget::HideBossUI()
+{
+	BossHpBar->SetVisibility(ESlateVisibility::Collapsed);
+	BossName->SetVisibility(ESlateVisibility::Collapsed);
+	BossParryBar->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UUWorldUserWidget::UpdateBossHpBar(float currentHp, float currentParry)
+{
+	BossHpBar->SetPercent(currentHp/BossMaxHp);
+	BossParryBar->SetPercent(currentParry);
+}
+
+void UUWorldUserWidget::Damaged(float damaged)
+{
+	BossHpBar->SetPercent(damaged / BossMaxHp);
 }

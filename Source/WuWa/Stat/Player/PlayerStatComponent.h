@@ -15,6 +15,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillEStartDelegate, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillRStartDelegate, float);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBaseSkillchangeDelegate,class UPaperSprite* /*skillIcon*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRGaugaChangedDelegate, float /*RGuage*/);
 
 
 
@@ -39,14 +40,20 @@ public :
 	FOnSkillRStartDelegate FOnSkillRStart;
 
 	FOnBaseSkillchangeDelegate OnBaseSkillchange;
+	FOnRGaugaChangedDelegate OnRGaugaChanged;
 
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
+	FORCEINLINE float GetLevel() { return Level; }
 	FORCEINLINE float GetCurrentDash() { return CurrentDash; }
 	FORCEINLINE void SetCurrentDash(float change) { CurrentDash = change; }
-
+	
 	FORCEINLINE float GetCoolTime_E() { return coolTime_E; }
 	FORCEINLINE void SetCoolTime_E(float change) { coolTime_E = change; }
 
+	FORCEINLINE float GetRGauge() { return RGauge; }
+	FORCEINLINE void SetRGauge(float guage);
+
+	bool IsRPossible();
 
 	void ApplyDash();
 
@@ -74,13 +81,13 @@ private :
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float RecoveryRate;
 
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float coolTime_R;
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float coolTime_E;
 
-
+	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
+	float RGauge = 0.0f;
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TArray<TObjectPtr<class UPaperSprite>> NormalAttackIcons;

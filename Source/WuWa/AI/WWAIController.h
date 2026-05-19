@@ -21,11 +21,17 @@ public:
 	void RunAI();
 	void StopAI();
 	FORCEINLINE UBlackboardData* GetBBAsset() { return BBAsset; }
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	virtual void BeginPlay() override;
 
-private:
+protected:
+
+	UPROPERTY()
+	TObjectPtr<class UWWStatComponent> CachedStatComp;
+
 	void FindPlayerAndSetTarget();
 	FTimerHandle TimerHandle_FindPlayer;
 

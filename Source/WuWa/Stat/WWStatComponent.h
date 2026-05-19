@@ -22,11 +22,16 @@ public:
 	FOnHpChangedDelegate OnHpChagned;
 
 	FORCEINLINE float GetMaxHP() { return MaxHP; }
+	FORCEINLINE float SetMaxHP(float hp) { return MaxHP = hp; }
+
 	FORCEINLINE float GetCurrentHP() { return CurrentHP; }
 	float ApplyDamage(float Damage);
 
-	FORCEINLINE float GetLevel() { return Level; }
-	FORCEINLINE float SetLevel(float levelup) { return Level = levelup; }
+	FORCEINLINE int GetLevel() { return Level; }
+	FORCEINLINE int SetLevel(int levelup) { return Level = levelup; }
+
+	void SetHp(float NewHp);
+
 
 protected:
 
@@ -34,7 +39,6 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-	void SetHp(float NewHp);
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float MaxHP;
@@ -43,7 +47,7 @@ protected:
 	float CurrentHP;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
-	float Level;
+	int Level;
 
 
 };
