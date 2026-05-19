@@ -151,7 +151,7 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 	if (RGaugeMaterial)
 	{
 		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), currenGauge);
-		UE_LOG(LogTemp, Log, TEXT("R ++"));
+		//UE_LOG(LogTemp, Log, TEXT("R ++"));
 	}
 	
 }
@@ -163,13 +163,13 @@ void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
 {
-	UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
+	//UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
 	EHideImage->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUWorldUserWidget::SkillCoolEDisable()
 {
-	UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
+	//UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
 	EHideImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
@@ -222,5 +222,5 @@ void UUWorldUserWidget::UpdateBossHpBar(float currentHp, float currentParry)
 
 void UUWorldUserWidget::Damaged(float damaged)
 {
-	UE_LOG(LogTemp, Log, TEXT("BOSSDAMAGED"));
+	BossHpBar->SetPercent(damaged / BossMaxHp);
 }

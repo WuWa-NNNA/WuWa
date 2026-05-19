@@ -22,6 +22,8 @@ public:
 	FOnHpChangedDelegate OnHpChagned;
 
 	FORCEINLINE float GetMaxHP() { return MaxHP; }
+	FORCEINLINE float SetMaxHP(float hp) { return MaxHP = hp; }
+
 	FORCEINLINE float GetCurrentHP() { return CurrentHP; }
 	float ApplyDamage(float Damage);
 

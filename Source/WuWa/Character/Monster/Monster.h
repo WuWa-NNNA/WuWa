@@ -85,5 +85,8 @@ private:
 	TObjectPtr<class UAnimMontage> AttackMontage;
 
 
-protected : 
+public :
+	UFUNCTION(BlueprintCallable)
+	void DamagedTestBoss();
+
 };
