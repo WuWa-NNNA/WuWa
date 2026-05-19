@@ -5,6 +5,7 @@
 #include "Engine/DamageEvents.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Camera/CameraShakeBase.h"
 
 AWWCharacter::AWWCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -29,12 +30,13 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
 
-//#if ENABLE_DRAW_DEBUG
-//	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-//	const float CapsuleHalfHeight = AttackRange * 0.5f;
-//	FColor DrawColor = bHitDetected ? FColor::Green : FColor::Red;
-//	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 1.0f);
-//#endif
+#if ENABLE_DRAW_DEBUG
+
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+	const float CapsuleHalfHeight = AttackRange * 0.5f;
+	FColor DrawColor = bHitDetected ? FColor::Green : FColor::Red;
+	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 1.0f);
+#endif
 
 	if (!bHitDetected)
 	{
@@ -46,6 +48,8 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 	{
 		return;
 	}
+
+	bool bDidShakeCamera = false;
 
 	for (const FHitResult& HitResult : OutHitResults)
 	{
@@ -73,9 +77,19 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 		DamagedActors.Add(HitActor);
 
-		if (AttackHitData.HitEffect)
+		if (AttackHitEffect)
 		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitData.HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation(), AttackHitData.HitEffectScale);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+		}
+
+		if (!bDidShakeCamera)
+		{
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if (PC && CameraShakeClass)
+			{
+				bDidShakeCamera = true;
+				PC->ClientStartCameraShake(CameraShakeClass);
+			}
 		}
 
 		const float AttackDamage = 0.0f;
