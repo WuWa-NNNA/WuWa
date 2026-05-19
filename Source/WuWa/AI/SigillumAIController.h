@@ -14,5 +14,9 @@ class WUWA_API ASigillumAIController : public AWWAIController
 {
 	GENERATED_BODY()
 
-	
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+
+	void HandleHPChanged(float CurrentHP);
+
 };

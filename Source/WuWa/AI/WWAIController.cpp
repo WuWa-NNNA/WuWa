@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "TimerManager.h"
+#include "Stat/WWStatComponent.h"
 
 AWWAIController::AWWAIController()
 {
@@ -44,7 +45,20 @@ void AWWAIController::StopAI()
 void AWWAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+	CachedStatComp = InPawn->FindComponentByClass<UWWStatComponent>();
+
 	RunAI();
+}
+
+void AWWAIController::OnUnPossess()
+{
+	if (CachedStatComp)
+	{
+		CachedStatComp->OnHpChagned.RemoveAll(this);
+		CachedStatComp = nullptr;
+	}
+
+	Super::OnUnPossess();
 }
 
 void AWWAIController::FindPlayerAndSetTarget()
