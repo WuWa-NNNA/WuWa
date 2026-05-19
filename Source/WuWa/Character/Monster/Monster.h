@@ -89,4 +89,7 @@ public :
 	UFUNCTION(BlueprintCallable)
 	void DamagedTestBoss();
 
+	UFUNCTION(BlueprintCallable)
+	void PlayDamagedSkin(float damage);
+
 };

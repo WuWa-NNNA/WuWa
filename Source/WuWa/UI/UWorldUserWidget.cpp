@@ -33,6 +33,7 @@ void UUWorldUserWidget::NativeConstruct()
 	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
 	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
 	BossParryBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossParryBar")));
+	TransformationGauge = Cast<UProgressBar>(GetWidgetFromName(TEXT("TransformationGauge")));
 
 	ensure(HPProgressBar);
 	ensure(LevelText);
@@ -42,6 +43,7 @@ void UUWorldUserWidget::NativeConstruct()
 	ensure(BossName);
 	ensure(BossHpBar);
 	ensure(BossParryBar);
+	ensure(TransformationGauge);
 
 	if (DashBarImage)
 	{
@@ -80,7 +82,6 @@ void UUWorldUserWidget::NativeConstruct()
 		if (CharacterWidget)
 		{
 			CharacterWidget->SetupCharacterWidget(this);
-			UE_LOG(LogTemp, Log, TEXT("갱신 완료"));
 		}
 
 	SkillCoolEDisable();
@@ -223,4 +224,9 @@ void UUWorldUserWidget::UpdateBossHpBar(float currentHp, float currentParry)
 void UUWorldUserWidget::Damaged(float damaged)
 {
 	BossHpBar->SetPercent(damaged / BossMaxHp);
+}
+
+void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
+{
+	TransformationGauge->SetPercent(Gauge);
 }
