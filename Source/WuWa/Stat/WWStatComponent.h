@@ -28,13 +28,15 @@ public:
 	FORCEINLINE float GetLevel() { return Level; }
 	FORCEINLINE float SetLevel(float levelup) { return Level = levelup; }
 
+	void SetHp(float NewHp);
+
+
 protected:
 
 	// Called when the game starts¤Ñ,.
 	
 	virtual void BeginPlay() override;
 
-	void SetHp(float NewHp);
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float MaxHP;

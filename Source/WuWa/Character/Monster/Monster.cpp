@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
 #include "Stat/Monster/MonsterStatComponent.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 AMonster::AMonster(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UMonsterStatComponent>(TEXT("Stat")))
@@ -100,4 +103,41 @@ void AMonster::Attack()
 	{
 		AnimInstance->Montage_Play(AttackMontage);
 	}
+}
+
+
+float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	AAIController* AICon = Cast<AAIController>(GetController());
+
+	if (ActualDamage > 0.0f && Stat)
+	{
+		float CurrentHP = Stat->GetCurrentHP();
+		Stat->SetHp(CurrentHP - ActualDamage);
+	}
+
+	if (AICon && AICon->GetBlackboardComponent())
+	{
+		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+	}
+
+	// TODO: DamageCauser와 논의해서 결정 필요
+
+	/*AAIController* AICon = Cast<AAIController>(GetController());
+	if (AICon && AICon->GetBlackboardComponent())
+	{
+		bool bIsHeavyOrParryAttack = CheckIfHeavyAttack(DamageEvent);
+
+		if (bIsHeavyOrParryAttack)
+		{
+			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+		}
+		else
+		{
+		}
+	}*/
+
+	return ActualDamage;
 }

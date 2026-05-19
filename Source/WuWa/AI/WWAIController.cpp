@@ -98,7 +98,7 @@ void AWWAIController::HandleHPChanged(float CurrentHP)
 
 		if (BlackboardPtr->GetValueAsBool(FName("IsPhase2")) && CurrentHP <= 0.f)
 		{
-			BlackboardPtr->SetValueAsFloat(FName("IsDead"), true);
+			BlackboardPtr->SetValueAsBool(FName("IsDead"), true);
 		}
 	}
 }

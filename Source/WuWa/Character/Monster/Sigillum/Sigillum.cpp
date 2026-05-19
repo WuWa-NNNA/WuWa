@@ -8,8 +8,6 @@
 #include "InputTriggers.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
-#include "AIController.h" 
-#include "BehaviorTree/BlackboardComponent.h"
 
 #include "Stat/Monster/SigillumStatComponent.h"
 
@@ -51,35 +49,6 @@ void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	AAIController* AICon = Cast<AAIController>(GetController());
-
-	if (AICon && AICon->GetBlackboardComponent())
-	{
-		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
-	}
-
-	// TODO: DamageCauser와 논의해서 결정 필요
-
-	/*AAIController* AICon = Cast<AAIController>(GetController());
-	if (AICon && AICon->GetBlackboardComponent())
-	{
-		bool bIsHeavyOrParryAttack = CheckIfHeavyAttack(DamageEvent);
-
-		if (bIsHeavyOrParryAttack)
-		{
-			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
-		}
-		else
-		{
-		}
-	}*/
-
-	return ActualDamage;
-}
 
 void ASigillum::EvadeAndAttack()
 {
