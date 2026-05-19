@@ -15,7 +15,8 @@ UENUM(BlueprintType)
 enum class EResonatorState : uint8
 {
 	Normal,
-	Attack
+	Attack,
+	Hit
 };
 
 UENUM(BlueprintType)
@@ -63,6 +64,7 @@ protected:
 	virtual void Burst();
 
 protected:
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void ProcessAttack();
 	virtual void PlayDashMontage();
 	virtual void PlayBurstCinematic();
@@ -90,8 +92,9 @@ public:
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
 	FORCEINLINE uint32 GetCurrentAttackCombo() const { return CurrentAttackCombo; }
+	FORCEINLINE AActor* GetLockOnTarget() const { return LockOnTarget; }
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE FRotator GetLockOnRotator() const { return (LockOnTarget->GetActorLocation() - GetActorLocation()).Rotation(); }
+	virtual FRotator GetLockOnRotator() const { return (LockOnTarget->GetActorLocation() - GetActorLocation()).Rotation(); }
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
