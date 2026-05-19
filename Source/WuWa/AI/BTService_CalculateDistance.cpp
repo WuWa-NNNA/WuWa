@@ -29,9 +29,7 @@ void UBTService_CalculateDistance::TickNode(UBehaviorTreeComponent& OwnerComp, u
 		float Distance = FVector::Dist(BossPawn->GetActorLocation(), TargetActor->GetActorLocation());
 		EDistanceRange CurrentRange = EDistanceRange::Long; 
 
-		if (Distance <= 200.0f) CurrentRange = EDistanceRange::Melee; 
-		else if (Distance <= 500.0f) CurrentRange = EDistanceRange::Short; 
-		else if (Distance <= 1000.0f) CurrentRange = EDistanceRange::Mid;
+		if (Distance <= 200.0f) CurrentRange = EDistanceRange::Short; 
 		else CurrentRange = EDistanceRange::Long;
 
 		BlackboardComp->SetValueAsEnum(DistanceRangeKey.SelectedKeyName, static_cast<uint8>(CurrentRange));
