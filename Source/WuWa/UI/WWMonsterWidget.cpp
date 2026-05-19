@@ -3,3 +3,7 @@
 
 #include "UI/WWMonsterWidget.h"
 
+void UWWMonsterWidget::BindStatComponent(UWWMonsterWidget* statComponent)
+{
+
+}

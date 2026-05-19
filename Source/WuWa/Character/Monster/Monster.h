@@ -83,7 +83,4 @@ private:
 
 
 protected : 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
-	TObjectPtr<class UWWStatComponent> MonsterStat;
-
 };
