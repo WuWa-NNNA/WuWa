@@ -32,7 +32,8 @@ public :
 	UFUNCTION()
 	void UpdateLevel(int Level);
 
-
+	UFUNCTION()
+	void UpdateRGauge(float currenGauge);
 
 	UFUNCTION()
 	void UpdateSkillIcon(class UPaperSprite* NewIcon);
@@ -53,8 +54,14 @@ protected :
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> DashBarImage;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> RBarImage;
+
 	UPROPERTY()
-	TObjectPtr<class UMaterialInstanceDynamic> ProgressDynamicMaterial;
+	TObjectPtr<class UMaterialInstanceDynamic> DashGaugeMaterial;
+
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> RGaugeMaterial;
 	
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> LevelText;
@@ -69,7 +76,13 @@ protected :
 	float MaxDash;
 
 	UPROPERTY()
-	TObjectPtr<class UImage> Skill_E_Active_Image;
+	TObjectPtr<class UImage> EHideImage;
+
+	UPROPERTY()
+	TObjectPtr<class UImage> RHideImage;
+
+public :
+	void UpdateAllVisuals(class UPlayerStatComponent* Stat);
 
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")

@@ -25,8 +25,8 @@ public:
 	FORCEINLINE float GetCurrentHP() { return CurrentHP; }
 	float ApplyDamage(float Damage);
 
-	FORCEINLINE float GetLevel() { return Level; }
-	FORCEINLINE float SetLevel(float levelup) { return Level = levelup; }
+	FORCEINLINE int GetLevel() { return Level; }
+	FORCEINLINE int SetLevel(int levelup) { return Level = levelup; }
 
 	void SetHp(float NewHp);
 
@@ -45,7 +45,7 @@ protected:
 	float CurrentHP;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
-	float Level;
+	int Level;
 
 
 };

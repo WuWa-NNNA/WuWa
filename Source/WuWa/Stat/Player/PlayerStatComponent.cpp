@@ -60,6 +60,17 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 
 
+void UPlayerStatComponent::SetRGauge(float guage)
+{
+	RGauge = guage;
+	OnRGaugaChanged.Broadcast(guage);
+}
+
+bool UPlayerStatComponent::IsRPossible()
+{
+	return (RGauge >= 1.0f);
+}
+
 void UPlayerStatComponent::ApplyDash()
 {
 	const float PrevHP = CurrentDash;

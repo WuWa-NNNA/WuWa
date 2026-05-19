@@ -58,17 +58,17 @@ AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
 
-	MainHUD = CreateDefaultSubobject<UUWorldUserWidget>(TEXT("MainHUD"));
+	/*MainHUD = CreateDefaultSubobject<UUWorldUserWidget>(TEXT("MainHUD"));
 
 	if (!MainHUD)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Fail MainHUD"));
-	}
-	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
-	if (HUDWidgetAsset.Succeeded())
+	}*/
+	//static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
+	/*if (HUDWidgetAsset.Succeeded())
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
-	}
+	}*/
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -116,7 +116,7 @@ void AResonator::BeginPlay()
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
 
-	if (HUDWidgetClass)
+	/*if (HUDWidgetClass)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		if (PC)
@@ -142,7 +142,7 @@ void AResonator::BeginPlay()
 				}
 			}
 		}
-	}
+	}*/
 	  
 }
 
@@ -356,6 +356,12 @@ void AResonator::BurstTest()
 	PlayerStat->SkillR();
 }
 
+void AResonator::RGaugeUp()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.2f);
+}
+
 void AResonator::Attack()
 {
 	if (CurrentAttackCombo == 0)
@@ -365,7 +371,7 @@ void AResonator::Attack()
 		{
 			return;
 		}
-
+		RGaugeUp();
 		BeginComboAttack();
 		return;
 	}
@@ -414,6 +420,12 @@ void AResonator::Skill()
 
 void AResonator::Burst()
 {
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	if (!PlayerStat->IsRPossible())
+	{
+		return;
+	}
+		
 	if (CurrentState != EResonatorState::Normal)
 	{
 		return;
@@ -432,6 +444,7 @@ void AResonator::Burst()
 	PlayAnimMontage(BurstMontage, 1.0f);
 	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
 	PlayBurstCinematic();
+	PlayerStat->SetRGauge(0.0f);
 }
 
 void AResonator::PlayDashMontage()
@@ -575,7 +588,7 @@ void AResonator::CheckAttackComboInput()
 	}
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
+	RGaugeUp();
 
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
@@ -606,26 +619,25 @@ void AResonator::OnBurstCinematicEnded()
 
 void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
 {
-	//UE_LOG(LogTemp, Log, TEXT("SUCCED SetupCharacterWidget!"));
+	//UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	//UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
 
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
+	//if (PlayerStat && MyWidget)
+	//{
+	//	MyWidget->SetMaxHp(Stat->GetMaxHP());
+	//	MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
 
-	if (PlayerStat && MyWidget)
-	{
-		MyWidget->SetMaxHp(Stat->GetMaxHP());
-		MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
+	//	MyWidget->UpdateHpBar(Stat->GetCurrentHP());
+	//	MyWidget->UpdateMainHUD(PlayerStat->GetCurrentDash());
 
-		MyWidget->UpdateHpBar(Stat->GetCurrentHP());
-		MyWidget->UpdateMainHUD(PlayerStat->GetCurrentDash());
 
-		PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
-		PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
-		PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
+	//	PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
+	//	PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
+	//	PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
 
-		PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
-		PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
+	//	PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
+	//	PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
+	//
 
-	}
-
+	//}
 }
