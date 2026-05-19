@@ -13,6 +13,7 @@
 #include "Stat/Player/PlayerStatComponent.h"
 #include "PaperSprite.h"
 #include "WWMonsterWidget.h"
+#include "Stat/Monster/SigillumStatComponent.h"
 
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -29,12 +30,18 @@ void UUWorldUserWidget::NativeConstruct()
 	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
+	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
+	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
+	BossParryBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossParryBar")));
 
 	ensure(HPProgressBar);
 	ensure(LevelText);
 	ensure(SkillImage);
 	ensure(EHideImage);
 	ensure(RHideImage);
+	ensure(BossName);
+	ensure(BossHpBar);
+	ensure(BossParryBar);
 
 	if (DashBarImage)
 	{
@@ -77,6 +84,8 @@ void UUWorldUserWidget::NativeConstruct()
 		}
 
 	SkillCoolEDisable();
+	HideBossUI();
+
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -176,9 +185,42 @@ void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
 {
 	if (!Stat) return;
 
-
 	UpdateHpBar(Stat->GetCurrentHP());
 	UpdateMainHUD(Stat->GetCurrentDash());
+}
+
+void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat)
+{
+
+	BossHpBar->SetVisibility(ESlateVisibility::Visible);
+	BossName->SetVisibility(ESlateVisibility::Visible);
+	BossParryBar->SetVisibility(ESlateVisibility::Visible);
 
 
+	BossMaxHp = BossStat->GetMaxHP();
+	BossHpBar->SetPercent(BossStat->GetCurrentHP() / BossMaxHp);
+	BossParryBar->SetPercent(BossStat->GetParryGauge());
+
+	BossStat->OnHpChagned.Clear();
+	BossStat->OnHpChagned.AddUObject(this, &UUWorldUserWidget::Damaged);
+	UE_LOG(LogTemp, Log, TEXT("Succed InitializeBossUISetting"));
+}
+
+
+void UUWorldUserWidget::HideBossUI()
+{
+	BossHpBar->SetVisibility(ESlateVisibility::Collapsed);
+	BossName->SetVisibility(ESlateVisibility::Collapsed);
+	BossParryBar->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UUWorldUserWidget::UpdateBossHpBar(float currentHp, float currentParry)
+{
+	BossHpBar->SetPercent(currentHp/BossMaxHp);
+	BossParryBar->SetPercent(currentParry);
+}
+
+void UUWorldUserWidget::Damaged(float damaged)
+{
+	UE_LOG(LogTemp, Log, TEXT("BOSSDAMAGED"));
 }

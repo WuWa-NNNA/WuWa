@@ -6,6 +6,8 @@
 #include "Stat/Monster/MonsterStatComponent.h"
 #include "SigillumStatComponent.generated.h"
 
+//Todo : 패리게이지 깍이는 거 델리게이트 만들기
+
 /**
  * 
  */
@@ -18,4 +20,10 @@ public :
 
 	virtual void BeginPlay() override;
 
+	FORCEINLINE float GetParryGauge() { return ParryGauge; }
+	FORCEINLINE void SetParryGauge(float ApplyParryGauge);
+
+private :
+	float ParryGauge;
+	float MaxParryGauge;
 };
