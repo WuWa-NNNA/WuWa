@@ -18,6 +18,8 @@ public:
 public:
 	FORCEINLINE virtual ETeamType GetTeamType() const override { return TeamType; }
 
+	FORCEINLINE class UWWStatComponent* GetStatComponent() const { return Stat; }
+
 public:
 	virtual void CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObjectPtr<AActor>>& DamagedActors) override;
 
@@ -28,4 +30,6 @@ protected:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
 	TObjectPtr<class UWWStatComponent> Stat;
+
+
 };
