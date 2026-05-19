@@ -4,6 +4,7 @@
 #include "Character/Monster/Sigillum/Sigillum.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+
 #include "EnhancedInputComponent.h"
 #include "InputTriggers.h"
 #include "Animation/AnimMontage.h"
@@ -35,6 +36,24 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 	}
 }
 
+
+void ASigillum::SetDead()
+{
+	bIsDead = true;
+
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->Montage_Stop(0.0f);
+	}
+
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->StopMovementImmediately();
+		MoveComp->DisableMovement();
+	}
+
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
 
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

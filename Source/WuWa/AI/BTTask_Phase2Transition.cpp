@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Monster/Sigillum/Sigillum.h"
+#include "Stat/Monster/SigillumStatComponent.h"
 
 UBTTask_Phase2Transition::UBTTask_Phase2Transition()
 {
@@ -28,10 +29,14 @@ EBTNodeResult::Type UBTTask_Phase2Transition::ExecuteTask(UBehaviorTreeComponent
         BossCharacter->GetWeapon()->EmptyOverrideMaterials();
     }
 
-    // BossCharacter 무기 mesh에 모든 엘리먼트 보이도록 해야함.
+    USigillumStatComponent* Stat = BossCharacter->GetComponentByClass<USigillumStatComponent>();
+    if (Stat)
+    {
+        Stat->SetHp(Stat->GetMaxHP());
+    }
+
 
     BlackboardComp->SetValueAsBool(IsPhase2Key.SelectedKeyName, true);
-    BlackboardComp->SetValueAsFloat(HealthRatioKey.SelectedKeyName, 1.0f);
 
     BossCharacter->PlayAnimMontage(TransitionMontage);
 

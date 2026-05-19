@@ -9,7 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "TimerManager.h"
-#include "Stat/Monster/MonsterStatComponent.h"
+#include "Stat/WWStatComponent.h"
 
 AWWAIController::AWWAIController()
 {
@@ -24,8 +24,6 @@ void AWWAIController::BeginPlay()
 
 void AWWAIController::RunAI()
 {
-	
-
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	if (UseBlackboard(BBAsset, BlackboardPtr))
 	{
@@ -47,13 +45,7 @@ void AWWAIController::StopAI()
 void AWWAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	CachedStatComp = InPawn->FindComponentByClass<UMonsterStatComponent>();
-
-	if (CachedStatComp)
-	{
-		CachedStatComp->OnHPChanged.RemoveAll(this);
-		CachedStatComp->OnHPChanged.AddUObject(this, &AWWAIController::HandleHPChanged);
-	}
+	CachedStatComp = InPawn->FindComponentByClass<UWWStatComponent>();
 
 	RunAI();
 }
@@ -62,7 +54,7 @@ void AWWAIController::OnUnPossess()
 {
 	if (CachedStatComp)
 	{
-		CachedStatComp->OnHPChanged.RemoveAll(this);
+		CachedStatComp->OnHpChagned.RemoveAll(this);
 		CachedStatComp = nullptr;
 	}
 
@@ -79,26 +71,6 @@ void AWWAIController::FindPlayerAndSetTarget()
 		if (PlayerCharacter)
 		{
 			BlackboardPtr->SetValueAsObject(FName("Target"), PlayerCharacter);
-		}
-	}
-}
-
-void AWWAIController::HandleHPChanged(float CurrentHP)
-{
-	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
-	if (BlackboardPtr && CachedStatComp)
-	{
-		float MaxHP = CachedStatComp->GetMaxHP();
-
-		if (MaxHP > 0.f)
-		{
-			float HealthRatio = CurrentHP / MaxHP;
-			BlackboardPtr->SetValueAsFloat(FName("HealthRatio"), HealthRatio);
-		}
-
-		if (BlackboardPtr->GetValueAsBool(FName("IsPhase2")) && CurrentHP <= 0.f)
-		{
-			BlackboardPtr->SetValueAsBool(FName("IsDead"), true);
 		}
 	}
 }
