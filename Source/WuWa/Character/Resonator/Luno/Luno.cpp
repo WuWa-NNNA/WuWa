@@ -66,10 +66,17 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	switch (NextLunoState)
 	{
 	case ELunoState::Half:
+		if (GetCurrentState() == EResonatorState::Attack)
+		{
+			ChangeState(EResonatorState::Normal);
+			GetMesh()->GetAnimInstance()->StopAllMontages(0.0f);
+			GetWeaponMeshComponent()->GetAnimInstance()->StopAllMontages(0.0f);
+		}
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(true);
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Cast<ULunoStatComponent>(Stat)->SetCrescentTimer();
 		break;
 	}
 
@@ -86,6 +93,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	{
 		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState succes"));
 		LunoStat->ChangeAttackMode(NextLunoState);
+		LunoStat->ChangeSkillIcon(GetCurrentAttackCombo());
 	}
 	else
 	{

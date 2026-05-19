@@ -25,6 +25,7 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeLunoState(ELunoState NextLunoState);
+
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponMaterial(ELunoState NextLunoState);
 

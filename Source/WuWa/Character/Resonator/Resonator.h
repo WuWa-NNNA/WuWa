@@ -87,6 +87,7 @@ public:
 	FORCEINLINE UAnimMontage* GetWeaponDashMontage() const { return WeaponDashMontage; }
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
+	FORCEINLINE uint32 GetCurrentAttackCombo() const { return CurrentAttackCombo; }
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }

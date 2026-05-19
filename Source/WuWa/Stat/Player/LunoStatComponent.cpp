@@ -2,11 +2,12 @@
 
 
 #include "LunoStatComponent.h"
-
+#include "Character/Resonator/Luno/Luno.h"
 
 
 ULunoStatComponent::ULunoStatComponent()
 {
+    CrescentTime = 15.0f;
 }
 
 void ULunoStatComponent::AttackChange()
@@ -28,4 +29,15 @@ void ULunoStatComponent::ChangeAttackMode(ELunoState currentStatMode)
     {
         UE_LOG(LogTemp, Warning, TEXT("ChangeAttackMode: Could not find icons for the current mode!"));
     }
+}
+
+void ULunoStatComponent::SetCrescentTimer()
+{
+	CrescentTimer.Invalidate();
+    GetWorld()->GetTimerManager().SetTimer(CrescentTimer, this, &ULunoStatComponent::RevertLunoState, CrescentTime, false);
+}
+
+void ULunoStatComponent::RevertLunoState()
+{
+    Cast<ALuno>(GetOwner())->ChangeLunoState(ELunoState::Half);
 }

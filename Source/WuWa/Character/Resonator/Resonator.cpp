@@ -358,9 +358,11 @@ void AResonator::BurstTest()
 
 void AResonator::Attack()
 {
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+
 	if (CurrentAttackCombo == 0)
 	{
-
 		if (CurrentState != EResonatorState::Normal)
 		{
 			return;
@@ -524,6 +526,10 @@ void AResonator::TryCancelAttackMontageByNewInput()
 	}
 
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.0f);
+	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(0);
 }
 
 void AResonator::BeginComboAttack()
@@ -531,10 +537,6 @@ void AResonator::BeginComboAttack()
 	CurrentAttackCombo = 1;
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
-
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	//UE_LOG(LogTemp, Log, TEXT("BeginComboAttack : %d"), CurrentAttackCombo);
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
@@ -573,9 +575,6 @@ void AResonator::CheckAttackComboInput()
 	{
 		CurrentAttackCombo = 1;
 	}
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	//UE_LOG(LogTemp, Log, TEXT("CheckAttackComboInput : %d"), CurrentAttackCombo);
 
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
