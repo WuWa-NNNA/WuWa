@@ -40,9 +40,17 @@ public :
 	UFUNCTION()
 	void ChangeAttackMode(ELunoState currentStatMode);
 
+	void SetCrescentTimer();
+
+private:
+	void RevertLunoState();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TMap<ELunoState, FLunoIconGroup> AttackIcon_Luno;
 
-
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LunoStat", meta = (AllowPrivateAccess = "true"))
+	float CrescentTime = 0.0f;
+	FTimerHandle CrescentTimer;
 };

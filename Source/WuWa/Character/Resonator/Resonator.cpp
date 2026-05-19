@@ -149,6 +149,12 @@ void AResonator::BeginPlay()
 void AResonator::Tick(float DeltaSeconds)
 {
 	TickCamera(DeltaSeconds);
+	switch (CurrentState)
+	{
+	case EResonatorState::Attack:
+		TickAttack(DeltaSeconds);
+		break;
+	}
 	TickLocomotionGait(DeltaSeconds);
 }
 
@@ -175,6 +181,18 @@ void AResonator::TickCamera(float DeltaSeconds)
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
 
 		GetController()->SetControlRotation(NewRot);
+	}
+}
+
+void AResonator::TickAttack(float DeltaSeconds)
+{
+	if (!GetMesh()->GetAnimInstance()->Montage_IsPlaying(nullptr))
+	{
+		CurrentAttackCombo = 0;
+		UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+		PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+		ChangeState(EResonatorState::Normal);
+		return;
 	}
 }
 
@@ -262,15 +280,14 @@ void AResonator::Lock()
 {
 	TArray<FHitResult> OutHitResults;
 
-	const float AttackRange = 0.0f;
-	const float AttackRadius = 2000.0f;
+	const float DetectRadius = 3000.0f;
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
 	FVector Start = GetActorLocation();
 	FVector End = Start;
 
-	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(DetectRadius), Params);
 
 	if (!bHitDetected)
 	{
@@ -364,34 +381,12 @@ void AResonator::RGaugeUp()
 
 void AResonator::Attack()
 {
-	if (CurrentAttackCombo == 0)
-	{
-
-		if (CurrentState != EResonatorState::Normal)
-		{
-			return;
-		}
-		RGaugeUp();
-		BeginComboAttack();
-		return;
-	}
-
-	if (AttackComboTimer.IsValid())
-	{
-		bHasNextComboCommand = true;
-	}
-	else
-	{
-		bHasNextComboCommand = false;
-	}
-
-	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
 	{
 		return;
 	}
 
-	bHasNextComboCommand = true;
-	CheckAttackComboInput();
+	ProcessAttack();
 }
 
 void AResonator::Skill()
@@ -445,6 +440,41 @@ void AResonator::Burst()
 	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
 	PlayBurstCinematic();
 	PlayerStat->SetRGauge(0.0f);
+}
+
+void AResonator::ProcessAttack()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+
+	if (CurrentAttackCombo == 0)
+	{
+		if (CurrentState != EResonatorState::Normal)
+		{
+			return;
+		}
+
+		RGaugeUp();
+		BeginComboAttack();
+		return;
+	}
+
+	if (AttackComboTimer.IsValid())
+	{
+		bHasNextComboCommand = true;
+	}
+	else
+	{
+		bHasNextComboCommand = false;
+	}
+
+	if (CurrentState == EResonatorState::Attack || !bCanCancelAttack)
+	{
+		return;
+	}
+
+	bHasNextComboCommand = true;
+	CheckAttackComboInput();
 }
 
 void AResonator::PlayDashMontage()
@@ -537,6 +567,10 @@ void AResonator::TryCancelAttackMontageByNewInput()
 	}
 
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.0f);
+	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(0);
 }
 
 void AResonator::BeginComboAttack()
@@ -544,10 +578,6 @@ void AResonator::BeginComboAttack()
 	CurrentAttackCombo = 1;
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
-
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
-	//UE_LOG(LogTemp, Log, TEXT("BeginComboAttack : %d"), CurrentAttackCombo);
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnAttackMontageEnded);
@@ -557,6 +587,9 @@ void AResonator::BeginComboAttack()
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
 }
 
 void AResonator::SetAttackComboTimer()
@@ -586,8 +619,7 @@ void AResonator::CheckAttackComboInput()
 	{
 		CurrentAttackCombo = 1;
 	}
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	
 	RGaugeUp();
 
 	ChangeState(EResonatorState::Attack);
@@ -600,6 +632,9 @@ void AResonator::CheckAttackComboInput()
 	SetAttackComboTimer();
 
 	bHasNextComboCommand = false;
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
 }
 
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
