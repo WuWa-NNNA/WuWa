@@ -5,6 +5,7 @@
 #include "Engine/DamageEvents.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Camera/CameraShakeBase.h"
 
 AWWCharacter::AWWCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -48,6 +49,8 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 		return;
 	}
 
+	bool bDidShakeCamera = false;
+
 	for (const FHitResult& HitResult : OutHitResults)
 	{
 		AActor* HitActor = HitResult.GetActor();
@@ -74,9 +77,19 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 		DamagedActors.Add(HitActor);
 
-		if (AttackHitData.HitEffect)
+		if (AttackHitEffect)
 		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitData.HitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation(), AttackHitData.HitEffectScale);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+		}
+
+		if (!bDidShakeCamera)
+		{
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if (PC && CameraShakeClass)
+			{
+				bDidShakeCamera = true;
+				PC->ClientStartCameraShake(CameraShakeClass);
+			}
 		}
 
 		const float AttackDamage = 0.0f;
