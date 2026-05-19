@@ -30,6 +30,8 @@ protected:
 
 public :
 	void CreateHUDWidget();
+	UFUNCTION(BlueprintCallable)
+	void SpawnBoss();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))

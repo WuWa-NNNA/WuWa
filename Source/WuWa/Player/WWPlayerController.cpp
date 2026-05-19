@@ -3,7 +3,9 @@
 #include "UI/UWorldUserWidget.h"
 #include "Character/Resonator/Resonator.h"
 #include "Stat/Player/PlayerStatComponent.h"
-
+#include "Character/Monster/Sigillum/Sigillum.h"
+#include "Stat/Monster/SigillumStatComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AWWPlayerController::AWWPlayerController()
 {
@@ -92,4 +94,26 @@ void AWWPlayerController::CreateHUDWidget()
 		UE_LOG(LogTemp, Log, TEXT("Failed MainHUDWidget"));
 
 	}
+}
+
+void AWWPlayerController::SpawnBoss()
+{
+	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), ASigillum::StaticClass());
+	ASigillum* Boss = Cast<ASigillum>(FoundActor);
+	if (!Boss)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Finde Sigllium"));
+		return;
+	}
+	if (MainHUDWidget)
+	{
+		USigillumStatComponent* BossStat = Cast<USigillumStatComponent>(Boss->GetStatComponent());
+		if (!BossStat)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No Finde USigillumStatComponent"));
+			return;
+		}
+		MainHUDWidget->InitializeBossUISetting(BossStat);
+	}
+
 }

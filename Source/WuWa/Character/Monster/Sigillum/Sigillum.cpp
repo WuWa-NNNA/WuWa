@@ -11,11 +11,13 @@
 #include "Animation/AnimInstance.h"
 
 #include "Stat/Monster/SigillumStatComponent.h"
+#include "UI/UWorldUserWidget.h"
 
-ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer) 
+ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+	Stat->SetMaxHP(1000);
 }
 
 

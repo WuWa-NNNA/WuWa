@@ -13,7 +13,7 @@ void ASigillumAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 	if (CachedStatComp)
 	{
-		CachedStatComp->OnHpChagned.RemoveAll(this);
+		//CachedStatComp->OnHpChagned.RemoveAll(this);
 		CachedStatComp->OnHpChagned.AddUObject(this, &ASigillumAIController::HandleHPChanged);
 	}
 }

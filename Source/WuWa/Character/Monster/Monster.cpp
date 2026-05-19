@@ -116,6 +116,7 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	{
 		float CurrentHP = Stat->GetCurrentHP();
 		Stat->SetHp(CurrentHP - ActualDamage);
+		UE_LOG(LogTemp, Log, TEXT("BossHP : %f"), CurrentHP- ActualDamage);
 	}
 
 	if (AICon && AICon->GetBlackboardComponent())
@@ -140,4 +141,10 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	}*/
 
 	return ActualDamage;
+}
+
+void AMonster::DamagedTestBoss()
+{
+	float CurrentHP = Stat->GetCurrentHP() - 10.f;
+	Stat->SetHp(CurrentHP);
 }
