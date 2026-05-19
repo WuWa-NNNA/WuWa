@@ -30,6 +30,7 @@ public:
 	void SetWeaponMaterial(ELunoState NextLunoState);
 
 protected:
+	virtual void Attack() override;
 	virtual void Skill() override;
 
 protected:

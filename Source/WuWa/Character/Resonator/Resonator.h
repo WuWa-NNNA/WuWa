@@ -43,6 +43,7 @@ protected:
 
 protected:
 	virtual void TickCamera(float DeltaSeconds);
+	virtual void TickAttack(float DeltaSeconds);
 	virtual void TickLocomotionGait(float DeltaSeconds);
 
 public:
@@ -62,6 +63,7 @@ protected:
 	virtual void Burst();
 
 protected:
+	virtual void ProcessAttack();
 	virtual void PlayDashMontage();
 	virtual void PlayBurstCinematic();
 
@@ -88,6 +90,8 @@ public:
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
 	FORCEINLINE uint32 GetCurrentAttackCombo() const { return CurrentAttackCombo; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE FRotator GetLockOnRotator() const { return (LockOnTarget->GetActorLocation() - GetActorLocation()).Rotation(); }
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
@@ -128,7 +132,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bApplyZMotionToCamera = false;
 
-	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bIsLockOn = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))

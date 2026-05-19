@@ -33,7 +33,9 @@ void ULunoStatComponent::ChangeAttackMode(ELunoState currentStatMode)
 
 void ULunoStatComponent::SetCrescentTimer()
 {
-	CrescentTimer.Invalidate();
+    GetWorld()->GetTimerManager().ClearTimer(CrescentTimer);
+    CrescentTimer.Invalidate();
+
     GetWorld()->GetTimerManager().SetTimer(CrescentTimer, this, &ULunoStatComponent::RevertLunoState, CrescentTime, false);
 }
 
