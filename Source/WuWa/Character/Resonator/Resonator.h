@@ -42,6 +42,7 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
+	virtual void TickCamera(float DeltaSeconds);
 	virtual void TickLocomotionGait(float DeltaSeconds);
 
 public:
@@ -53,6 +54,7 @@ protected:
 	virtual void Move(const FInputActionValue& Value);
 	virtual void StopMove(const FInputActionValue& Value);
 	virtual void Look(const FInputActionValue& Value);
+	virtual void Lock();
 	virtual void Jump();
 	virtual void Dash();
 	virtual void Attack();
@@ -65,6 +67,7 @@ protected:
 
 private:
 	void SetRotationByMoveInput();
+	void SetAttackRotationByMoveInput();
 	void TryCancelAttackMontageByNewInput();
 	void BeginComboAttack();
 	void SetAttackComboTimer();
@@ -97,16 +100,21 @@ private:
 
 private:
 	bool bHasCurrentMoveInput = false;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FVector CurrentMoveInputDirection;
+
 	ELocomotionGait CurrentLocomotionGait;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	uint32 CurrentAttackCombo = 0;
+
 	bool bHasNextComboCommand = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack", meta = (AllowPrivateAccess = "true"))
 	bool bCanCancelAttack = false;
+
 	FTimerHandle AttackComboTimer;
 
 private:
@@ -118,6 +126,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bApplyZMotionToCamera = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	bool bIsLockOn = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<AActor> LockOnTarget = nullptr;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Cinematic", meta = (AllowPrivateAccess = "true"))
@@ -145,6 +159,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> LookAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> LockAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> JumpAction;
