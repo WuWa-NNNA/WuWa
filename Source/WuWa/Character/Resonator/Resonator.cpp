@@ -1,6 +1,7 @@
 #include "Character/Resonator/Resonator.h"
 #include "DataAsset/AttackComboData.h"
 #include "Physics/WWCollision.h"
+#include "Effect/GhostTrailEffect.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -114,6 +115,7 @@ void AResonator::BeginPlay()
 
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
+	DodgeTime = 0.5f;
 
 	if (!DashGaugeComponent)
 	{
@@ -142,12 +144,14 @@ void AResonator::BeginPlay()
 void AResonator::Tick(float DeltaSeconds)
 {
 	TickCamera(DeltaSeconds);
+
 	switch (CurrentState)
 	{
 	case EResonatorState::Attack:
 		TickAttack(DeltaSeconds);
 		break;
 	}
+
 	TickLocomotionGait(DeltaSeconds);
 	
 	FVector CurrentLocation = DashGaugeComponent->GetComponentLocation();
@@ -345,7 +349,7 @@ void AResonator::Dash()
 		return;
 	}
 
-	if (CurrentLocomotionGait == ELocomotionGait::Dash)
+	if (CurrentState == EResonatorState::Normal && CurrentLocomotionGait == ELocomotionGait::Dash)
 	{
 		return;
 	}
@@ -360,6 +364,10 @@ void AResonator::Dash()
 		return;
 	}
 
+	bHasCurrentDashInput = true;
+	GetWorldTimerManager().ClearTimer(DodgeTimer);
+	GetWorldTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
+
 	PlayerStat->ApplyDash();
 
 	TryCancelAttackMontageByNewInput();
@@ -368,6 +376,18 @@ void AResonator::Dash()
 	SetRotationByMoveInput();
 
 	PlayDashMontage();
+}
+
+void AResonator::Dodge()
+{
+	bHasCurrentDashInput = false;
+	GetWorldTimerManager().ClearTimer(DodgeTimer);
+
+	ChangeState(EResonatorState::Dodge);
+	PlayDodgeMontage();
+	
+	SpawnGhostTrailEffect();
+	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
 }
 
 void AResonator::DamagedTest()
@@ -452,9 +472,20 @@ void AResonator::Burst()
 
 float AResonator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (CurrentState == EResonatorState::Dodge)
+	{
+		return 0.0f;
+	}
 
+	if (bHasCurrentDashInput)
+	{
+		Dodge();
+		return 0.0f;
+	}
 
-	return 0.0f;
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return ActualDamage;
 }
 
 void AResonator::ProcessAttack()
@@ -528,6 +559,25 @@ void AResonator::PlayDashMontage()
 	}
 }
 
+void AResonator::PlayDodgeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnDodgeMontageEnded);
+	if (bHasCurrentMoveInput)
+	{
+		PlayAnimMontage(DodgeMontage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+	}
+	else
+	{
+		PlayAnimMontage(DodgeMontage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+		AnimInstance->Montage_JumpToSection(TEXT("Back"), DodgeMontage);
+	}
+}
+
 void AResonator::PlayBurstCinematic()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
@@ -591,6 +641,25 @@ void AResonator::TryCancelAttackMontageByNewInput()
 	PlayerStat->ChangeSkillIcon(0);
 }
 
+void AResonator::OnFinishedDodgeTimer()
+{
+	bHasCurrentDashInput = false;
+}
+
+void AResonator::SpawnGhostTrailEffect()
+{
+	if (!GhostTrailEffectClass || !GetMesh())
+	{
+		return;
+	}
+
+	AGhostTrailEffect* Ghost = GetWorld()->SpawnActor<AGhostTrailEffect>(GhostTrailEffectClass, GetMesh()->GetComponentTransform());
+	if (Ghost)
+	{
+		Ghost->Initialize(GetMesh(), GhostTrailEffectMaterial, 0.3f);
+	}
+}
+
 void AResonator::BeginComboAttack()
 {
 	CurrentAttackCombo = 1;
@@ -621,7 +690,7 @@ void AResonator::SetAttackComboTimer()
 	float ComboEffectTime = (AttackComboData->EffectiveFrameCount[ComboIndex] / AttackComboData->FrameRate / AttackSpeedRate);
 	if (ComboEffectTime > 0)
 	{
-		GetWorld()->GetTimerManager().SetTimer(AttackComboTimer, this, &AResonator::CheckAttackComboInput, ComboEffectTime, false);
+		GetWorldTimerManager().SetTimer(AttackComboTimer, this, &AResonator::CheckAttackComboInput, ComboEffectTime, false);
 	}
 }
 
@@ -658,6 +727,12 @@ void AResonator::CheckAttackComboInput()
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ChangeLocomotionGait(ELocomotionGait::Sprint);
+}
+
+void AResonator::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	ChangeState(EResonatorState::Normal);
+	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
 }
 
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)

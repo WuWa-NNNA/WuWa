@@ -16,7 +16,8 @@ enum class EResonatorState : uint8
 {
 	Normal,
 	Attack,
-	Hit
+	Hit,
+	Dodge
 };
 
 UENUM(BlueprintType)
@@ -59,6 +60,7 @@ protected:
 	virtual void Lock();
 	virtual void Jump();
 	virtual void Dash();
+	virtual void Dodge();
 	virtual void Attack();
 	virtual void Skill();
 	virtual void Burst();
@@ -67,18 +69,22 @@ protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void ProcessAttack();
 	virtual void PlayDashMontage();
+	virtual void PlayDodgeMontage();
 	virtual void PlayBurstCinematic();
 
 private:
 	void SetRotationByMoveInput();
 	void SetAttackRotationByMoveInput();
 	void TryCancelAttackMontageByNewInput();
+	void OnFinishedDodgeTimer();
+	void SpawnGhostTrailEffect();
 	void BeginComboAttack();
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
 
 public:
 	virtual void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual void OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	virtual void OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted);
 	UFUNCTION()
 	virtual void OnBurstCinematicEnded();
@@ -88,6 +94,7 @@ public:
 	FORCEINLINE ELocomotionGait GetCurrentLocomotionGait() const { return CurrentLocomotionGait; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMeshComponent() const { return Weapon; }
 	FORCEINLINE UAnimMontage* GetDashMontage() const { return DashMontage; }
+	FORCEINLINE UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
 	FORCEINLINE UAnimMontage* GetWeaponDashMontage() const { return WeaponDashMontage; }
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
@@ -98,6 +105,7 @@ public:
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
+	FORCEINLINE void SetDodgeMontage(UAnimMontage* NewDodgeMontage) { DodgeMontage = NewDodgeMontage; }
 	FORCEINLINE void SetAttackMontage(UAnimMontage* NewAttackMontage) { AttackMontage = NewAttackMontage; }
 	FORCEINLINE void SetWeaponAttackMontage(UAnimMontage* NewWeaponAttackMontage) { WeaponAttackMontage = NewWeaponAttackMontage; }
 	FORCEINLINE void SetAttackComboData(UAttackComboData* NewAttackComboData) { AttackComboData = NewAttackComboData; }
@@ -124,6 +132,11 @@ private:
 	bool bCanCancelAttack = false;
 
 	FTimerHandle AttackComboTimer;
+
+private:
+	bool bHasCurrentDashInput = false;
+	float DodgeTime = 0.0f;
+	FTimerHandle DodgeTimer;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
@@ -197,6 +210,9 @@ private:
 	TObjectPtr<UAnimMontage> DashMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> DodgeMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> JumpDashMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
@@ -224,6 +240,15 @@ private:
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAttackComboData> AttackComboData;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AGhostTrailEffect> GhostTrailEffectClass;
+
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UMaterialInterface> GhostTrailEffectMaterial;
+
+	FTimerHandle GhostTrailEffectSpawnTimer;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
