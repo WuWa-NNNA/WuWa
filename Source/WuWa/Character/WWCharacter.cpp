@@ -104,7 +104,45 @@ float AWWCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	if (ActualDamage > 0.0f && Stat)
 	{
 		Stat->ApplyDamage(ActualDamage);
+		PlayDamagedSkin(DamageAmount);
 	}
 
 	return ActualDamage;
+}
+
+void AWWCharacter::PlayDamagedSkin(float damage)
+{
+	int32 RandomInt = FMath::RandRange(1, 10);
+
+	if (!Stat->DamageTextActorClass)
+	{
+		UE_LOG(LogTemp, Log, TEXT("no DamageTextActorClass"));
+		return;
+	}
+
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		AActor* DamageActor = world->SpawnActorDeferred<AActor>(
+			Stat->DamageTextActorClass,
+			GetTransform(),
+			this,
+			GetInstigator(),
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+		);
+		if (DamageActor)
+		{
+			FProperty* Property = DamageActor->GetClass()->FindPropertyByName(TEXT("Dmg"));
+
+			if (FDoubleProperty* DoubleProperty = CastField<FDoubleProperty>(Property))
+			{
+				DoubleProperty->SetPropertyValue_InContainer(DamageActor, static_cast<double>(damage + RandomInt));
+			}
+			else if (FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
+			{
+				FloatProperty->SetPropertyValue_InContainer(DamageActor, damage + RandomInt);
+			}
+			DamageActor->FinishSpawning(GetTransform());
+		}
+	}
 }
