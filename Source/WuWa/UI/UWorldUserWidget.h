@@ -59,6 +59,12 @@ public :
 	UFUNCTION()
 	void ChangedTransformationGauge(float Gauge);
 
+public :
+	UFUNCTION()
+	void HUDVisible();
+
+	UFUNCTION()
+	void HUDHidden();
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;

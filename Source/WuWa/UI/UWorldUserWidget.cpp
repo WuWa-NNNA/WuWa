@@ -103,32 +103,32 @@ void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
 
 void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
 {
-	ensure(MaxDash > 0.0f);
+	//ensure(MaxDash > 0.0f);
 
-	if (DashGaugeMaterial)
-	{
-		float DashPercent = NewCurrentDash / MaxDash;
+	//if (DashGaugeMaterial)
+	//{
+	//	float DashPercent = NewCurrentDash / MaxDash;
 
-		DashGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
-		if (DashPercent >= 1)
-		{
-			DashBarImage->SetVisibility(ESlateVisibility::Collapsed);
-		}
-		else
-		{
-			DashBarImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		}
+	//	DashGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
+	//	if (DashPercent >= 1)
+	//	{
+	//		DashBarImage->SetVisibility(ESlateVisibility::Collapsed);
+	//	}
+	//	else
+	//	{
+	//		DashBarImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	//	}
 
-		if (DashPercent < 0.4)
-		{
-			DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FVector3d(0.5f,0.0f, 0.f));
-		}
-		else //(R=0.381326,G=0.327778,B=0.102242,A=1.000000)
-		{
-			DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
-		}
+	//	if (DashPercent < 0.4)
+	//	{
+	//		DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FVector3d(0.5f,0.0f, 0.f));
+	//	}
+	//	else //(R=0.381326,G=0.327778,B=0.102242,A=1.000000)
+	//	{
+	//		DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
+	//	}
 
-	}
+	//}
 }
 
 
@@ -144,7 +144,7 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 	if (currenGauge >= 1)
 	{
 		RHideImage->SetVisibility(ESlateVisibility::Hidden);
-		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1);
+		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 0);
 		return;
 	}
 	else
@@ -153,7 +153,7 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 	}
 	if (RGaugeMaterial)
 	{
-		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), currenGauge);
+		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - currenGauge);
 		//UE_LOG(LogTemp, Log, TEXT("R ++"));
 	}
 	
@@ -234,4 +234,14 @@ void UUWorldUserWidget::Damaged(float damaged)
 void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
 {
 	TransformationGauge->SetPercent(Gauge);
+}
+
+void UUWorldUserWidget::HUDVisible()
+{
+	SetVisibility(ESlateVisibility::Visible);
+}
+
+void UUWorldUserWidget::HUDHidden()
+{
+	SetVisibility(ESlateVisibility::Hidden);
 }

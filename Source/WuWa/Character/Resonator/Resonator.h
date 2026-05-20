@@ -250,6 +250,10 @@ private:
 
 	FTimerHandle GhostTrailEffectSpawnTimer;
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	class UWidgetComponent* DashGaugeComponent;
+
 protected :
 	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
 

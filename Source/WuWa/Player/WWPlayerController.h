@@ -30,6 +30,7 @@ protected:
 
 public :
 	void CreateHUDWidget();
+
 	UFUNCTION(BlueprintCallable)
 	void SpawnBoss();
 
@@ -45,5 +46,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UUWorldUserWidget> HUDWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UUserWidget> DashGaugeWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> DashWidgetClass;
+
 
 };
