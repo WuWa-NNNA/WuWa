@@ -26,6 +26,9 @@ public:
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+private:
+	void PlayDamagedSkin(float damage);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	ETeamType TeamType = ETeamType::Neutral;
