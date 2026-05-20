@@ -29,7 +29,7 @@ void UUWorldUserWidget::NativeConstruct()
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
 	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
-	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("ESkillKeyImage")));
+	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("W_ESkillKeyImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
 	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
 	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
