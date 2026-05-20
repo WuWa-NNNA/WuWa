@@ -75,3 +75,4 @@ DerivedDataCache/*
 
 # Temp Files
 Config/DefaultEditorPerProjectUserSettings.ini
+/Content/LJB/Blueprint/Combat/BP_AttackCameraShake.uasset
