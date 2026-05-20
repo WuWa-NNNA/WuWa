@@ -655,7 +655,7 @@ void AResonator::SpawnGhostTrailEffect()
 	AGhostTrailEffect* Ghost = GetWorld()->SpawnActor<AGhostTrailEffect>(GhostTrailEffectClass, GetMesh()->GetComponentTransform());
 	if (Ghost)
 	{
-		Ghost->Initialize(GetMesh(), GhostTrailEffectMaterial, 0.3f);
+		Ghost->Initialize(GetMesh(), GhostTrailEffectMaterial, 0.4f);
 	}
 }
 
