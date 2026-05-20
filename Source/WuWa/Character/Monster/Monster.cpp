@@ -122,7 +122,7 @@ void AMonster::BeginPlay()
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 			TEXT("Bip001Spine2")
 		);		
-		hideLockOn();
+		hideLockOnMonster();
 	}
 	else
 	{
@@ -164,4 +164,24 @@ void AMonster::DamagedTestBoss()
 {
 	float CurrentHP = Stat->GetCurrentHP() - 10.f;
 	Stat->SetHp(CurrentHP);
+}
+void AMonster::showLockOnMonster()
+{
+	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
+	if (!MonsterStat)
+	{
+		return;
+	}
+	MonsterStat->showLockOn();
+
+}
+void AMonster::hideLockOnMonster()
+{
+	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
+	if (!MonsterStat)
+	{
+		return;
+	}
+	MonsterStat->hideLockOn();
+
 }

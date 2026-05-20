@@ -46,8 +46,8 @@ private:
 	void SetRotationByMoveInput();
 
 public :
-	void showLockOn();
-	void hideLockOn();
+	void showLockOnMonster();
+	void hideLockOnMonster();
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))

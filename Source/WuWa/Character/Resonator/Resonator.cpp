@@ -301,7 +301,7 @@ void AResonator::Lock()
 		AMonster* monster = Cast<AMonster>(LockOnTarget);
 		if (monster)
 		{
-			monster->showLockOn();
+			monster->showLockOnMonster();
 		}
 	}
 	else
@@ -309,7 +309,7 @@ void AResonator::Lock()
 		AMonster* monster = Cast<AMonster>(LockOnTarget);
 		if (monster)
 		{
-			monster->hideLockOn();
+			monster->hideLockOnMonster();
 		}
 		LockOnTarget = nullptr;
 	}
