@@ -22,16 +22,20 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-	FVector Start = GetActorLocation()
-		+ GetActorForwardVector() * AttackHitData.StartOffset.X
-		+ GetActorRightVector() * AttackHitData.StartOffset.Y
-		+ GetActorUpVector() * AttackHitData.StartOffset.Z;
-	FVector End = Start + AttackHitData.Direction * AttackRange;
+	FVector OriginalStart = GetActorTransform().TransformPosition(AttackHitData.StartOffset);
+	FVector OriginalEnd = OriginalStart + AttackHitData.Direction * AttackRange;
 
-	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+	FVector CapsuleOrigin = OriginalStart + (OriginalEnd - OriginalStart) * 0.5f;
 
+	float SweepHalfLength = FMath::Max(0.0f, (AttackRange * 0.5f) - AttackRadius);
+
+	FVector SweepStart = CapsuleOrigin - (GetActorForwardVector() * SweepHalfLength);
+	FVector SweepEnd = CapsuleOrigin + (GetActorForwardVector() * SweepHalfLength);
+
+	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, SweepStart, SweepEnd, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	UE_LOG(LogTemp, Warning, TEXT("Direction: %s, Range: %f"), *AttackHitData.Direction.ToString(), AttackRange);
 #if ENABLE_DRAW_DEBUG
-	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
 	const float CapsuleHalfHeight = AttackRange * 0.5f;
 	FColor DrawColor = bHitDetected ? FColor::Green : FColor::Red;
 	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 1.0f);
@@ -104,7 +108,45 @@ float AWWCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	if (ActualDamage > 0.0f && Stat)
 	{
 		Stat->ApplyDamage(ActualDamage);
+		PlayDamagedSkin(DamageAmount);
 	}
 
 	return ActualDamage;
+}
+
+void AWWCharacter::PlayDamagedSkin(float damage)
+{
+	int32 RandomInt = FMath::RandRange(1, 10);
+
+	if (!Stat->DamageTextActorClass)
+	{
+		UE_LOG(LogTemp, Log, TEXT("no DamageTextActorClass"));
+		return;
+	}
+
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		AActor* DamageActor = world->SpawnActorDeferred<AActor>(
+			Stat->DamageTextActorClass,
+			GetTransform(),
+			this,
+			GetInstigator(),
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+		);
+		if (DamageActor)
+		{
+			FProperty* Property = DamageActor->GetClass()->FindPropertyByName(TEXT("Dmg"));
+
+			if (FDoubleProperty* DoubleProperty = CastField<FDoubleProperty>(Property))
+			{
+				DoubleProperty->SetPropertyValue_InContainer(DamageActor, static_cast<double>(damage + RandomInt));
+			}
+			else if (FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
+			{
+				FloatProperty->SetPropertyValue_InContainer(DamageActor, damage + RandomInt);
+			}
+			DamageActor->FinishSpawning(GetTransform());
+		}
+	}
 }
