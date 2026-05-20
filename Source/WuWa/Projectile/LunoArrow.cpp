@@ -142,7 +142,7 @@ bool ALunoArrow::CheckAttackHit()
 			}
 		}
 
-		const float AttackDamage = 0.0f;
+		const float AttackDamage = 100.0f;
 
 		FDamageEvent DamageEvent;
 		HitActor->TakeDamage(AttackDamage, DamageEvent, GetInstigatorController(), this);
