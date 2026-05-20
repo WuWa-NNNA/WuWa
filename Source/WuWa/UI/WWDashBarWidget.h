@@ -14,4 +14,18 @@ class WUWA_API UWWDashBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public :
+	virtual void NativeConstruct() override;
+
+	void UpdataWorldDash(float NewCurrentDash);
+
+protected :
+
+	UPROPERTY()
+	TObjectPtr<class UImage> DashGaugeImage;
+
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> DashGaugeMaterial;
+
+	float MaxDash;
 };

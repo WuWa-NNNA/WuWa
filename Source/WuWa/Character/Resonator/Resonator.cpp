@@ -20,6 +20,7 @@
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
 #include "Character/Monster/Monster.h"
+#include "UI/WWDashBarWidget.h"
 
 AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
@@ -58,17 +59,15 @@ AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 	Weapon->SetVisibility(false);
 
-	/*MainHUD = CreateDefaultSubobject<UUWorldUserWidget>(TEXT("MainHUD"));
-
-	if (!MainHUD)
+	DashGaugeComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("DashGaugeComponent"));
+	
+	static ConstructorHelpers::FClassFinder<UUserWidget> DashBarRef(TEXT("/Game/PCH/UI/Blueprint/WBP_DashGauage.WBP_DashGauage_C"));
+	if (DashBarRef.Class)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Fail MainHUD"));
-	}*/
-	//static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_HUD.WBP_HUD_C"));
-	/*if (HUDWidgetAsset.Succeeded())
-	{
-		HUDWidgetClass = HUDWidgetAsset.Class;
-	}*/
+		DashGaugeComponent->SetWidgetClass(DashBarRef.Class);
+		DashGaugeComponent->SetWidgetSpace(EWidgetSpace::Screen);			
+		DashGaugeComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -116,34 +115,28 @@ void AResonator::BeginPlay()
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
 
-	/*if (HUDWidgetClass)
+	if (!DashGaugeComponent)
 	{
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		if (PC)
-		{
-			MainHUD = CreateWidget<UUWorldUserWidget>(PC, HUDWidgetClass);
-			if (MainHUD)
-			{
-				MainHUD->AddToViewport();
-				MainHUD->SetOwningActor(this);
+		return;
+	}
+	
+	UUserWidget* WidgetObject =	DashGaugeComponent->GetUserWidgetObject();
+	UWWDashBarWidget* DashWidget =	Cast<UWWDashBarWidget>(WidgetObject);
 
-				if (Stat)
-				{
-					UPlayerStatComponent* PlayerStat123Wideget = Cast<UPlayerStatComponent>(Stat);
+	if (!DashWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DashWidget NULL"));
+		return;
+	}
 
-					PlayerStat123Wideget->OnHpChagned.AddUObject(MainHUD, &UUWorldUserWidget::UpdateHpBar);
-					PlayerStat123Wideget->OnDashChanged.AddUObject(MainHUD, &UUWorldUserWidget::UpdateMainHUD);
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 
-					MainHUD->UpdateHpBar(Stat->GetCurrentHP());
-					MainHUD->UpdateMainHUD(PlayerStat123Wideget->GetCurrentDash());
-					MainHUD->UpdateLevel(Stat->GetLevel());
+	if (!PlayerStat)
+	{
+		return;
+	}
 
-					PlayerStat123Wideget->ChangeSkillIcon(CurrentAttackCombo);
-				}
-			}
-		}
-	}*/
-	  
+	PlayerStat->OnDashChanged.AddUObject(DashWidget,&UWWDashBarWidget::UpdataWorldDash);
 }
 
 void AResonator::Tick(float DeltaSeconds)
@@ -156,6 +149,11 @@ void AResonator::Tick(float DeltaSeconds)
 		break;
 	}
 	TickLocomotionGait(DeltaSeconds);
+	
+	FVector CurrentLocation = DashGaugeComponent->GetComponentLocation();
+	FVector TargetLocation = GetActorLocation() + Camera->GetRightVector()*80.0f + Camera->GetUpVector()*20.0f;
+	FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.f);
+	DashGaugeComponent->SetWorldLocation(NewLocation);
 }
 
 void AResonator::TickCamera(float DeltaSeconds)
@@ -532,6 +530,9 @@ void AResonator::PlayDashMontage()
 
 void AResonator::PlayBurstCinematic()
 {
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->HideUI();
+
 	CineCameraActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
 	CineLookAtActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(CineCameraActor, 0.0f);
@@ -666,6 +667,8 @@ void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterru
 
 void AResonator::OnBurstCinematicEnded()
 {
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ShowUI();
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
 }
 

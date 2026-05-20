@@ -225,6 +225,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAttackComboData> AttackComboData;
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	class UWidgetComponent* DashGaugeComponent;
+
 protected :
 	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
 

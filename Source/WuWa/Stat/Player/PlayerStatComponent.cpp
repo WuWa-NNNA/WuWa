@@ -45,6 +45,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 void UPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	SetDash(GetMaxDash()-0.01f);
 }
 
 void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -131,4 +132,14 @@ void UPlayerStatComponent::SetDash(float NewDash)
 {
 	CurrentDash = FMath::Clamp<float>(NewDash, 0.0f, MaxDash);
 	OnDashChanged.Broadcast(CurrentDash);
+}
+
+void UPlayerStatComponent::HideUI()
+{
+	OnRSart.Broadcast();
+}
+
+void UPlayerStatComponent::ShowUI()
+{
+	OnREnd.Broadcast();
 }

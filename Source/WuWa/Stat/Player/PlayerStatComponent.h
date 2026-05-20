@@ -17,6 +17,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillRStartDelegate, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBaseSkillchangeDelegate,class UPaperSprite* /*skillIcon*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnRGaugaChangedDelegate, float /*RGuage*/);
 
+DECLARE_MULTICAST_DELEGATE(FOnRSartDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnREndDelegate);
 
 
 
@@ -41,6 +43,9 @@ public :
 
 	FOnBaseSkillchangeDelegate OnBaseSkillchange;
 	FOnRGaugaChangedDelegate OnRGaugaChanged;
+
+	FOnRSartDelegate OnRSart;
+	FOnREndDelegate OnREnd;
 
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
 	FORCEINLINE float GetLevel() { return Level; }
@@ -68,6 +73,13 @@ public :
 	
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	void SkillR();
+
+
+	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
+	void HideUI();
+
+	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
+	void ShowUI();
 	
 private :	
 	void SetDash(float NewDash);
