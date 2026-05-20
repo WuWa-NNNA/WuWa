@@ -29,19 +29,23 @@ void UUWorldUserWidget::NativeConstruct()
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
 	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
+	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("ESkillKeyImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
 	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
 	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
 	BossParryBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossParryBar")));
-
+	TransformationGauge = Cast<UProgressBar>(GetWidgetFromName(TEXT("TransformationGauge")));
+	
 	ensure(HPProgressBar);
 	ensure(LevelText);
 	ensure(SkillImage);
 	ensure(EHideImage);
 	ensure(RHideImage);
+	ensure(ESkillKeyImage);
 	ensure(BossName);
 	ensure(BossHpBar);
 	ensure(BossParryBar);
+	ensure(TransformationGauge);
 
 	if (DashBarImage)
 	{
@@ -80,7 +84,6 @@ void UUWorldUserWidget::NativeConstruct()
 		if (CharacterWidget)
 		{
 			CharacterWidget->SetupCharacterWidget(this);
-			UE_LOG(LogTemp, Log, TEXT("갱신 완료"));
 		}
 
 	SkillCoolEDisable();
@@ -165,12 +168,15 @@ void UUWorldUserWidget::SkillCoolEActive(float a)
 {
 	//UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
 	EHideImage->SetVisibility(ESlateVisibility::Visible);
+	ESkillKeyImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUWorldUserWidget::SkillCoolEDisable()
 {
 	//UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
 	EHideImage->SetVisibility(ESlateVisibility::Hidden);
+	ESkillKeyImage->SetVisibility(ESlateVisibility::Visible);
+
 }
 
 
@@ -223,4 +229,9 @@ void UUWorldUserWidget::UpdateBossHpBar(float currentHp, float currentParry)
 void UUWorldUserWidget::Damaged(float damaged)
 {
 	BossHpBar->SetPercent(damaged / BossMaxHp);
+}
+
+void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
+{
+	TransformationGauge->SetPercent(Gauge);
 }

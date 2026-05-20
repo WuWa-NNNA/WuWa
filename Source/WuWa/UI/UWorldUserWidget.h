@@ -55,6 +55,10 @@ public :
 
 	UFUNCTION()
 	void Damaged(float damaged);
+	
+	UFUNCTION()
+	void ChangedTransformationGauge(float Gauge);
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
@@ -78,6 +82,9 @@ protected :
 	TObjectPtr<class UImage> SkillImage;
 
 	UPROPERTY()
+	TObjectPtr<class UImage> ESkillKeyImage;
+
+	UPROPERTY()
 	float MaxHp;
 
 	UPROPERTY()
@@ -91,6 +98,9 @@ protected :
 
 	UPROPERTY()
 	TObjectPtr<class UImage> RHideImage;
+
+	UPROPERTY()
+	TObjectPtr<class UProgressBar> TransformationGauge;
 
 protected : // 보스
 	UPROPERTY()

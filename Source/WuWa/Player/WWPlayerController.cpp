@@ -3,6 +3,8 @@
 #include "UI/UWorldUserWidget.h"
 #include "Character/Resonator/Resonator.h"
 #include "Stat/Player/PlayerStatComponent.h"
+#include "Stat/Player/LunoStatComponent.h"
+
 #include "Character/Monster/Sigillum/Sigillum.h"
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -71,6 +73,12 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			MainHUDWidget->SetMaxDash(PlayerStat->GetMaxDash());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
 			MainHUDWidget->UpdateRGauge(PlayerStat->GetRGauge());
+		}
+		ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Resonator->GetStatComponent());
+		if (LunoStat)
+		{
+			LunoStat->OnChangeCrescentTime.AddUObject(MainHUDWidget, &UUWorldUserWidget::ChangedTransformationGauge);
+			LunoStat->OnBaseEndCrescentTime.AddUObject(MainHUDWidget, &UUWorldUserWidget::SkillCoolEDisable);
 		}
 	}
 }

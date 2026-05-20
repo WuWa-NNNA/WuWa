@@ -37,8 +37,6 @@ protected:
 	TObjectPtr<class UNiagaraSystem> AttackHitEffect;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAcess = "true"))
 	TObjectPtr<class UWWStatComponent> Stat;
-
-
 };

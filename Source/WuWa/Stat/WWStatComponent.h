@@ -49,5 +49,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	int Level;
 
+	// ... 기존 헤더 코드
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DamageSkin", Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> DamageTextActorClass;
 };
