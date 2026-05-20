@@ -13,7 +13,15 @@ UCLASS()
 class WUWA_API UMonsterStatComponent : public UWWStatComponent
 {
 	GENERATED_BODY()
-	
-public:
 
+public :
+	void showLockOn();
+	void hideLockOn();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI_LockOn")
+	TSubclassOf<class AActor> AttachActorClass;
+	
+	UPROPERTY()
+	TObjectPtr<AActor> SpawnedLockOn;
 };

@@ -16,10 +16,10 @@
 
 // Stat/UI
 #include "Stat/Player/LunoStatComponent.h"
-//#include "Components/WidgetComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
+#include "Character/Monster/Monster.h"
 
 AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
@@ -298,9 +298,19 @@ void AResonator::Lock()
 	if (bIsLockOn)
 	{
 		LockOnTarget = OutHitResults[0].GetActor();
+		AMonster* monster = Cast<AMonster>(LockOnTarget);
+		if (monster)
+		{
+			monster->showLockOnMonster();
+		}
 	}
 	else
 	{
+		AMonster* monster = Cast<AMonster>(LockOnTarget);
+		if (monster)
+		{
+			monster->hideLockOnMonster();
+		}
 		LockOnTarget = nullptr;
 	}
 }

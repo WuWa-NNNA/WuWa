@@ -25,7 +25,7 @@ public:
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Attack();
-
+	virtual void BeginPlay() override;
 
 private:
 	virtual void Tick(float DeltaSeconds) override;
@@ -45,6 +45,9 @@ private:
 private:
 	void SetRotationByMoveInput();
 
+public :
+	void showLockOnMonster();
+	void hideLockOnMonster();
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
