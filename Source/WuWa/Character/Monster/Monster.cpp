@@ -5,6 +5,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Actor.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -105,6 +106,30 @@ void AMonster::Attack()
 	}
 }
 
+void AMonster::BeginPlay()
+{
+	Super::BeginPlay();
+	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+
+	MonsterStat->SpawnedLockOn = GetWorld()->SpawnActor<AActor>(MonsterStat->AttachActorClass);
+
+	if (IsValid(MonsterStat->SpawnedLockOn))
+	{
+		MonsterStat->SpawnedLockOn->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("Bip001Spine2")
+		);		
+		hideLockOn();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("No SpawnedLockOn"));
+	}
+}
+
 
 float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -185,4 +210,24 @@ void AMonster::PlayDamagedSkin(float damage)
 			DamageActor->FinishSpawning(GetTransform());
 		}
 	}
+}
+void AMonster::showLockOn()
+{
+	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
+	if (!MonsterStat)
+	{
+		return;
+	}
+	MonsterStat->showLockOn();
+
+}
+void AMonster::hideLockOn()
+{
+	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
+	if (!MonsterStat)
+	{
+		return;
+	}
+	MonsterStat->hideLockOn();
+
 }
