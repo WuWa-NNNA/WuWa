@@ -15,8 +15,7 @@ UENUM(BlueprintType)
 enum class EResonatorState : uint8
 {
 	Normal,
-	Attack,
-	Hit
+	Attack
 };
 
 UENUM(BlueprintType)
@@ -44,7 +43,6 @@ protected:
 
 protected:
 	virtual void TickCamera(float DeltaSeconds);
-	virtual void TickAttack(float DeltaSeconds);
 	virtual void TickLocomotionGait(float DeltaSeconds);
 
 public:
@@ -64,8 +62,6 @@ protected:
 	virtual void Burst();
 
 protected:
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	virtual void ProcessAttack();
 	virtual void PlayDashMontage();
 	virtual void PlayBurstCinematic();
 
@@ -91,10 +87,6 @@ public:
 	FORCEINLINE UAnimMontage* GetWeaponDashMontage() const { return WeaponDashMontage; }
 	FORCEINLINE bool HasCurrentMoveInput() const { return bHasCurrentMoveInput; }
 	FORCEINLINE FVector GetCurrentMoveInputDirection() const { return CurrentMoveInputDirection; }
-	FORCEINLINE uint32 GetCurrentAttackCombo() const { return CurrentAttackCombo; }
-	FORCEINLINE AActor* GetLockOnTarget() const { return LockOnTarget; }
-	UFUNCTION(BlueprintCallable)
-	virtual FRotator GetLockOnRotator() const { return (LockOnTarget->GetActorLocation() - GetActorLocation()).Rotation(); }
 
 public:
 	FORCEINLINE void SetDashMontage(UAnimMontage* NewDashMontage) { DashMontage = NewDashMontage; }
@@ -135,7 +127,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bApplyZMotionToCamera = false;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool bIsLockOn = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))

@@ -25,15 +25,10 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeLunoState(ELunoState NextLunoState);
-
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponMaterial(ELunoState NextLunoState);
 
-public:
-	virtual FRotator GetLockOnRotator() const override;
-
 protected:
-	virtual void Attack() override;
 	virtual void Skill() override;
 
 protected:
