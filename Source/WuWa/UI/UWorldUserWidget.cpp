@@ -201,7 +201,7 @@ void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat
 	BossHpBar->SetPercent(BossStat->GetCurrentHP() / BossMaxHp);
 	BossParryBar->SetPercent(BossStat->GetParryGauge());
 
-	BossStat->OnHpChagned.Clear();
+	BossStat->OnHpChagned.RemoveAll(this);
 	BossStat->OnHpChagned.AddUObject(this, &UUWorldUserWidget::Damaged);
 	UE_LOG(LogTemp, Log, TEXT("Succed InitializeBossUISetting"));
 }
