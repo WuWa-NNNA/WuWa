@@ -8,8 +8,8 @@
 #include "LunoStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnBaseAttackDelegate);
-
-//DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillRStartDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeCrescentTimeDelegate, float /*currentDash*/);
+DECLARE_MULTICAST_DELEGATE(FOnBaseEndCrescentTimeDelegate);
 
 /**
  * 
@@ -33,6 +33,9 @@ public :
 	ULunoStatComponent();
 
 	FOnBaseAttackDelegate OnBaseAttack;
+	FOnChangeCrescentTimeDelegate OnChangeCrescentTime;
+	FOnBaseEndCrescentTimeDelegate OnBaseEndCrescentTime;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void AttackChange();
@@ -40,9 +43,17 @@ public :
 	UFUNCTION()
 	void ChangeAttackMode(ELunoState currentStatMode);
 
+	void SetCrescentTimer();
+
+private:
+	void RevertLunoState();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TMap<ELunoState, FLunoIconGroup> AttackIcon_Luno;
 
-
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LunoStat", meta = (AllowPrivateAccess = "true"))
+	float CrescentTime = 0.0f;
+	FTimerHandle CrescentTimer;
 };

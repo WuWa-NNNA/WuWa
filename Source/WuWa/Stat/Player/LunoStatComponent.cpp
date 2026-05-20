@@ -2,18 +2,32 @@
 
 
 #include "LunoStatComponent.h"
-
+#include "Character/Resonator/Luno/Luno.h"
 
 
 ULunoStatComponent::ULunoStatComponent()
 {
+    CrescentTime = 10.0f;
+}
+
+
+
+void ULunoStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    float RemainingTime = GetWorld()->GetTimerManager().GetTimerRemaining(CrescentTimer);
+    if (CrescentTime > RemainingTime)
+    {
+        OnChangeCrescentTime.Broadcast(RemainingTime/ CrescentTime);
+    }
 }
 
 void ULunoStatComponent::AttackChange()
 {
 	UE_LOG(LogTemp, Log, TEXT("SkillR"));
 
-	OnBaseAttack.Broadcast();
+	//OnBaseAttack.Broadcast();
 }
 
 void ULunoStatComponent::ChangeAttackMode(ELunoState currentStatMode)
@@ -28,4 +42,18 @@ void ULunoStatComponent::ChangeAttackMode(ELunoState currentStatMode)
     {
         UE_LOG(LogTemp, Warning, TEXT("ChangeAttackMode: Could not find icons for the current mode!"));
     }
+}
+
+void ULunoStatComponent::SetCrescentTimer()
+{
+    GetWorld()->GetTimerManager().ClearTimer(CrescentTimer);
+    CrescentTimer.Invalidate();
+
+    GetWorld()->GetTimerManager().SetTimer(CrescentTimer, this, &ULunoStatComponent::RevertLunoState, CrescentTime, false);
+}
+
+void ULunoStatComponent::RevertLunoState()
+{
+    Cast<ALuno>(GetOwner())->ChangeLunoState(ELunoState::Half);
+    OnBaseEndCrescentTime.Broadcast();
 }

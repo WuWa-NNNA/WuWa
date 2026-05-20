@@ -31,7 +31,6 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
 
 #if ENABLE_DRAW_DEBUG
-
 	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
 	const float CapsuleHalfHeight = AttackRange * 0.5f;
 	FColor DrawColor = bHitDetected ? FColor::Green : FColor::Red;
@@ -84,7 +83,7 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 		if (!bDidShakeCamera)
 		{
-			APlayerController* PC = Cast<APlayerController>(GetController());
+			APlayerController* PC = GetWorld()->GetFirstPlayerController();
 			if (PC && CameraShakeClass)
 			{
 				bDidShakeCamera = true;
@@ -97,4 +96,15 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 		FDamageEvent DamageEvent;
 		HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
 	}
+}
+
+float AWWCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.0f && Stat)
+	{
+		Stat->ApplyDamage(ActualDamage);
+	}
+
+	return ActualDamage;
 }

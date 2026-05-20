@@ -24,6 +24,9 @@ public:
 	virtual void CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObjectPtr<AActor>>& DamagedActors) override;
 
 protected:
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	ETeamType TeamType = ETeamType::Neutral;
 
@@ -34,8 +37,6 @@ protected:
 	TObjectPtr<class UNiagaraSystem> AttackHitEffect;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAcess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAcess = "true"))
 	TObjectPtr<class UWWStatComponent> Stat;
-
-
 };
