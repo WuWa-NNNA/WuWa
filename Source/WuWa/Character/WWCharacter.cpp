@@ -80,25 +80,28 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 		DamagedActors.Add(HitActor);
 
-		if (AttackHitEffect)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-		}
-
-		if (!bDidShakeCamera)
-		{
-			APlayerController* PC = GetWorld()->GetFirstPlayerController();
-			if (PC && CameraShakeClass)
-			{
-				bDidShakeCamera = true;
-				PC->ClientStartCameraShake(CameraShakeClass);
-			}
-		}
-
 		const float AttackDamage = 100.0f;
 
 		FDamageEvent DamageEvent;
-		HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+		float ActualDamage = HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+
+		if (ActualDamage > 0.0f)
+		{
+			if (AttackHitEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+			}
+
+			if (!bDidShakeCamera)
+			{
+				APlayerController* PC = GetWorld()->GetFirstPlayerController();
+				if (PC && CameraShakeClass)
+				{
+					bDidShakeCamera = true;
+					PC->ClientStartCameraShake(CameraShakeClass);
+				}
+			}
+		}
 	}
 }
 

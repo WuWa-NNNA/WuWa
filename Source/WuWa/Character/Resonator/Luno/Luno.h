@@ -38,6 +38,7 @@ protected:
 
 protected:
 	virtual void PlayDashMontage() override;
+	virtual void PlayDodgeMontage() override;
 
 public:
 	FORCEINLINE ELunoState GetCurrentLunoState() const { return CurrentLunoState; }
@@ -65,6 +66,9 @@ private:
 private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, TObjectPtr<class UAnimMontage>> DashMontages;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TMap<ELunoState, TObjectPtr<class UAnimMontage>> DodgeMontages;
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, TObjectPtr<class UAnimMontage>> AttackMontages;

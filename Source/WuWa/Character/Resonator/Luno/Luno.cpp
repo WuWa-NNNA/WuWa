@@ -81,6 +81,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	GetMesh()->SetMaterial(7, ShoesMaterials[NextLunoState]);
 	SetWeaponMaterial(NextLunoState);
 	SetDashMontage(DashMontages[NextLunoState]);
+	SetDodgeMontage(DodgeMontages[NextLunoState]);
 	SetAttackMontage(AttackMontages[NextLunoState]);
 	SetWeaponAttackMontage(WeaponAttackMontages[NextLunoState]);
 	SetAttackComboData(AttackComboDatas[NextLunoState]);
@@ -141,22 +142,53 @@ void ALuno::PlayDashMontage()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	UAnimInstance* WeaponAnimInstance = GetWeaponMeshComponent()->GetAnimInstance();
 
-	UAnimMontage* Motage = GetDashMontage();
+	UAnimMontage* Montage = GetDashMontage();
 	UAnimMontage* WeaponMotage = GetWeaponDashMontage();
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AResonator::OnDashMontageEnded);
 	if (HasCurrentMoveInput())
 	{
-		PlayAnimMontage(Motage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, Motage);
+		PlayAnimMontage(Montage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
 		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
 	}
 	else
 	{
-		PlayAnimMontage(Motage, 1.5f);
-		AnimInstance->Montage_SetEndDelegate(EndDelegate, Motage);
-		AnimInstance->Montage_JumpToSection(TEXT("Back"), Motage);
+		PlayAnimMontage(Montage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+		AnimInstance->Montage_JumpToSection(TEXT("Back"), Montage);
+		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
+	}
+}
+
+void ALuno::PlayDodgeMontage()
+{
+	if (CurrentLunoState == ELunoState::Half)
+	{
+		Super::PlayDodgeMontage();
+		return;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UAnimInstance* WeaponAnimInstance = GetWeaponMeshComponent()->GetAnimInstance();
+
+	UAnimMontage* Montage = GetDodgeMontage();
+	UAnimMontage* WeaponMotage = GetWeaponDashMontage();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnDodgeMontageEnded);
+	if (HasCurrentMoveInput())
+	{
+		PlayAnimMontage(Montage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
+	}
+	else
+	{
+		PlayAnimMontage(Montage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+		AnimInstance->Montage_JumpToSection(TEXT("Back"), Montage);
 		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
 	}
 }

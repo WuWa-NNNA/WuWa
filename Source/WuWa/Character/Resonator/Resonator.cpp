@@ -115,6 +115,7 @@ void AResonator::BeginPlay()
 
 	ChangeState(EResonatorState::Normal);
 	ChangeLocomotionGait(ELocomotionGait::Run);
+	DodgeTime = 0.5f;
 
 	/*if (HUDWidgetClass)
 	{
@@ -153,6 +154,8 @@ void AResonator::Tick(float DeltaSeconds)
 	{
 	case EResonatorState::Attack:
 		TickAttack(DeltaSeconds);
+		break;
+	case EResonatorState::Dodge:
 		break;
 	}
 	TickLocomotionGait(DeltaSeconds);
@@ -194,6 +197,17 @@ void AResonator::TickAttack(float DeltaSeconds)
 		ChangeState(EResonatorState::Normal);
 		return;
 	}
+}
+
+void AResonator::TickDodge(float DeltaSeconds)
+{
+	GetWorldTimerManager().SetTimer(
+		GhostTimerHandle,
+		this,
+		&AResonator::SpawnGhostTrailEffect,
+		0.05f,
+		true
+	);
 }
 
 void AResonator::TickLocomotionGait(float DeltaSeconds)
@@ -347,7 +361,7 @@ void AResonator::Dash()
 		return;
 	}
 
-	if (CurrentLocomotionGait == ELocomotionGait::Dash)
+	if (CurrentState == EResonatorState::Normal && CurrentLocomotionGait == ELocomotionGait::Dash)
 	{
 		return;
 	}
@@ -362,7 +376,11 @@ void AResonator::Dash()
 		return;
 	}
 
-	PlayerStat->ApplyDash();
+	bHasCurrentDashInput = true;
+	GetWorld()->GetTimerManager().ClearTimer(DodgeTimer);
+	GetWorld()->GetTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
+
+	//PlayerStat->ApplyDash();
 
 	TryCancelAttackMontageByNewInput();
 
@@ -370,6 +388,15 @@ void AResonator::Dash()
 	SetRotationByMoveInput();
 
 	PlayDashMontage();
+}
+
+void AResonator::Dodge()
+{
+	bHasCurrentDashInput = false;
+	GetWorld()->GetTimerManager().ClearTimer(DodgeTimer);
+
+	ChangeState(EResonatorState::Dodge);
+	PlayDodgeMontage();
 }
 
 void AResonator::DamagedTest()
@@ -454,9 +481,20 @@ void AResonator::Burst()
 
 float AResonator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (CurrentState == EResonatorState::Dodge)
+	{
+		return 0.0f;
+	}
 
+	if (bHasCurrentDashInput)
+	{
+		Dodge();
+		return 0.0f;
+	}
 
-	return 0.0f;
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return ActualDamage;
 }
 
 void AResonator::ProcessAttack()
@@ -530,6 +568,25 @@ void AResonator::PlayDashMontage()
 	}
 }
 
+void AResonator::PlayDodgeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AResonator::OnDodgeMontageEnded);
+	if (bHasCurrentMoveInput)
+	{
+		PlayAnimMontage(DodgeMontage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+	}
+	else
+	{
+		PlayAnimMontage(DodgeMontage, 1.5f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+		AnimInstance->Montage_JumpToSection(TEXT("Back"), DodgeMontage);
+	}
+}
+
 void AResonator::PlayBurstCinematic()
 {
 	CineCameraActor->AttachToComponent(CineRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -588,6 +645,16 @@ void AResonator::TryCancelAttackMontageByNewInput()
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(0);
+}
+
+void AResonator::OnFinishedDodgeTimer()
+{
+	bHasCurrentDashInput = false;
+}
+
+void AResonator::SpawnGhostTrailEffect()
+{
+
 }
 
 void AResonator::BeginComboAttack()
@@ -657,6 +724,11 @@ void AResonator::CheckAttackComboInput()
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ChangeLocomotionGait(ELocomotionGait::Sprint);
+}
+
+void AResonator::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	ChangeState(EResonatorState::Normal);
 }
 
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
