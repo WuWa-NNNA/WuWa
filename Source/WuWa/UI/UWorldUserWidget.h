@@ -82,6 +82,9 @@ protected :
 	TObjectPtr<class UImage> SkillImage;
 
 	UPROPERTY()
+	TObjectPtr<class UImage> ESkillKeyImage;
+
+	UPROPERTY()
 	float MaxHp;
 
 	UPROPERTY()
