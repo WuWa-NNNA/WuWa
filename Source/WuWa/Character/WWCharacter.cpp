@@ -80,7 +80,7 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 		DamagedActors.Add(HitActor);
 
-		const float AttackDamage = 100.0f;
+		const float AttackDamage = 1.0f;
 
 		FDamageEvent DamageEvent;
 		float ActualDamage = HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);

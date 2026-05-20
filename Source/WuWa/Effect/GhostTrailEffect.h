@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,16 +9,22 @@ class WUWA_API AGhostTrailEffect : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
+public:
 	AGhostTrailEffect();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+public:
+	void Initialize(USkeletalMeshComponent* SourceMesh, UMaterialInterface* InGhostMaterial, float InLifeTime = 0.4f);
 
-public:	
-	// Called every frame
+public:
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UPoseableMeshComponent> GhostMesh;
+
+	UPROPERTY()
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
+
+	float LifeTime = 0.4f;
+	float ElapsedTime = 0.f;
 };

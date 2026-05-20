@@ -46,7 +46,6 @@ protected:
 protected:
 	virtual void TickCamera(float DeltaSeconds);
 	virtual void TickAttack(float DeltaSeconds);
-	virtual void TickDodge(float DeltaSeconds);
 	virtual void TickLocomotionGait(float DeltaSeconds);
 
 public:
@@ -241,6 +240,15 @@ private:
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAttackComboData> AttackComboData;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AGhostTrailEffect> GhostTrailEffectClass;
+
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UMaterialInterface> GhostTrailEffectMaterial;
+
+	FTimerHandle GhostTrailEffectSpawnTimer;
 
 protected :
 	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;

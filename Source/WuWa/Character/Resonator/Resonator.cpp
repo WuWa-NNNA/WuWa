@@ -1,6 +1,7 @@
 #include "Character/Resonator/Resonator.h"
 #include "DataAsset/AttackComboData.h"
 #include "Physics/WWCollision.h"
+#include "Effect/GhostTrailEffect.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -150,14 +151,14 @@ void AResonator::BeginPlay()
 void AResonator::Tick(float DeltaSeconds)
 {
 	TickCamera(DeltaSeconds);
+
 	switch (CurrentState)
 	{
 	case EResonatorState::Attack:
 		TickAttack(DeltaSeconds);
 		break;
-	case EResonatorState::Dodge:
-		break;
 	}
+
 	TickLocomotionGait(DeltaSeconds);
 }
 
@@ -197,17 +198,6 @@ void AResonator::TickAttack(float DeltaSeconds)
 		ChangeState(EResonatorState::Normal);
 		return;
 	}
-}
-
-void AResonator::TickDodge(float DeltaSeconds)
-{
-	GetWorldTimerManager().SetTimer(
-		GhostTimerHandle,
-		this,
-		&AResonator::SpawnGhostTrailEffect,
-		0.05f,
-		true
-	);
 }
 
 void AResonator::TickLocomotionGait(float DeltaSeconds)
@@ -377,10 +367,10 @@ void AResonator::Dash()
 	}
 
 	bHasCurrentDashInput = true;
-	GetWorld()->GetTimerManager().ClearTimer(DodgeTimer);
-	GetWorld()->GetTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
+	GetWorldTimerManager().ClearTimer(DodgeTimer);
+	GetWorldTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
 
-	//PlayerStat->ApplyDash();
+	PlayerStat->ApplyDash();
 
 	TryCancelAttackMontageByNewInput();
 
@@ -393,10 +383,13 @@ void AResonator::Dash()
 void AResonator::Dodge()
 {
 	bHasCurrentDashInput = false;
-	GetWorld()->GetTimerManager().ClearTimer(DodgeTimer);
+	GetWorldTimerManager().ClearTimer(DodgeTimer);
 
 	ChangeState(EResonatorState::Dodge);
 	PlayDodgeMontage();
+	
+	SpawnGhostTrailEffect();
+	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
 }
 
 void AResonator::DamagedTest()
@@ -654,7 +647,16 @@ void AResonator::OnFinishedDodgeTimer()
 
 void AResonator::SpawnGhostTrailEffect()
 {
+	if (!GhostTrailEffectClass || !GetMesh())
+	{
+		return;
+	}
 
+	AGhostTrailEffect* Ghost = GetWorld()->SpawnActor<AGhostTrailEffect>(GhostTrailEffectClass, GetMesh()->GetComponentTransform());
+	if (Ghost)
+	{
+		Ghost->Initialize(GetMesh(), GhostTrailEffectMaterial, 0.3f);
+	}
 }
 
 void AResonator::BeginComboAttack()
@@ -687,7 +689,7 @@ void AResonator::SetAttackComboTimer()
 	float ComboEffectTime = (AttackComboData->EffectiveFrameCount[ComboIndex] / AttackComboData->FrameRate / AttackSpeedRate);
 	if (ComboEffectTime > 0)
 	{
-		GetWorld()->GetTimerManager().SetTimer(AttackComboTimer, this, &AResonator::CheckAttackComboInput, ComboEffectTime, false);
+		GetWorldTimerManager().SetTimer(AttackComboTimer, this, &AResonator::CheckAttackComboInput, ComboEffectTime, false);
 	}
 }
 
@@ -729,6 +731,7 @@ void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 void AResonator::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ChangeState(EResonatorState::Normal);
+	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
 }
 
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
