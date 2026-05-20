@@ -442,6 +442,13 @@ void AResonator::Burst()
 	PlayerStat->SetRGauge(0.0f);
 }
 
+float AResonator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+
+
+	return 0.0f;
+}
+
 void AResonator::ProcessAttack()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);

@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponMaterial(ELunoState NextLunoState);
 
+public:
+	virtual FRotator GetLockOnRotator() const override;
+
 protected:
 	virtual void Attack() override;
 	virtual void Skill() override;

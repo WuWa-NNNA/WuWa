@@ -7,7 +7,7 @@
 
 ULunoStatComponent::ULunoStatComponent()
 {
-    CrescentTime = 15.0f;
+    CrescentTime = 10.0f;
 }
 
 
