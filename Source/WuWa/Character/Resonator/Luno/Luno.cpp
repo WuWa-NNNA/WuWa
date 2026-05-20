@@ -104,6 +104,11 @@ void ALuno::SetWeaponMaterial(ELunoState NextLunoState)
 	GetWeaponMeshComponent()->SetMaterial(2, WeaponMaterials[NextLunoState]);
 }
 
+FRotator ALuno::GetLockOnRotator() const
+{
+	return (GetLockOnTarget()->GetActorLocation() - GetMesh()->GetSocketLocation(TEXT("ArrowStart"))).Rotation();
+}
+
 void ALuno::Attack()
 {
 	if (CurrentLunoState == ELunoState::Half)
