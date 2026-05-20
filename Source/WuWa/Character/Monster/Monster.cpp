@@ -112,13 +112,6 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 	AAIController* AICon = Cast<AAIController>(GetController());
 
-	if (ActualDamage > 0.0f && Stat)
-	{
-		float CurrentHP = Stat->GetCurrentHP();
-		Stat->SetHp(CurrentHP - ActualDamage);
-		UE_LOG(LogTemp, Log, TEXT("BossHP : %f"), CurrentHP- ActualDamage);
-	}
-
 	if (AICon && AICon->GetBlackboardComponent())
 	{
 		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);

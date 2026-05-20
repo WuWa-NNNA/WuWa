@@ -60,16 +60,21 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(false);
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		break;
 	}
 
 	switch (NextLunoState)
 	{
 	case ELunoState::Half:
+		ChangeState(EResonatorState::Normal);
+		GetMesh()->GetAnimInstance()->StopAllMontages(0.0f);
+		GetWeaponMeshComponent()->GetAnimInstance()->StopAllMontages(0.0f);
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(true);
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Cast<ULunoStatComponent>(Stat)->SetCrescentTimer();
 		break;
 	}
 
@@ -86,6 +91,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 	{
 		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState succes"));
 		LunoStat->ChangeAttackMode(NextLunoState);
+		LunoStat->ChangeSkillIcon(GetCurrentAttackCombo());
 	}
 	else
 	{
@@ -96,6 +102,22 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 void ALuno::SetWeaponMaterial(ELunoState NextLunoState)
 {
 	GetWeaponMeshComponent()->SetMaterial(2, WeaponMaterials[NextLunoState]);
+}
+
+FRotator ALuno::GetLockOnRotator() const
+{
+	return (GetLockOnTarget()->GetActorLocation() - GetMesh()->GetSocketLocation(TEXT("ArrowStart"))).Rotation();
+}
+
+void ALuno::Attack()
+{
+	if (CurrentLunoState == ELunoState::Half)
+	{
+		Super::Attack();
+		return;
+	}
+
+	ProcessAttack();
 }
 
 void ALuno::Skill()
