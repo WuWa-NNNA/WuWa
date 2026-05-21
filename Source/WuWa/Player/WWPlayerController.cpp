@@ -48,6 +48,11 @@ void AWWPlayerController::SetInputMappingContext(EInputType InNewInputType)
 	}
 }
 
+//t 局丛犁积
+//{
+//	MainHUDWidget->局丛犁积
+//}
+
 void AWWPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -71,7 +76,10 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
 			PlayerStat->OnRSart.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDHidden);
 			PlayerStat->OnREnd.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDVisible);
-
+			PlayerStat->OnLockOn.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchLockOnAnimation);
+			PlayerStat->OnPlayIconAnimation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBaseAttackAnimation);
+			PlayerStat->OnPlayIcon4Animation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBurstAnimation);
+			
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
 			MainHUDWidget->SetMaxDash(PlayerStat->GetMaxDash());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());

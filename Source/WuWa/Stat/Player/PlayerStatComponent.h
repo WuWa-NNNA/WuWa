@@ -20,7 +20,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnRGaugaChangedDelegate, float /*RGuage*/);
 DECLARE_MULTICAST_DELEGATE(FOnRSartDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnREndDelegate);
 
-
+DECLARE_MULTICAST_DELEGATE(FOnLockOnDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnPlayIconAnimationDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnPlayIcon4AnimationDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class WUWA_API UPlayerStatComponent : public UWWStatComponent
@@ -47,6 +49,10 @@ public :
 	FOnRSartDelegate OnRSart;
 	FOnREndDelegate OnREnd;
 
+	FOnLockOnDelegate OnLockOn;
+	FOnPlayIconAnimationDelegate OnPlayIconAnimation;
+	FOnPlayIcon4AnimationDelegate OnPlayIcon4Animation;
+
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
 	FORCEINLINE float GetLevel() { return Level; }
 	FORCEINLINE float GetCurrentDash() { return CurrentDash; }
@@ -65,6 +71,9 @@ public :
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	void ChangeSkillIcon(int attacknumber);
 
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	void PlaySkillIconAnimation();
+
 	FORCEINLINE float GetRecoveryDash() { return RecoveryRate; }
 
 public :
@@ -80,6 +89,9 @@ public :
 
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void ShowUI();
+
+	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
+	void LockOnUI();
 	
 private :	
 	void SetDash(float NewDash);
@@ -100,8 +112,14 @@ private :
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float RGauge = 0.0f;
+
+	bool bWasRPossible = false;
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TArray<TObjectPtr<class UPaperSprite>> NormalAttackIcons;
 
+private:
+	FTimerHandle RPossibleTimerHandle;
+
+	void PlayRAnimationLoop();
 };
