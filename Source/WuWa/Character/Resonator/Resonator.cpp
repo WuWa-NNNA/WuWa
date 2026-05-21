@@ -15,13 +15,13 @@
 #include "LevelSequencePlayer.h"
 #include "Kismet/GameplayStatics.h"
 
-// Stat/UI
 #include "Stat/Player/LunoStatComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"
 #include "PaperSprite.h"
 #include "Character/Monster/Monster.h"
 #include "UI/WWDashBarWidget.h"
+#include "Player/WWPlayerController.h"
 
 AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
@@ -132,7 +132,6 @@ void AResonator::BeginPlay()
 	}
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-
 	if (!PlayerStat)
 	{
 		return;
@@ -154,9 +153,9 @@ void AResonator::Tick(float DeltaSeconds)
 
 	TickLocomotionGait(DeltaSeconds);
 	
-	FVector CurrentLocation = DashGaugeComponent->GetComponentLocation();
-	FVector TargetLocation = GetActorLocation() + Camera->GetRightVector()*80.0f + Camera->GetUpVector()*20.0f;
-	FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.f);
+	CurrentLocation = DashGaugeComponent->GetComponentLocation();
+	TargetLocation = GetActorLocation() + Camera->GetRightVector()* 80.0f + Camera->GetUpVector()* 20.0f;
+	NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.0f);
 	DashGaugeComponent->SetWorldLocation(NewLocation);
 }
 
@@ -304,6 +303,9 @@ void AResonator::Lock()
 		if (monster)
 		{
 			monster->showLockOnMonster();
+
+			UPlayerStatComponent* playerStat = Cast< UPlayerStatComponent>(Stat);
+			playerStat->LockOnUI();
 		}
 	}
 	else
@@ -395,16 +397,22 @@ void AResonator::DamagedTest()
 	Stat->ApplyDamage(2);
 }
 
-void AResonator::BurstTest()
-{
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SkillR();
-}
-
 void AResonator::RGaugeUp()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.2f);
+}
+
+void AResonator::OpenUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ShowUI();
+}
+
+void AResonator::CloseUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->HideUI();
 }
 
 void AResonator::Attack()
@@ -448,7 +456,7 @@ void AResonator::Burst()
 	{
 		return;
 	}
-		
+
 	if (CurrentState != EResonatorState::Normal)
 	{
 		return;
@@ -675,9 +683,8 @@ void AResonator::BeginComboAttack()
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
-
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	PlayerStat->PlaySkillIconAnimation();
 }
 
 void AResonator::SetAttackComboTimer()
@@ -723,6 +730,7 @@ void AResonator::CheckAttackComboInput()
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	PlayerStat->PlaySkillIconAnimation();
 }
 
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -746,29 +754,4 @@ void AResonator::OnBurstCinematicEnded()
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ShowUI();
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
-}
-
-void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
-{
-	//UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	//UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
-
-	//if (PlayerStat && MyWidget)
-	//{
-	//	MyWidget->SetMaxHp(Stat->GetMaxHP());
-	//	MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
-
-	//	MyWidget->UpdateHpBar(Stat->GetCurrentHP());
-	//	MyWidget->UpdateMainHUD(PlayerStat->GetCurrentDash());
-
-
-	//	PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
-	//	PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
-	//	PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
-
-	//	PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
-	//	PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
-	//
-
-	//}
 }

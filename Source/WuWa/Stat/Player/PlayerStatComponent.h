@@ -7,22 +7,21 @@
 #include "Stat/WWStatComponent.h"
 #include "PlayerStatComponent.generated.h"
 
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillEStartDelegate, float);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDashChangedDelegate, float /*currentDash*/);
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillEStartDelegate, float);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillRStartDelegate, float);
-
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBaseSkillchangeDelegate,class UPaperSprite* /*skillIcon*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnRGaugaChangedDelegate, float /*RGuage*/);
 
 DECLARE_MULTICAST_DELEGATE(FOnRSartDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnREndDelegate);
 
-
+DECLARE_MULTICAST_DELEGATE(FOnLockOnDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnPlayIconAnimationDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnPlayIcon4AnimationDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
 class WUWA_API UPlayerStatComponent : public UWWStatComponent
 {
 	GENERATED_BODY()
@@ -37,15 +36,19 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public :
-	FOnDashChangedDelegate OnDashChanged;
 	FOnSkillEStartDelegate FOnSkillEStart;
-	FOnSkillRStartDelegate FOnSkillRStart;
+	//FOnSkillRStartDelegate FOnSkillRStart;
+	FOnDashChangedDelegate OnDashChanged;
 
 	FOnBaseSkillchangeDelegate OnBaseSkillchange;
 	FOnRGaugaChangedDelegate OnRGaugaChanged;
 
 	FOnRSartDelegate OnRSart;
 	FOnREndDelegate OnREnd;
+
+	FOnLockOnDelegate OnLockOn;
+	FOnPlayIconAnimationDelegate OnPlayIconAnimation;
+	FOnPlayIcon4AnimationDelegate OnPlayIcon4Animation;
 
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
 	FORCEINLINE float GetLevel() { return Level; }
@@ -65,43 +68,46 @@ public :
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	void ChangeSkillIcon(int attacknumber);
 
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	void PlaySkillIconAnimation();
+
 	FORCEINLINE float GetRecoveryDash() { return RecoveryRate; }
 
 public :
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	void SkillE();
-	
-	UFUNCTION(BlueprintCallable, Category = "Skill")
-	void SkillR();
-
 
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void HideUI();
 
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void ShowUI();
+
+	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
+	void LockOnUI();
 	
 private :	
 	void SetDash(float NewDash);
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float MaxDash;
-	
 	UPROPERTY(Transient, VisibleAnywhere, Category = "Stat")
 	float CurrentDash;
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float RecoveryRate;
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float coolTime_R;
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float coolTime_E;
-
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float RGauge = 0.0f;
+
+	bool bWasRPossible = false;
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TArray<TObjectPtr<class UPaperSprite>> NormalAttackIcons;
 
+private:
+	FTimerHandle RPossibleTimerHandle;
+
+	void PlayRAnimationLoop();
 };

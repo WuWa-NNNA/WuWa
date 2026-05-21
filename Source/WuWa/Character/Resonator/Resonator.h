@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "Character/WWCharacter.h"
 #include "InputActionValue.h"
-#include "Interface/WWCharacterWidgetInterface.h"
 #include "Resonator.generated.h"
 
 class USkeletalMeshComponent;
@@ -29,7 +28,7 @@ enum class ELocomotionGait : uint8
 };
 
 UCLASS()
-class WUWA_API AResonator : public AWWCharacter, public IWWCharacterWidgetInterface
+class WUWA_API AResonator : public AWWCharacter
 {
 	GENERATED_BODY()
 
@@ -254,16 +253,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	class UWidgetComponent* DashGaugeComponent;
 
-protected :
-	virtual void SetupCharacterWidget(class UWWUserWidget* InUserWidget) override;
+private :
+	FVector CurrentLocation;
+	FVector TargetLocation;
+	FVector NewLocation;
 
 public :
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "test")
 	void DamagedTest();
-	UFUNCTION(BlueprintCallable)
-	void BurstTest();
-
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "test")
 	void RGaugeUp();
-
+	UFUNCTION(BlueprintCallable, Category = "test")
+	void OpenUI();
+	UFUNCTION(BlueprintCallable, Category = "test")
+	void CloseUI();
 };

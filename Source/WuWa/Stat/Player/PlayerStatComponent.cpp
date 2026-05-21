@@ -4,9 +4,6 @@
 #include "Stat/Player/PlayerStatComponent.h"
 #include "PaperSprite.h"
 
-
-
-// Sets default values for this component's properties
 UPlayerStatComponent::UPlayerStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -18,34 +15,12 @@ UPlayerStatComponent::UPlayerStatComponent()
 
 	coolTime_E = 1.0f;
 	coolTime_R = 5.0f;
-	/*NormalAttackIcons.SetNum(3);
-
-	static ConstructorHelpers::FObjectFinder<UPaperSprite> Icon1(TEXT("/Game/PCH/Asset/UIImage/YounuoSkill/LB1.LB1"));
-	static ConstructorHelpers::FObjectFinder<UPaperSprite> Icon2(TEXT("/Game/PCH/Asset/UIImage/YounuoSkill/LB2.LB2"));
-	static ConstructorHelpers::FObjectFinder<UPaperSprite> Icon3(TEXT("/Game/PCH/Asset/UIImage/YounuoSkill/LB3.LB3"));
-
-
-	if (Icon1.Succeeded())
-	{
-		NormalAttackIcons[0] = Icon1.Object;
-		UE_LOG(LogTemp, Log, TEXT("NormalAttackIcons"));
-	}
-	if (Icon2.Succeeded())
-	{
-		NormalAttackIcons[1] = Icon2.Object;
-		UE_LOG(LogTemp, Log, TEXT("NormalAttackIcons"));
-	}
-	if (Icon3.Succeeded())
-	{
-		NormalAttackIcons[2] = Icon3.Object;
-		UE_LOG(LogTemp, Log, TEXT("NormalAttackIcons"));
-	}*/
 }
 
 void UPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	SetDash(GetMaxDash()-0.01f);
+	SetDash(GetMaxDash()-0.1f);
 }
 
 void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -57,9 +32,38 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		CurrentDash = FMath::Clamp(CurrentDash + (RecoveryRate * DeltaTime), 0.0f, MaxDash);
 		OnDashChanged.Broadcast(CurrentDash);
 	}
+
+	if (IsRPossible())
+	{
+		if (!GetWorld()->GetTimerManager().IsTimerActive(RPossibleTimerHandle))
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				RPossibleTimerHandle,
+				this,
+				&UPlayerStatComponent::PlayRAnimationLoop,
+				0.2f,
+				true
+			);
+			OnPlayIcon4Animation.Broadcast();
+		}
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RPossibleTimerHandle);
+	}
+
 }
 
+void UPlayerStatComponent::PlayRAnimationLoop()
+{
+	if (!IsRPossible())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RPossibleTimerHandle);
+		return;
+	}
 
+	OnPlayIcon4Animation.Broadcast();
+}
 
 void UPlayerStatComponent::SetRGauge(float guage)
 {
@@ -86,8 +90,7 @@ void UPlayerStatComponent::ApplyDash()
 void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)
 {
 	uint32 tempattacknumber = 0;
-	//UE_LOG(LogTemp, Log, TEXT("컴포넌트 이름: %s | 배열 내부 개수: %d"), *GetName(), NormalAttackIcons.Num());
-	//UE_LOG(LogTemp, Log, TEXT("ChangeSkillIcon: %d"), attacknumber);
+
 	if (attacknumber >= 3)
 	{
 		tempattacknumber = 0;
@@ -108,25 +111,18 @@ void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("no sprite : %d"), tempattacknumber);
-
 	}
+}
+
+void UPlayerStatComponent::PlaySkillIconAnimation()
+{
+	OnPlayIconAnimation.Broadcast();
 }
 
 void UPlayerStatComponent::SkillE()
 {
-	UE_LOG(LogTemp, Log, TEXT("SkillE"));
-
 	FOnSkillEStart.Broadcast(coolTime_E);
 }
-
-void UPlayerStatComponent::SkillR()
-{
-	UE_LOG(LogTemp, Log, TEXT("SkillR"));
-
-	FOnSkillRStart.Broadcast(coolTime_R);
-}
-
-
 
 void UPlayerStatComponent::SetDash(float NewDash)
 {
@@ -142,4 +138,9 @@ void UPlayerStatComponent::HideUI()
 void UPlayerStatComponent::ShowUI()
 {
 	OnREnd.Broadcast();
+}
+
+void UPlayerStatComponent::LockOnUI()
+{
+	OnLockOn.Broadcast();
 }

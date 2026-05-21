@@ -27,13 +27,11 @@ void UWWDashBarWidget::NativeConstruct()
 
 void UWWDashBarWidget::UpdataWorldDash(float NewCurrentDash)
 {
-	//UE_LOG(LogTemp, Log, TEXT("UpdataWorldDash1"));
 	if (DashGaugeMaterial)
 	{
 		float DashPercent = NewCurrentDash / MaxDash;
 
 		DashGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
-		//UE_LOG(LogTemp, Log, TEXT("UpdataWorldDash2"));
 
 		if (DashPercent >= 1)
 		{

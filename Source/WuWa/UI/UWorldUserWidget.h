@@ -25,10 +25,6 @@ public :
 	UFUNCTION()
 	void UpdateHpBar(float NewCurrentHp);
 
-	FORCEINLINE void SetMaxDash(float NewMaxDash) { MaxDash = NewMaxDash; }
-	UFUNCTION()
-	void UpdateMainHUD(float NewCurrentDash);
-
 	UFUNCTION()
 	void UpdateLevel(int Level);
 
@@ -43,9 +39,6 @@ public :
 
 	UFUNCTION()
 	void SkillCoolEDisable();
-	
-	UFUNCTION()
-	void UpdateSkillCoolR(float coolTime);
 	
 	UFUNCTION()
 	void HideBossUI();
@@ -65,6 +58,19 @@ public :
 
 	UFUNCTION()
 	void HUDHidden();
+
+	UFUNCTION()
+	void TriggerTouchAnimation(UUserWidget* touchwidget);
+
+	UFUNCTION()
+	void TriggerTouchLockOnAnimation();
+
+	UFUNCTION()
+	void TriggerTouchBaseAttackAnimation();
+
+	UFUNCTION()
+	void TriggerTouchBurstAnimation();
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
@@ -94,9 +100,6 @@ protected :
 	float MaxHp;
 
 	UPROPERTY()
-	float MaxDash;
-
-	UPROPERTY()
 	float BossMaxHp;
 
 	UPROPERTY()
@@ -107,6 +110,18 @@ protected :
 
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> TransformationGauge;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH1;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH2;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH3;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH4;
 
 protected : // 보스
 	UPROPERTY()
@@ -126,5 +141,4 @@ public :
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<class UPaperSprite> ChangeIconSprite;
-
 };

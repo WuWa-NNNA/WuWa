@@ -31,7 +31,8 @@ protected:
 public :
 	void CreateHUDWidget();
 
-	UFUNCTION(BlueprintCallable)
+public :
+	UFUNCTION(BlueprintCallable, Category = "Staging", meta = (AllowPrivateAccess = "true"))
 	void SpawnBoss();
 
 private:
@@ -41,6 +42,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TMap<EInputType, TObjectPtr<class UInputMappingContext>> InputMappingContexts;
 
+private :
 	UPROPERTY(EditAnywhere, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UUWorldUserWidget> MainHUDWidget;
 
