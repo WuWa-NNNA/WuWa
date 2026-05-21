@@ -18,6 +18,12 @@ AWWPlayerController::AWWPlayerController()
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
 	}
+
+	/*static ConstructorHelpers::FClassFinder<UUserWidget> DashWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_Gauage.WBP_Gauage"));
+	if (DashWidgetAsset.Succeeded())
+	{
+		DashWidgetClass = DashWidgetAsset.Class;
+	}*/
 }
 
 void AWWPlayerController::BeginPlay()
@@ -45,17 +51,13 @@ void AWWPlayerController::SetInputMappingContext(EInputType InNewInputType)
 void AWWPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	UE_LOG(LogTemp, Log, TEXT("Succed UPlayerStatComponent1"));
 	if (!MainHUDWidget)
 	{
 		CreateHUDWidget();
-		UE_LOG(LogTemp, Log, TEXT("NoCreate"));
 	}
 	AResonator* Resonator = Cast<AResonator>(InPawn);
 	if (Resonator && MainHUDWidget)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Succed UPlayerStatComponent2"));
-
 		UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Resonator->GetStatComponent());
 		if (PlayerStat)
 		{
@@ -67,7 +69,8 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->FOnSkillRStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillCoolR);
 			PlayerStat->OnBaseSkillchange.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillIcon);
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
-			UE_LOG(LogTemp, Log, TEXT("Succed UPlayerStatComponent3"));
+			PlayerStat->OnRSart.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDHidden);
+			PlayerStat->OnREnd.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDVisible);
 
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
 			MainHUDWidget->SetMaxDash(PlayerStat->GetMaxDash());
@@ -90,17 +93,9 @@ void AWWPlayerController::CreateHUDWidget()
 		return;
 	}
 	MainHUDWidget = CreateWidget<UUWorldUserWidget>(this, HUDWidgetClass);
-
 	if (MainHUDWidget)
 	{
 		MainHUDWidget->AddToViewport();
-		UE_LOG(LogTemp, Log, TEXT("Succed MainHUDWidget"));
-
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Failed MainHUDWidget"));
-
 	}
 }
 
