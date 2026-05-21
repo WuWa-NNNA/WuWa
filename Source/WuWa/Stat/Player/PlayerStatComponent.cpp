@@ -45,7 +45,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 void UPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	SetDash(GetMaxDash()-0.01f);
+	SetDash(GetMaxDash()-0.1f);
 }
 
 void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -57,9 +57,38 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		CurrentDash = FMath::Clamp(CurrentDash + (RecoveryRate * DeltaTime), 0.0f, MaxDash);
 		OnDashChanged.Broadcast(CurrentDash);
 	}
+
+	if (IsRPossible())
+	{
+		if (!GetWorld()->GetTimerManager().IsTimerActive(RPossibleTimerHandle))
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				RPossibleTimerHandle,
+				this,
+				&UPlayerStatComponent::PlayRAnimationLoop,
+				0.2f,
+				true
+			);
+			OnPlayIcon4Animation.Broadcast();
+		}
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RPossibleTimerHandle);
+	}
+
 }
 
+void UPlayerStatComponent::PlayRAnimationLoop()
+{
+	if (!IsRPossible())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RPossibleTimerHandle);
+		return;
+	}
 
+	OnPlayIcon4Animation.Broadcast();
+}
 
 void UPlayerStatComponent::SetRGauge(float guage)
 {
@@ -112,6 +141,11 @@ void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)
 	}
 }
 
+void UPlayerStatComponent::PlaySkillIconAnimation()
+{
+	OnPlayIconAnimation.Broadcast();
+}
+
 void UPlayerStatComponent::SkillE()
 {
 	UE_LOG(LogTemp, Log, TEXT("SkillE"));
@@ -142,4 +176,9 @@ void UPlayerStatComponent::HideUI()
 void UPlayerStatComponent::ShowUI()
 {
 	OnREnd.Broadcast();
+}
+
+void UPlayerStatComponent::LockOnUI()
+{
+	OnLockOn.Broadcast();
 }

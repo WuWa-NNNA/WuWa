@@ -65,6 +65,19 @@ public :
 
 	UFUNCTION()
 	void HUDHidden();
+
+	UFUNCTION()
+	void TriggerTouchAnimation(UUserWidget* touchwidget);
+
+	UFUNCTION()
+	void TriggerTouchLockOnAnimation();
+
+	UFUNCTION()
+	void TriggerTouchBaseAttackAnimation();
+
+	UFUNCTION()
+	void TriggerTouchBurstAnimation();
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
@@ -108,6 +121,18 @@ protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> TransformationGauge;
 
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH1;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH2;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH3;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> WBP_TOUCH4;
+
 protected : // 보스
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> BossName;
@@ -126,5 +151,7 @@ public :
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<class UPaperSprite> ChangeIconSprite;
+
+	bool stopanimation;
 
 };

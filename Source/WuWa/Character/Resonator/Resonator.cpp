@@ -22,6 +22,7 @@
 #include "PaperSprite.h"
 #include "Character/Monster/Monster.h"
 #include "UI/WWDashBarWidget.h"
+#include "Player/WWPlayerController.h"
 
 AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
@@ -304,6 +305,9 @@ void AResonator::Lock()
 		if (monster)
 		{
 			monster->showLockOnMonster();
+
+			UPlayerStatComponent* playerStat = Cast< UPlayerStatComponent>(Stat);
+			playerStat->LockOnUI();
 		}
 	}
 	else
@@ -407,6 +411,18 @@ void AResonator::RGaugeUp()
 	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.2f);
 }
 
+void AResonator::OpenUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ShowUI();
+}
+
+void AResonator::CloseUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->HideUI();
+}
+
 void AResonator::Attack()
 {
 	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
@@ -448,7 +464,7 @@ void AResonator::Burst()
 	{
 		return;
 	}
-		
+
 	if (CurrentState != EResonatorState::Normal)
 	{
 		return;
@@ -674,9 +690,8 @@ void AResonator::BeginComboAttack()
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
 
 	SetAttackComboTimer();
-
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	PlayerStat->PlaySkillIconAnimation();
 }
 
 void AResonator::SetAttackComboTimer()
@@ -722,6 +737,7 @@ void AResonator::CheckAttackComboInput()
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
+	PlayerStat->PlaySkillIconAnimation();
 }
 
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
