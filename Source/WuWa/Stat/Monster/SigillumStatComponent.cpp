@@ -11,8 +11,6 @@ USigillumStatComponent::USigillumStatComponent()
 void USigillumStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Log, TEXT("BOSS HP : %f"), CurrentHP);
-
 }
 
 void USigillumStatComponent::SetParryGauge(float ApplyParryGauge)

@@ -13,8 +13,6 @@ UWWStatComponent::UWWStatComponent()
 	SetLevel(90);
 }
 
-
-// Called when the game starts
 void UWWStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -23,10 +21,8 @@ void UWWStatComponent::BeginPlay()
 	SetHp(MaxHP);
 }
 
-
 float UWWStatComponent::ApplyDamage(float Damage)
 {
-	//UE_LOG(LogTemp, Log, TEXT("ApplyDamage"));
 	const float PrevHP = CurrentHP;
 	const float ActualDamage = FMath::Clamp<float>(Damage, 0, Damage);
 	SetHp(FMath::Clamp<float>(PrevHP - ActualDamage, 0.0f, MaxHP));

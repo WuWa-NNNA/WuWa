@@ -90,7 +90,6 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 
 	if (ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Stat))
 	{
-		UE_LOG(LogTemp, Log, TEXT("ChangeLunoState succes"));
 		LunoStat->ChangeAttackMode(NextLunoState);
 		LunoStat->ChangeSkillIcon(GetCurrentAttackCombo());
 	}

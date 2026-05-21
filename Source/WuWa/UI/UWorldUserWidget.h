@@ -25,10 +25,6 @@ public :
 	UFUNCTION()
 	void UpdateHpBar(float NewCurrentHp);
 
-	FORCEINLINE void SetMaxDash(float NewMaxDash) { MaxDash = NewMaxDash; }
-	UFUNCTION()
-	void UpdateMainHUD(float NewCurrentDash);
-
 	UFUNCTION()
 	void UpdateLevel(int Level);
 
@@ -43,9 +39,6 @@ public :
 
 	UFUNCTION()
 	void SkillCoolEDisable();
-	
-	UFUNCTION()
-	void UpdateSkillCoolR(float coolTime);
 	
 	UFUNCTION()
 	void HideBossUI();
@@ -107,9 +100,6 @@ protected :
 	float MaxHp;
 
 	UPROPERTY()
-	float MaxDash;
-
-	UPROPERTY()
 	float BossMaxHp;
 
 	UPROPERTY()
@@ -151,7 +141,4 @@ public :
 public :
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<class UPaperSprite> ChangeIconSprite;
-
-	bool stopanimation;
-
 };

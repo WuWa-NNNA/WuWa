@@ -35,10 +35,8 @@ public :
 	FOnBaseAttackDelegate OnBaseAttack;
 	FOnChangeCrescentTimeDelegate OnChangeCrescentTime;
 	FOnBaseEndCrescentTimeDelegate OnBaseEndCrescentTime;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION()
-	void AttackChange();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void ChangeAttackMode(ELunoState currentStatMode);
@@ -49,7 +47,7 @@ private:
 	void RevertLunoState();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	TMap<ELunoState, FLunoIconGroup> AttackIcon_Luno;
 
 private:

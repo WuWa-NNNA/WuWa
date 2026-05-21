@@ -15,7 +15,6 @@
 #include "LevelSequencePlayer.h"
 #include "Kismet/GameplayStatics.h"
 
-// Stat/UI
 #include "Stat/Player/LunoStatComponent.h"
 #include "UI/WWWidgetComponent.h"
 #include "UI/UWorldUserWidget.h"
@@ -133,7 +132,6 @@ void AResonator::BeginPlay()
 	}
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-
 	if (!PlayerStat)
 	{
 		return;
@@ -155,9 +153,9 @@ void AResonator::Tick(float DeltaSeconds)
 
 	TickLocomotionGait(DeltaSeconds);
 	
-	FVector CurrentLocation = DashGaugeComponent->GetComponentLocation();
-	FVector TargetLocation = GetActorLocation() + Camera->GetRightVector()*80.0f + Camera->GetUpVector()*20.0f;
-	FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.f);
+	CurrentLocation = DashGaugeComponent->GetComponentLocation();
+	TargetLocation = GetActorLocation() + Camera->GetRightVector()* 80.0f + Camera->GetUpVector()* 20.0f;
+	NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.0f);
 	DashGaugeComponent->SetWorldLocation(NewLocation);
 }
 
@@ -397,12 +395,6 @@ void AResonator::Dodge()
 void AResonator::DamagedTest()
 {
 	Stat->ApplyDamage(2);
-}
-
-void AResonator::BurstTest()
-{
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SkillR();
 }
 
 void AResonator::RGaugeUp()
@@ -761,29 +753,4 @@ void AResonator::OnBurstCinematicEnded()
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ShowUI();
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
-}
-
-void AResonator::SetupCharacterWidget(UWWUserWidget* InUserWidget)
-{
-	//UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	//UUWorldUserWidget* MyWidget = Cast<UUWorldUserWidget>(InUserWidget);
-
-	//if (PlayerStat && MyWidget)
-	//{
-	//	MyWidget->SetMaxHp(Stat->GetMaxHP());
-	//	MyWidget->SetMaxDash(PlayerStat->GetMaxDash());
-
-	//	MyWidget->UpdateHpBar(Stat->GetCurrentHP());
-	//	MyWidget->UpdateMainHUD(PlayerStat->GetCurrentDash());
-
-
-	//	PlayerStat->OnHpChagned.AddUObject(MyWidget, &UUWorldUserWidget::UpdateHpBar);
-	//	PlayerStat->OnDashChanged.AddUObject(MyWidget, &UUWorldUserWidget::UpdateMainHUD);
-	//	PlayerStat->FOnSkillEStart.AddUObject(MyWidget, &UUWorldUserWidget::SkillCoolEActive);
-
-	//	PlayerStat->FOnSkillRStart.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillCoolR);
-	//	PlayerStat->OnBaseSkillchange.AddUObject(MyWidget, &UUWorldUserWidget::UpdateSkillIcon);
-	//
-
-	//}
 }
