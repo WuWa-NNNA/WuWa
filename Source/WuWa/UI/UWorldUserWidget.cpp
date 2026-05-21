@@ -312,7 +312,7 @@ void UUWorldUserWidget::TriggerTouchBurstAnimation()
 	//{
 	//	return;
 	//}
-	UE_LOG(LogTemp, Log, TEXT("OnInteration"));
+	//UE_LOG(LogTemp, Log, TEXT("OnInteration"));
 	if (!WBP_TOUCH4)
 	{
 		return;
