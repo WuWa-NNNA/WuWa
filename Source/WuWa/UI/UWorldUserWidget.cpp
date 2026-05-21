@@ -6,19 +6,15 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
-
-#include "Interface/WWCharacterWidgetInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
-
 #include "Stat/Player/PlayerStatComponent.h"
 #include "PaperSprite.h"
-#include "WWMonsterWidget.h"
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "Misc/OutputDeviceNull.h"
+
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1.0f;
-	MaxDash = -1.0f;
 }
 
 void UUWorldUserWidget::NativeConstruct()
@@ -60,12 +56,11 @@ void UUWorldUserWidget::NativeConstruct()
 		UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
 		if (BaseMaterial)
 		{
-			// 다이나믹 인스턴스 생성
 			DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-			// 생성된 다이나믹 머터리얼을 다시 이미지의 브러시에 할당
 			DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
 		}
 	}
+
 	if (RBarImage)
 	{
 		UMaterialInterface* BaseMaterial = RBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(RBarImage->GetBrush().GetResourceObject()) : nullptr;
@@ -75,6 +70,7 @@ void UUWorldUserWidget::NativeConstruct()
 			RBarImage->SetBrushFromMaterial(RGaugeMaterial);
 		}
 	}
+
 	AActor* TargetActor = OwningActor ? OwningActor : GetOwningPlayerPawn();
 	if (TargetActor)
 	{
@@ -82,17 +78,11 @@ void UUWorldUserWidget::NativeConstruct()
 		if (PlayerStatComp)
 		{
 			MaxHp = PlayerStatComp->GetMaxHP();
-			MaxDash = PlayerStatComp->GetMaxDash();
+			//MaxDash = PlayerStatComp->GetMaxDash();
 			UpdateHpBar(PlayerStatComp->GetCurrentHP());
-			UpdateMainHUD(PlayerStatComp->GetCurrentDash());
 			UpdateLevel(PlayerStatComp->GetLevel());
 		}
 	}
-		IWWCharacterWidgetInterface* CharacterWidget = Cast<IWWCharacterWidgetInterface>(TargetActor);
-		if (CharacterWidget)
-		{
-			CharacterWidget->SetupCharacterWidget(this);
-		}
 
 	SkillCoolEDisable();
 	HideBossUI();
@@ -101,8 +91,6 @@ void UUWorldUserWidget::NativeConstruct()
 	WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH3->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH4->SetVisibility(ESlateVisibility::Hidden);
-
-	stopanimation = false;
 
 }
 
@@ -116,36 +104,6 @@ void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
 
 }
 
-void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
-{
-	//ensure(MaxDash > 0.0f);
-
-	//if (DashGaugeMaterial)
-	//{
-	//	float DashPercent = NewCurrentDash / MaxDash;
-
-	//	DashGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - DashPercent);
-	//	if (DashPercent >= 1)
-	//	{
-	//		DashBarImage->SetVisibility(ESlateVisibility::Collapsed);
-	//	}
-	//	else
-	//	{
-	//		DashBarImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	//	}
-
-	//	if (DashPercent < 0.4)
-	//	{
-	//		DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FVector3d(0.5f,0.0f, 0.f));
-	//	}
-	//	else //(R=0.381326,G=0.327778,B=0.102242,A=1.000000)
-	//	{
-	//		DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
-	//	}
-
-	//}
-}
-
 void UUWorldUserWidget::UpdateLevel(int Level)
 {
 	LevelText->SetText(FText::Format(FText::FromString("LV. {0}"), FText::AsNumber(Level)));
@@ -157,7 +115,6 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 	{
 		RHideImage->SetVisibility(ESlateVisibility::Hidden);
 		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 0);
-		//TriggerTouchAnimation(WBP_TOUCH4);
 		return;
 	}
 	else
@@ -167,19 +124,16 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 	if (RGaugeMaterial)
 	{
 		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - currenGauge);
-		//UE_LOG(LogTemp, Log, TEXT("R ++"));
 	}
 }
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
 	ChangeIconSprite = NewIcon;
-	//TriggerTouchAnimation(WBP_TOUCH2);
 }
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
 {
-	//UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
 	EHideImage->SetVisibility(ESlateVisibility::Visible);
 	ESkillKeyImage->SetVisibility(ESlateVisibility::Hidden);
 	TriggerTouchAnimation(WBP_TOUCH3);
@@ -187,17 +141,9 @@ void UUWorldUserWidget::SkillCoolEActive(float a)
 
 void UUWorldUserWidget::SkillCoolEDisable()
 {
-	//UE_LOG(LogTemp, Log, TEXT("SkillE - End"));
 	EHideImage->SetVisibility(ESlateVisibility::Hidden);
 	ESkillKeyImage->SetVisibility(ESlateVisibility::Visible);
 
-}
-
-
-
-void UUWorldUserWidget::UpdateSkillCoolR(float coolTime)
-{
-	UE_LOG(LogTemp, Log, TEXT("UpdateSkillCoolR"));
 }
 
 void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
@@ -205,7 +151,6 @@ void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
 	if (!Stat) return;
 
 	UpdateHpBar(Stat->GetCurrentHP());
-	UpdateMainHUD(Stat->GetCurrentDash());
 }
 
 void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat)
@@ -252,13 +197,11 @@ void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
 void UUWorldUserWidget::HUDVisible()
 {
 	SetVisibility(ESlateVisibility::Visible);
-	//stopanimation = false;
 }
 
 void UUWorldUserWidget::HUDHidden()
 {
 	SetVisibility(ESlateVisibility::Hidden);
-	//stopanimation = true;
 }
 
 void UUWorldUserWidget::TriggerTouchAnimation(UUserWidget* touchwidget)
@@ -308,11 +251,6 @@ void UUWorldUserWidget::TriggerTouchBaseAttackAnimation()
 
 void UUWorldUserWidget::TriggerTouchBurstAnimation()
 {
-	//if (!stopanimation)
-	//{
-	//	return;
-	//}
-	//UE_LOG(LogTemp, Log, TEXT("OnInteration"));
 	if (!WBP_TOUCH4)
 	{
 		return;

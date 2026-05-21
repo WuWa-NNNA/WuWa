@@ -18,9 +18,11 @@ class WUWA_API UWWStatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UWWStatComponent();
+
 	FOnHPZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChagned;
 
+public :
 	FORCEINLINE float GetMaxHP() { return MaxHP; }
 	FORCEINLINE float SetMaxHP(float hp) { return MaxHP = hp; }
 
@@ -34,12 +36,9 @@ public:
 
 
 protected:
-
-	// Called when the game startsㅡ,.
-	
 	virtual void BeginPlay() override;
 
-
+protected:
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float MaxHP;
 
@@ -48,8 +47,6 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	int Level;
-
-	// ... 기존 헤더 코드
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DamageSkin", Meta = (AllowPrivateAccess = "true"))

@@ -18,12 +18,6 @@ AWWPlayerController::AWWPlayerController()
 	{
 		HUDWidgetClass = HUDWidgetAsset.Class;
 	}
-
-	/*static ConstructorHelpers::FClassFinder<UUserWidget> DashWidgetAsset(TEXT("/Game/PCH/UI/Blueprint/WBP_Gauage.WBP_Gauage"));
-	if (DashWidgetAsset.Succeeded())
-	{
-		DashWidgetClass = DashWidgetAsset.Class;
-	}*/
 }
 
 void AWWPlayerController::BeginPlay()
@@ -48,11 +42,6 @@ void AWWPlayerController::SetInputMappingContext(EInputType InNewInputType)
 	}
 }
 
-//t 局丛犁积
-//{
-//	MainHUDWidget->局丛犁积
-//}
-
 void AWWPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -60,7 +49,9 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 	{
 		CreateHUDWidget();
 	}
+
 	AResonator* Resonator = Cast<AResonator>(InPawn);
+
 	if (Resonator && MainHUDWidget)
 	{
 		UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Resonator->GetStatComponent());
@@ -69,9 +60,8 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnHpChagned.Clear();
 
 			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
-			PlayerStat->OnDashChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateMainHUD);
+			//PlayerStat->OnDashChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateMainHUD);
 			PlayerStat->FOnSkillEStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::SkillCoolEActive);
-			PlayerStat->FOnSkillRStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillCoolR);
 			PlayerStat->OnBaseSkillchange.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillIcon);
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
 			PlayerStat->OnRSart.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDHidden);
@@ -81,7 +71,6 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnPlayIcon4Animation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBurstAnimation);
 			
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
-			MainHUDWidget->SetMaxDash(PlayerStat->GetMaxDash());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
 			MainHUDWidget->UpdateRGauge(PlayerStat->GetRGauge());
 		}
@@ -121,7 +110,6 @@ void AWWPlayerController::SpawnBoss()
 		USigillumStatComponent* BossStat = Cast<USigillumStatComponent>(Boss->GetStatComponent());
 		if (!BossStat)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("No Finde USigillumStatComponent"));
 			return;
 		}
 		MainHUDWidget->InitializeBossUISetting(BossStat);
