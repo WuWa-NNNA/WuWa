@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/WWCharacter.h"
 #include "InputActionValue.h"
+#include "../../Interface/ParringTimingInterface.h"
 #include "Monster.generated.h"
 
 
@@ -14,13 +15,14 @@ class USkeletalMeshComponent;
  * 
  */
 UCLASS()
-class WUWA_API AMonster : public AWWCharacter
+class WUWA_API AMonster : public AWWCharacter, public IParringTimingInterface
 {
 	GENERATED_BODY()
 
 public:
 	AMonster(const FObjectInitializer& ObjectInitializer);
 	USkeletalMeshComponent* GetWeapon() { return Weapon; }
+
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -48,6 +50,9 @@ private:
 public :
 	void showLockOnMonster();
 	void hideLockOnMonster();
+
+private:
+	bool bIsBeingParringTiming = false;
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
@@ -91,4 +96,7 @@ private:
 public :
 	UFUNCTION(BlueprintCallable)
 	void DamagedTestBoss();
+
+	// IParringTimingInterface을(를) 통해 상속됨
+	void SetIsParringTiming(bool InIsParringTiming) override;
 };
