@@ -14,7 +14,7 @@
 #include "PaperSprite.h"
 #include "WWMonsterWidget.h"
 #include "Stat/Monster/SigillumStatComponent.h"
-
+#include "Misc/OutputDeviceNull.h"
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1.0f;
@@ -35,7 +35,11 @@ void UUWorldUserWidget::NativeConstruct()
 	BossHpBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHpBar")));
 	BossParryBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossParryBar")));
 	TransformationGauge = Cast<UProgressBar>(GetWidgetFromName(TEXT("TransformationGauge")));
-	
+	WBP_TOUCH1 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch1")));
+	WBP_TOUCH2 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch2")));
+	WBP_TOUCH3 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch3")));
+	WBP_TOUCH4 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch4")));
+
 	ensure(HPProgressBar);
 	ensure(LevelText);
 	ensure(SkillImage);
@@ -46,6 +50,10 @@ void UUWorldUserWidget::NativeConstruct()
 	ensure(BossHpBar);
 	ensure(BossParryBar);
 	ensure(TransformationGauge);
+	ensure(WBP_TOUCH1);
+	ensure(WBP_TOUCH2);
+	ensure(WBP_TOUCH3);
+	ensure(WBP_TOUCH4);
 
 	if (DashBarImage)
 	{
@@ -88,6 +96,13 @@ void UUWorldUserWidget::NativeConstruct()
 
 	SkillCoolEDisable();
 	HideBossUI();
+	
+	WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
+	WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
+	WBP_TOUCH3->SetVisibility(ESlateVisibility::Hidden);
+	WBP_TOUCH4->SetVisibility(ESlateVisibility::Hidden);
+
+	stopanimation = false;
 
 }
 
@@ -131,8 +146,6 @@ void UUWorldUserWidget::UpdateMainHUD(float NewCurrentDash)
 	//}
 }
 
-
-
 void UUWorldUserWidget::UpdateLevel(int Level)
 {
 	LevelText->SetText(FText::Format(FText::FromString("LV. {0}"), FText::AsNumber(Level)));
@@ -140,11 +153,11 @@ void UUWorldUserWidget::UpdateLevel(int Level)
 
 void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 {
-	
 	if (currenGauge >= 1)
 	{
 		RHideImage->SetVisibility(ESlateVisibility::Hidden);
 		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 0);
+		//TriggerTouchAnimation(WBP_TOUCH4);
 		return;
 	}
 	else
@@ -156,12 +169,12 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 		RGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 1 - currenGauge);
 		//UE_LOG(LogTemp, Log, TEXT("R ++"));
 	}
-	
 }
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
 	ChangeIconSprite = NewIcon;
+	//TriggerTouchAnimation(WBP_TOUCH2);
 }
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
@@ -169,6 +182,7 @@ void UUWorldUserWidget::SkillCoolEActive(float a)
 	//UE_LOG(LogTemp, Log, TEXT("SkillE - Start"));
 	EHideImage->SetVisibility(ESlateVisibility::Visible);
 	ESkillKeyImage->SetVisibility(ESlateVisibility::Hidden);
+	TriggerTouchAnimation(WBP_TOUCH3);
 }
 
 void UUWorldUserWidget::SkillCoolEDisable()
@@ -184,7 +198,6 @@ void UUWorldUserWidget::SkillCoolEDisable()
 void UUWorldUserWidget::UpdateSkillCoolR(float coolTime)
 {
 	UE_LOG(LogTemp, Log, TEXT("UpdateSkillCoolR"));
-
 }
 
 void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
@@ -239,9 +252,76 @@ void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
 void UUWorldUserWidget::HUDVisible()
 {
 	SetVisibility(ESlateVisibility::Visible);
+	//stopanimation = false;
 }
 
 void UUWorldUserWidget::HUDHidden()
 {
 	SetVisibility(ESlateVisibility::Hidden);
+	//stopanimation = true;
+}
+
+void UUWorldUserWidget::TriggerTouchAnimation(UUserWidget* touchwidget)
+{
+	if (!touchwidget)
+	{
+		return;
+	}
+	if (touchwidget->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		touchwidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	FString FunctionName = TEXT("OnInteration");
+	FOutputDeviceNull ar;
+	touchwidget->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
+}
+
+void UUWorldUserWidget::TriggerTouchLockOnAnimation()
+{
+	if (!WBP_TOUCH1)
+	{
+		return;
+	}
+	if (WBP_TOUCH1->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		WBP_TOUCH1->SetVisibility(ESlateVisibility::Visible);
+	}
+	FString FunctionName = TEXT("OnInteration");
+	FOutputDeviceNull ar;
+	WBP_TOUCH1->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
+}
+
+void UUWorldUserWidget::TriggerTouchBaseAttackAnimation()
+{
+	if (!WBP_TOUCH2)
+	{
+		return;
+	}
+	if (WBP_TOUCH2->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		WBP_TOUCH2->SetVisibility(ESlateVisibility::Visible);
+	}
+	FString FunctionName = TEXT("OnInteration");
+	FOutputDeviceNull ar;
+	WBP_TOUCH2->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
+}
+
+void UUWorldUserWidget::TriggerTouchBurstAnimation()
+{
+	//if (!stopanimation)
+	//{
+	//	return;
+	//}
+	//UE_LOG(LogTemp, Log, TEXT("OnInteration"));
+	if (!WBP_TOUCH4)
+	{
+		return;
+	}
+	if (WBP_TOUCH4->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		WBP_TOUCH4->SetVisibility(ESlateVisibility::Visible);
+	}
+	FString FunctionName = TEXT("OnInteration");
+	FOutputDeviceNull ar;
+	WBP_TOUCH4->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
 }

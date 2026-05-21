@@ -266,4 +266,9 @@ public :
 	UFUNCTION(BlueprintCallable)
 	void RGaugeUp();
 
+	UFUNCTION(BlueprintCallable)
+	void OpenUI();
+
+	UFUNCTION(BlueprintCallable)
+	void CloseUI();
 };
