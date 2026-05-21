@@ -136,26 +136,10 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	AAIController* AICon = Cast<AAIController>(GetController());
-	if (AICon && AICon->GetBlackboardComponent())
+	if (bIsBeingParringTiming && AICon && AICon->GetBlackboardComponent())
 	{
 		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
 	}
-
-	// TODO: DamageCauser와 논의해서 결정 필요
-
-	/*AAIController* AICon = Cast<AAIController>(GetController());
-	if (AICon && AICon->GetBlackboardComponent())
-	{
-		bool bIsHeavyOrParryAttack = CheckIfHeavyAttack(DamageEvent);
-
-		if (bIsHeavyOrParryAttack)
-		{
-			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
-		}
-		else
-		{
-		}
-	}*/
 
 	return ActualDamage;
 }
@@ -165,6 +149,12 @@ void AMonster::DamagedTestBoss()
 	float CurrentHP = Stat->GetCurrentHP() - 10.f;
 	Stat->SetHp(CurrentHP);
 }
+
+void AMonster::SetIsParringTiming(bool InIsParringTiming)
+{
+	bIsBeingParringTiming = InIsParringTiming;
+}
+
 void AMonster::showLockOnMonster()
 {
 	UMonsterStatComponent* MonsterStat = Cast<UMonsterStatComponent>(Stat);
