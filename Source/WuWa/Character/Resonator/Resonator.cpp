@@ -519,6 +519,7 @@ void AResonator::ProcessAttack()
 		return;
 	}
 
+	CurrentAttackCombo = 0;
 	bHasNextComboCommand = true;
 	CheckAttackComboInput();
 }
