@@ -8,10 +8,10 @@ UPlayerStatComponent::UPlayerStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	MaxDash = 10.f;
+	MaxDash = 12.f;
 	CurrentDash = MaxDash;
 
-	RecoveryRate = 0.2f;
+	RecoveryRate = 0.6f;
 
 	coolTime_E = 1.0f;
 	coolTime_R = 5.0f;
