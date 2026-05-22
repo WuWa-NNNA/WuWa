@@ -78,30 +78,23 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 			continue;
 		}
 
-		DamagedActors.Add(HitActor);
+		OnAttackSucceeded(DamagedActors, HitActor, HitResult, bDidShakeCamera);
+	}
+}
 
-		const float AttackDamage = 1.0f;
+void AWWCharacter::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera)
+{
+	DamagedActors.Add(HitActor);
 
-		FDamageEvent DamageEvent;
-		float ActualDamage = HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+	const float AttackDamage = 1.0f;
 
-		if (ActualDamage > 0.0f)
-		{
-			if (AttackHitEffect)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-			}
-
-			if (!bDidShakeCamera)
-			{
-				APlayerController* PC = GetWorld()->GetFirstPlayerController();
-				if (PC && CameraShakeClass)
-				{
-					bDidShakeCamera = true;
-					PC->ClientStartCameraShake(CameraShakeClass);
-				}
-			}
-		}
+	FDamageEvent DamageEvent;
+	float ActualDamage = HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+	if (ActualDamage > 0.0f)
+	{
+		PlayDamagedSkin(HitActor, AttackDamage);
+		SpawnAttackHitEffect(HitResult);
+		PlayCameraShake(bDidShakeCamera);
 	}
 }
 
@@ -111,13 +104,33 @@ float AWWCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	if (ActualDamage > 0.0f && Stat)
 	{
 		Stat->ApplyDamage(ActualDamage);
-		PlayDamagedSkin(DamageAmount);
 	}
 
 	return ActualDamage;
 }
 
-void AWWCharacter::PlayDamagedSkin(float damage)
+void AWWCharacter::SpawnAttackHitEffect(const FHitResult& HitResult)
+{
+	if (AttackHitEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+	}
+}
+
+void AWWCharacter::PlayCameraShake(bool& bDidShakeCamera)
+{
+	if (!bDidShakeCamera)
+	{
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC && CameraShakeClass)
+		{
+			bDidShakeCamera = true;
+			PC->ClientStartCameraShake(CameraShakeClass);
+		}
+	}
+}
+
+void AWWCharacter::PlayDamagedSkin(AActor* HitActor, float damage)
 {
 	int32 RandomInt = FMath::RandRange(1, 10);
 
@@ -132,9 +145,9 @@ void AWWCharacter::PlayDamagedSkin(float damage)
 	{
 		AActor* DamageActor = world->SpawnActorDeferred<AActor>(
 			Stat->DamageTextActorClass,
-			GetTransform(),
-			this,
-			GetInstigator(),
+			HitActor->GetTransform(),
+			HitActor,
+			HitActor->GetInstigator(),
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 		);
 		if (DamageActor)
@@ -149,7 +162,7 @@ void AWWCharacter::PlayDamagedSkin(float damage)
 			{
 				FloatProperty->SetPropertyValue_InContainer(DamageActor, damage + RandomInt);
 			}
-			DamageActor->FinishSpawning(GetTransform());
+			DamageActor->FinishSpawning(HitActor->GetTransform());
 		}
 	}
 }

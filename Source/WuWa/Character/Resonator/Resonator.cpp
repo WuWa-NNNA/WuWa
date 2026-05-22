@@ -400,7 +400,7 @@ void AResonator::DamagedTest()
 void AResonator::RGaugeUp()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.2f);
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.05f);
 }
 
 void AResonator::OpenUI()
@@ -478,6 +478,13 @@ void AResonator::Burst()
 	PlayerStat->SetRGauge(0.0f);
 }
 
+void AResonator::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera)
+{
+	Super::OnAttackSucceeded(DamagedActors, HitActor, HitResult, bDidShakeCamera);
+
+	RGaugeUp();
+}
+
 float AResonator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (CurrentState == EResonatorState::Dodge)
@@ -508,7 +515,6 @@ void AResonator::ProcessAttack()
 			return;
 		}
 
-		RGaugeUp();
 		BeginComboAttack();
 		return;
 	}
@@ -714,8 +720,6 @@ void AResonator::CheckAttackComboInput()
 	{
 		CurrentAttackCombo = 1;
 	}
-	
-	RGaugeUp();
 
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
