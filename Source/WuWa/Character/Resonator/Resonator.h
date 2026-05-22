@@ -65,6 +65,7 @@ protected:
 	virtual void Burst();
 
 protected:
+	virtual void OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void ProcessAttack();
 	virtual void PlayDashMontage();

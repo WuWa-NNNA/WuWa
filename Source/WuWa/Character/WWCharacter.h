@@ -22,12 +22,15 @@ public:
 
 public:
 	virtual void CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObjectPtr<AActor>>& DamagedActors) override;
+	virtual void OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera);
 
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void SpawnAttackHitEffect(const FHitResult& HitResult);
+	virtual void PlayCameraShake(bool& bDidShakeCamera);
 
 private:
-	void PlayDamagedSkin(float damage);
+	void PlayDamagedSkin(AActor* HitActor, float damage);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
