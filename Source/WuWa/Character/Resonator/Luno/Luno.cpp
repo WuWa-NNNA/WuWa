@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
 #include "Stat/Player/LunoStatComponent.h"
@@ -189,5 +190,14 @@ void ALuno::PlayDodgeMontage()
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
 		AnimInstance->Montage_JumpToSection(TEXT("Back"), Montage);
 		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
+	}
+}
+
+void ALuno::SpawnAttackHitEffect(const FHitResult& HitResult)
+{
+	if (AttackHitEffect)
+	{
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+		SpawnedEffect->SetVariableFloat(TEXT("User._Size"), 3.0f);
 	}
 }

@@ -8,7 +8,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	MaxDash = 12.f;
+	MaxDash = 10.f;
 	CurrentDash = MaxDash;
 
 	RecoveryRate = 0.6f;
@@ -79,12 +79,11 @@ bool UPlayerStatComponent::IsRPossible()
 void UPlayerStatComponent::ApplyDash()
 {
 	const float PrevHP = CurrentDash;
-	if (CurrentDash <= 0.9f)
+	if (CurrentDash < 0.75f)
 	{
 		return;
 	}
-	CurrentDash--;
-	SetDash(CurrentDash);
+	SetDash(CurrentDash - 0.75f);
 }
 
 void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)

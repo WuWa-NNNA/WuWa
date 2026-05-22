@@ -40,6 +40,9 @@ protected:
 	virtual void PlayDashMontage() override;
 	virtual void PlayDodgeMontage() override;
 
+protected:
+	virtual void SpawnAttackHitEffect(const FHitResult& HitResult) override;
+
 public:
 	FORCEINLINE ELunoState GetCurrentLunoState() const { return CurrentLunoState; }
 
