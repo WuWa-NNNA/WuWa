@@ -80,7 +80,7 @@ bool AResonator::CanConcerto()
 
 void AResonator::ConcertoOut()
 {
-	SetActorEnableCollision(false);
+	//SetActorEnableCollision(false);
 	if (CurrentState == EResonatorState::Normal)
 	{
 		DeactivateByConcerto();
