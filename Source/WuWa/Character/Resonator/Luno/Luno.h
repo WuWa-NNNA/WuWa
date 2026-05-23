@@ -38,6 +38,7 @@ protected:
 	virtual void Skill() override;
 
 protected:
+	virtual bool CanAirDash() override;
 	virtual void PlayDashMontage() override;
 	virtual void PlayDodgeMontage() override;
 

@@ -56,9 +56,17 @@ void ALuno::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (CurrentLunoState == ELunoState::Crescent && GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Flying)
+	if (CurrentLunoState == ELunoState::Crescent)
 	{
-		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
+		if (GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Flying)
+		{
+			GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
+		}
+
+		if (!GetWeaponMeshComponent()->IsVisible())
+		{
+			GetWeaponMeshComponent()->SetVisibility(true);
+		}
 	}
 }
 
@@ -70,7 +78,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(false);
-		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Falling;
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		break;
 	}
@@ -84,7 +92,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(true);
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
 		Cast<ULunoStatComponent>(Stat)->SetCrescentTimer();
 		break;
 	}
@@ -139,6 +147,16 @@ void ALuno::Skill()
 	}
 
 	Super::Skill();
+}
+
+bool ALuno::CanAirDash()
+{
+	if (CurrentLunoState == ELunoState::Crescent)
+	{
+		return true;
+	}
+
+	return Super::CanAirDash();
 }
 
 void ALuno::PlayDashMontage()

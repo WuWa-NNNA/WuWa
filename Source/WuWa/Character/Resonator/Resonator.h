@@ -82,6 +82,7 @@ protected:
 	virtual void OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void ProcessAttack();
+	virtual bool CanAirDash();
 	virtual void PlayDashMontage();
 	virtual void PlayDodgeMontage();
 	virtual void PlayBurstCinematic();
@@ -256,6 +257,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> WeaponBurstMontage;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> WeaponConcertoAttackMontage;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "DataAsset", meta = (AllowPrivateAccess = "true"))

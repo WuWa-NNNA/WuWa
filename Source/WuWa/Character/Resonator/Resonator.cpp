@@ -80,6 +80,7 @@ bool AResonator::CanConcerto()
 
 void AResonator::ConcertoOut()
 {
+	SetActorEnableCollision(false);
 	if (CurrentState == EResonatorState::Normal)
 	{
 		DeactivateByConcerto();
@@ -88,27 +89,6 @@ void AResonator::ConcertoOut()
 
 void AResonator::ConcertoIn(AResonator* Other)
 {
-	if (Other->CurrentState == EResonatorState::Normal)
-	{
-		SetActorTransform(Other->GetActorTransform());
-	}
-	else
-	{
-		// 1. 락온 중일 때 - 타깃 근처에서 소환
-		if (bIsLockOn && LockOnTarget)
-		{
-			const float Radius = 250.f;
-			const FVector Offset = FRotator(0.f, 360.f, 0.f).Vector() * Radius;
-			SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
-		}
-		else // 2. 락온 아닐 때 - 캐릭터 근처에서 소환
-		{
-			SetActorTransform(Other->GetActorTransform());
-		}
-
-		ConcertoAttack();
-	}
-
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 
@@ -119,11 +99,31 @@ void AResonator::ConcertoIn(AResonator* Other)
 	UPlayerStatComponent* OtherPlayerStat = Cast<UPlayerStatComponent>(Other->Stat);
 	if (PlayerStat && OtherPlayerStat)
 	{
-		float DashValue = PlayerStat->GetCurrentDash();
+		float DashValue = OtherPlayerStat->GetCurrentDash();
 		PlayerStat->SetCurrentDash(DashValue);
 		UpdateDashGaugeUI(DashValue);
-		TargetLocation = GetActorLocation() + Camera->GetRightVector() * 70.0f + Camera->GetUpVector() * -30.0f;
-		DashGaugeComponent->SetWorldLocation(TargetLocation);
+		DashGaugeComponent->SetWorldLocation(Other->DashGaugeComponent->GetComponentLocation());
+	}
+
+	if (Other->CurrentState == EResonatorState::Normal)
+	{
+		SetActorTransform(Other->GetActorTransform());
+	}
+	else
+	{
+		if (bIsLockOn && LockOnTarget)
+		{
+			const float Radius = 250.f;
+			const float RandomAngle = FMath::RandRange(0.f, 360.f);
+			const FVector Offset = FRotator(0.f, RandomAngle, 0.f).Vector() * Radius;
+			SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
+		}
+		else
+		{
+			SetActorTransform(Other->GetActorTransform());
+		}
+
+		ConcertoAttack();
 	}
 
 	BeginConcertoGhostTrailEffect();
@@ -526,7 +526,7 @@ void AResonator::Dash()
 
 	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
 	{
-		if (bHasDashedInAir)
+		if (!CanAirDash())
 		{
 			return;
 		}
@@ -586,7 +586,7 @@ void AResonator::Skill()
 	SetAttackRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
-	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->SkillE();
@@ -624,6 +624,11 @@ void AResonator::Burst()
 
 void AResonator::ConcertoAttack()
 {
+	ChangeState(EResonatorState::Attack);
+	SetAttackRotationByMoveInput();
+
+	PlayAnimMontage(ConcertoAttackMontage, 1.5f);
+	Weapon->GetAnimInstance()->Montage_Play(ConcertoAttackMontage, 1.5f);
 }
 
 void AResonator::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera)
@@ -684,6 +689,11 @@ void AResonator::ProcessAttack()
 	CurrentAttackCombo = 0;
 	bHasNextComboCommand = true;
 	CheckAttackComboInput();
+}
+
+bool AResonator::CanAirDash()
+{
+	return !bHasDashedInAir;
 }
 
 void AResonator::PlayDashMontage()
