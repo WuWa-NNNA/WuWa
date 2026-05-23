@@ -38,25 +38,6 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 	}
 }
 
-
-void ASigillum::SetDead()
-{
-	bIsDead = true;
-
-	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-	{
-		AnimInstance->Montage_Stop(0.0f);
-	}
-
-	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
-	{
-		MoveComp->StopMovementImmediately();
-		MoveComp->DisableMovement();
-	}
-
-	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
-}
-
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

@@ -35,8 +35,15 @@ class WUWA_API AResonator : public AWWCharacter
 public:
 	AResonator(const FObjectInitializer& ObjectInitializer);
 
+public:
+	bool CanConcerto();
+	void ConcertoOut();
+	void ConcertoIn(AResonator* Other);
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void InitializeCinematicActors();
+	void InitializeUIComponents();
 
 protected:
 	virtual void BeginPlay() override;
@@ -44,8 +51,10 @@ protected:
 
 protected:
 	virtual void TickCamera(float DeltaSeconds);
+	virtual void TickNormal(float DeltaSeconds);
 	virtual void TickAttack(float DeltaSeconds);
 	virtual void TickLocomotionGait(float DeltaSeconds);
+	virtual void TickUIWidget(float DeltaSeconds);
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -73,6 +82,7 @@ protected:
 	virtual void PlayBurstCinematic();
 
 private:
+	void InheritTransformFrom(AResonator* Other);
 	void SetRotationByMoveInput();
 	void SetAttackRotationByMoveInput();
 	void TryCancelAttackMontageByNewInput();
@@ -81,6 +91,7 @@ private:
 	void BeginComboAttack();
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
+	void OnConcertoBlendEnded();
 
 public:
 	virtual void OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -134,6 +145,7 @@ private:
 	FTimerHandle AttackComboTimer;
 
 private:
+	bool bHasDashedInAir = false;
 	bool bHasCurrentDashInput = false;
 	float DodgeTime = 0.0f;
 	FTimerHandle DodgeTimer;
@@ -250,6 +262,8 @@ private:
 
 	FTimerHandle GhostTrailEffectSpawnTimer;
 
+	FTimerHandle ConcertoBlendTimer;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	class UWidgetComponent* DashGaugeComponent;
@@ -268,4 +282,8 @@ public :
 	void OpenUI();
 	UFUNCTION(BlueprintCallable, Category = "test")
 	void CloseUI();
+
+private:
+	void UseDashGauge();
+	void UpdateDashGaugeUI(float NewDash);
 };

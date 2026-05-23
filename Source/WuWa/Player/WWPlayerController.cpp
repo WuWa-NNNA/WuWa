@@ -8,6 +8,7 @@
 #include "Character/Monster/Sigillum/Sigillum.h"
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
 
 AWWPlayerController::AWWPlayerController()
 {
@@ -20,6 +21,18 @@ AWWPlayerController::AWWPlayerController()
 	}
 }
 
+void AWWPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	if (EnhancedInputComponent)
+	{
+		EnhancedInputComponent->BindAction(Concerto1Action, ETriggerEvent::Started, this, &AWWPlayerController::Concerto1);
+		EnhancedInputComponent->BindAction(Concerto2Action, ETriggerEvent::Started, this, &AWWPlayerController::Concerto2);
+	}
+}
+
 void AWWPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -29,6 +42,7 @@ void AWWPlayerController::BeginPlay()
 
 	SetInputMappingContext(CurrentInputType);
 
+	SpawnResonators();
 	CreateHUDWidget();
 }
 
@@ -51,16 +65,13 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 	}
 
 	AResonator* Resonator = Cast<AResonator>(InPawn);
-
 	if (Resonator && MainHUDWidget)
 	{
 		UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Resonator->GetStatComponent());
+
 		if (PlayerStat)
 		{
-			PlayerStat->OnHpChagned.Clear();
-
 			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
-			//PlayerStat->OnDashChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateMainHUD);
 			PlayerStat->FOnSkillEStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::SkillCoolEActive);
 			PlayerStat->OnBaseSkillchange.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillIcon);
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
@@ -74,6 +85,7 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
 			MainHUDWidget->UpdateRGauge(PlayerStat->GetRGauge());
 		}
+
 		ULunoStatComponent* LunoStat = Cast<ULunoStatComponent>(Resonator->GetStatComponent());
 		if (LunoStat)
 		{
@@ -83,12 +95,99 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void AWWPlayerController::OnUnPossess()
+{
+	if (AResonator* OldResonator = Cast<AResonator>(GetPawn()))
+	{
+		if (UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(OldResonator->GetStatComponent()))
+		{
+			PlayerStat->OnHpChagned.RemoveAll(MainHUDWidget);
+			PlayerStat->FOnSkillEStart.RemoveAll(MainHUDWidget);
+			PlayerStat->OnBaseSkillchange.RemoveAll(MainHUDWidget);
+			PlayerStat->OnRGaugaChanged.RemoveAll(MainHUDWidget);
+			PlayerStat->OnRSart.RemoveAll(MainHUDWidget);
+			PlayerStat->OnREnd.RemoveAll(MainHUDWidget);
+			PlayerStat->OnLockOn.RemoveAll(MainHUDWidget);
+			PlayerStat->OnPlayIconAnimation.RemoveAll(MainHUDWidget);
+			PlayerStat->OnPlayIcon4Animation.RemoveAll(MainHUDWidget);
+		}
+
+		if (ULunoStatComponent* LunoStat =
+			Cast<ULunoStatComponent>(OldResonator->GetStatComponent()))
+		{
+			LunoStat->OnChangeCrescentTime.RemoveAll(MainHUDWidget);
+			LunoStat->OnBaseEndCrescentTime.RemoveAll(MainHUDWidget);
+		}
+	}
+
+	Super::OnUnPossess();
+}
+
+void AWWPlayerController::Concerto1()
+{
+	ProcessConcerto(0);
+}
+
+void AWWPlayerController::Concerto2()
+{
+	ProcessConcerto(1);
+}
+
+void AWWPlayerController::ProcessConcerto(int NextResonatorIndex)
+{
+	if (!PartyResonators.IsEmpty() && PartyResonators[NextResonatorIndex])
+	{
+		if (CurrentResonatorIndex == NextResonatorIndex)
+		{
+			return;
+		}
+		
+		AResonator* CurrentResonator = PartyResonators[CurrentResonatorIndex];
+		AResonator* NextResonator = PartyResonators[NextResonatorIndex];
+		if (!CurrentResonator->CanConcerto())
+		{
+			return;
+		}
+
+		CurrentResonator->ConcertoOut();
+		NextResonator->ConcertoIn(CurrentResonator);
+
+		Possess(NextResonator);
+		SetViewTargetWithBlend(NextResonator, 0.f);
+
+		CurrentResonatorIndex = NextResonatorIndex;
+	}
+}
+
+void AWWPlayerController::SpawnResonators()
+{
+	for (TSubclassOf<AResonator> ResonatorClass : PartyResonatorClasses)
+	{
+		if (ResonatorClass)
+		{
+			AResonator* Resonator = GetWorld()->SpawnActor<AResonator>(ResonatorClass, ResonatorSpawnTransform);
+			PartyResonators.Add(Resonator);
+			Resonator->SetActorHiddenInGame(true);
+			Resonator->SetActorEnableCollision(false);
+		}
+	}
+
+	AResonator* PossessResonator = (!PartyResonators.IsEmpty() ? PartyResonators[0] : nullptr);
+	if (PossessResonator)
+	{
+		Possess(PossessResonator);
+		PossessResonator->SetActorHiddenInGame(false);
+		PossessResonator->SetActorEnableCollision(true);
+	}
+}
+
 void AWWPlayerController::CreateHUDWidget()
 {
 	if (MainHUDWidget)
 	{
 		return;
 	}
+
 	MainHUDWidget = CreateWidget<UUWorldUserWidget>(this, HUDWidgetClass);
 	if (MainHUDWidget)
 	{
@@ -114,5 +213,4 @@ void AWWPlayerController::SpawnBoss()
 		}
 		MainHUDWidget->InitializeBossUISetting(BossStat);
 	}
-
 }

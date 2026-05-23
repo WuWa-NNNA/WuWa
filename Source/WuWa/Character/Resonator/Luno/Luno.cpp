@@ -52,6 +52,16 @@ void ALuno::BeginPlay()
 	ChangeLunoState(ELunoState::Half);
 }
 
+void ALuno::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (CurrentLunoState == ELunoState::Crescent && GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Flying)
+	{
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
+	}
+}
+
 void ALuno::ChangeLunoState(ELunoState NextLunoState)
 {
 	switch (CurrentLunoState)
@@ -198,6 +208,6 @@ void ALuno::SpawnAttackHitEffect(const FHitResult& HitResult)
 	if (AttackHitEffect)
 	{
 		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-		SpawnedEffect->SetVariableFloat(TEXT("User._Size"), 3.0f);
+		SpawnedEffect->SetVariableFloat(TEXT("User._Size"), 2.0f);
 	}
 }
