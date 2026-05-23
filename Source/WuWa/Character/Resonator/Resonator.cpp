@@ -80,15 +80,37 @@ bool AResonator::CanConcerto()
 
 void AResonator::ConcertoOut()
 {
+	if (CurrentState == EResonatorState::Normal)
+	{
+		DeactivateByConcerto();
+	}
 }
 
 void AResonator::ConcertoIn(AResonator* Other)
 {
-	InheritTransformFrom(Other);
+	if (Other->CurrentState == EResonatorState::Normal)
+	{
+		SetActorTransform(Other->GetActorTransform());
+	}
+	else
+	{
+		// 1. 락온 중일 때 - 타깃 근처에서 소환
+		if (bIsLockOn && LockOnTarget)
+		{
+			const float Radius = 250.f;
+			const FVector Offset = FRotator(0.f, 360.f, 0.f).Vector() * Radius;
+			SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
+		}
+		else // 2. 락온 아닐 때 - 캐릭터 근처에서 소환
+		{
+			SetActorTransform(Other->GetActorTransform());
+		}
+
+		ConcertoAttack();
+	}
+
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
-	//SetActorTickEnabled(true);
-	//GetMesh()->SetComponentTickEnabled(true);
 
 	bIsLockOn = Other->bIsLockOn;
 	LockOnTarget = Other->LockOnTarget;
@@ -104,11 +126,7 @@ void AResonator::ConcertoIn(AResonator* Other)
 		DashGaugeComponent->SetWorldLocation(TargetLocation);
 	}
 
-	SpawnGhostTrailEffect();
-	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
-	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
-	GetWorldTimerManager().ClearTimer(ConcertoBlendTimer);
-	GetWorldTimerManager().SetTimer(ConcertoBlendTimer, this, &AResonator::OnConcertoBlendEnded, 0.3f);
+	BeginConcertoGhostTrailEffect();
 }
 
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -253,20 +271,7 @@ void AResonator::TickNormal(float DeltaSeconds)
 	{
 		if (!IsHidden())
 		{
-			SetActorHiddenInGame(true);
-			SetActorEnableCollision(false);
-			//SetActorTickEnabled(false);
-			//GetMesh()->SetComponentTickEnabled(false);
-			if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance())
-			{
-				AnimInst->StopAllMontages(0.0f);
-				Weapon->GetAnimInstance()->StopAllMontages(0.0f);
-			}
-			SpawnGhostTrailEffect();
-			GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
-			GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
-			GetWorldTimerManager().ClearTimer(ConcertoBlendTimer);
-			GetWorldTimerManager().SetTimer(ConcertoBlendTimer, this, &AResonator::OnConcertoBlendEnded, 0.3f);
+			DeactivateByConcerto();
 		}
 
 		return;
@@ -329,6 +334,25 @@ void AResonator::ChangeLocomotionGait(const ELocomotionGait NextLocomotionGait)
 	}
 
 	CurrentLocomotionGait = NextLocomotionGait;
+}
+
+void AResonator::DeactivateByConcerto()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance())
+	{
+		AnimInst->StopAllMontages(0.0f);
+		Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+	}
+
+	BeginConcertoGhostTrailEffect();
+}
+
+void AResonator::SetCameraLag(bool bNewValue)
+{
+	SpringArm->bEnableCameraLag = bNewValue;
+	SpringArm->bEnableCameraRotationLag = bNewValue;
 }
 
 void AResonator::Move(const FInputActionValue& Value)
@@ -598,6 +622,10 @@ void AResonator::Burst()
 	PlayerStat->SetRGauge(0.0f);
 }
 
+void AResonator::ConcertoAttack()
+{
+}
+
 void AResonator::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera)
 {
 	Super::OnAttackSucceeded(DamagedActors, HitActor, HitResult, bDidShakeCamera);
@@ -734,24 +762,6 @@ void AResonator::PlayBurstCinematic()
 	SequencePlayer->Play();
 }
 
-void AResonator::InheritTransformFrom(AResonator* Other)
-{
-	if (!Other || Other->GetCurrentState() != EResonatorState::Normal)
-	{
-		return;
-	}
-
-	SetActorTransform(Other->GetActorTransform());
-
-	if (SpringArm && Other->SpringArm)
-	{
-		SpringArm->TargetArmLength = Other->SpringArm->TargetArmLength;
-		SpringArm->SocketOffset = Other->SpringArm->SocketOffset;
-		SpringArm->TargetOffset = Other->SpringArm->TargetOffset;
-		SpringArm->SetWorldRotation(Other->SpringArm->GetComponentRotation());
-	}
-}
-
 void AResonator::SetRotationByMoveInput()
 {
 	if (!bHasCurrentMoveInput)
@@ -878,6 +888,15 @@ void AResonator::CheckAttackComboInput()
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
 	PlayerStat->PlaySkillIconAnimation();
+}
+
+void AResonator::BeginConcertoGhostTrailEffect()
+{
+	SpawnGhostTrailEffect();
+	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
+	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
+	GetWorldTimerManager().ClearTimer(ConcertoBlendTimer);
+	GetWorldTimerManager().SetTimer(ConcertoBlendTimer, this, &AResonator::OnConcertoBlendEnded, 0.3f);
 }
 
 void AResonator::OnConcertoBlendEnded()

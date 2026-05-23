@@ -61,6 +61,10 @@ public:
 	virtual void ChangeState(const EResonatorState NextState);
 	virtual void ChangeLocomotionGait(const ELocomotionGait NextLocomotionGait);
 
+public:
+	void DeactivateByConcerto();
+	void SetCameraLag(bool bNewValue);
+
 protected:
 	virtual void Move(const FInputActionValue& Value);
 	virtual void StopMove(const FInputActionValue& Value);
@@ -72,6 +76,7 @@ protected:
 	virtual void Attack();
 	virtual void Skill();
 	virtual void Burst();
+	virtual void ConcertoAttack();
 
 protected:
 	virtual void OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera) override;
@@ -82,7 +87,6 @@ protected:
 	virtual void PlayBurstCinematic();
 
 private:
-	void InheritTransformFrom(AResonator* Other);
 	void SetRotationByMoveInput();
 	void SetAttackRotationByMoveInput();
 	void TryCancelAttackMontageByNewInput();
@@ -91,6 +95,7 @@ private:
 	void BeginComboAttack();
 	void SetAttackComboTimer();
 	void CheckAttackComboInput();
+	void BeginConcertoGhostTrailEffect();
 	void OnConcertoBlendEnded();
 
 public:
@@ -235,6 +240,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> BurstMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> ConcertoAttackMontage;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "WeaponMontage", meta = (AllowPrivateAccess = "true"))

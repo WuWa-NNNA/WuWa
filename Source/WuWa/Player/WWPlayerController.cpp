@@ -152,8 +152,25 @@ void AWWPlayerController::ProcessConcerto(int NextResonatorIndex)
 		CurrentResonator->ConcertoOut();
 		NextResonator->ConcertoIn(CurrentResonator);
 
+		NextResonator->SetCameraLag(false);
+		FRotator SavedRotator = GetControlRotation();
+
 		Possess(NextResonator);
-		SetViewTargetWithBlend(NextResonator, 0.f);
+
+		SetControlRotation(SavedRotator);
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(
+			TimerHandle,
+			[NextResonator]()
+			{
+				if (IsValid(NextResonator))
+				{
+					NextResonator->SetCameraLag(true);
+				}
+			},
+			0.05f,
+			false
+		);
 
 		CurrentResonatorIndex = NextResonatorIndex;
 	}
