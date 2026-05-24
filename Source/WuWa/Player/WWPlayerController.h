@@ -84,4 +84,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Party", meta = (AllowPrivateAccess = "true"))
 	FTransform ResonatorSpawnTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Party", meta = (AllowPrivateAccess = "true"))
+	FTransform ResonatorSpawnTransform2;
+
 };
