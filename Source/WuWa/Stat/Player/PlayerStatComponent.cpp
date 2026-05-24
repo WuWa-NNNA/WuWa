@@ -11,7 +11,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	MaxDash = 10.f;
 	CurrentDash = MaxDash;
 
-	RecoveryRate = 0.2f;
+	RecoveryRate = 0.6f;
 
 	coolTime_E = 1.0f;
 	coolTime_R = 5.0f;
@@ -79,12 +79,11 @@ bool UPlayerStatComponent::IsRPossible()
 void UPlayerStatComponent::ApplyDash()
 {
 	const float PrevHP = CurrentDash;
-	if (CurrentDash <= 0.9f)
+	if (CurrentDash < 0.75f)
 	{
 		return;
 	}
-	CurrentDash--;
-	SetDash(CurrentDash);
+	SetDash(CurrentDash - 0.75f);
 }
 
 void UPlayerStatComponent::ChangeSkillIcon(int attacknumber)

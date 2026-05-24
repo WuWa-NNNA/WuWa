@@ -37,6 +37,24 @@ AMonster::AMonster(const FObjectInitializer& ObjectInitializer)
 	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponProp05"));
 }
 
+void AMonster::SetDead()
+{
+	bIsDead = true;
+
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->Montage_Stop(0.0f);
+	}
+
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->StopMovementImmediately();
+		MoveComp->DisableMovement();
+	}
+
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
+
 void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

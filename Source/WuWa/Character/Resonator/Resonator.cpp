@@ -23,6 +23,8 @@
 #include "UI/WWDashBarWidget.h"
 #include "Player/WWPlayerController.h"
 
+const float LockOnDetectRadius = 3000.0f;
+
 AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPlayerStatComponent>(TEXT("Stat")))
 {
@@ -71,6 +73,62 @@ AResonator::AResonator(const FObjectInitializer& ObjectInitializer)
 	}
 }
 
+bool AResonator::CanConcerto()
+{
+	return !SequenceActor->GetSequencePlayer()->IsPlaying();
+}
+
+void AResonator::ConcertoOut()
+{
+	//SetActorEnableCollision(false);
+	if (CurrentState == EResonatorState::Normal)
+	{
+		DeactivateByConcerto();
+	}
+}
+
+void AResonator::ConcertoIn(AResonator* Other)
+{
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+
+	bIsLockOn = Other->bIsLockOn;
+	LockOnTarget = Other->LockOnTarget;
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	UPlayerStatComponent* OtherPlayerStat = Cast<UPlayerStatComponent>(Other->Stat);
+	if (PlayerStat && OtherPlayerStat)
+	{
+		float DashValue = OtherPlayerStat->GetCurrentDash();
+		PlayerStat->SetCurrentDash(DashValue);
+		UpdateDashGaugeUI(DashValue);
+		DashGaugeComponent->SetWorldLocation(Other->DashGaugeComponent->GetComponentLocation());
+	}
+
+	if (Other->CurrentState == EResonatorState::Normal)
+	{
+		SetActorTransform(Other->GetActorTransform());
+	}
+	else
+	{
+		if (bIsLockOn && LockOnTarget)
+		{
+			const float Radius = 250.f;
+			const float RandomAngle = FMath::RandRange(0.f, 360.f);
+			const FVector Offset = FRotator(0.f, RandomAngle, 0.f).Vector() * Radius;
+			SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
+		}
+		else
+		{
+			SetActorTransform(Other->GetActorTransform());
+		}
+
+		ConcertoAttack();
+	}
+
+	BeginConcertoGhostTrailEffect();
+}
+
 void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -90,77 +148,90 @@ void AResonator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	}
 }
 
-void AResonator::BeginPlay()
+void AResonator::InitializeCinematicActors()
 {
-	Super::BeginPlay();
-
 	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSequenceActor::StaticClass(), FoundActors);
-	if (!FoundActors.IsEmpty() && FoundActors[0])
+
+	if (!SequenceActor)
 	{
-		SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+		FoundActors.Empty();
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelSequenceActor::StaticClass(), FoundActors);
+		if (!FoundActors.IsEmpty() && FoundActors[0])
+		{
+			SequenceActor = Cast<ALevelSequenceActor>(FoundActors[0]);
+		}
 	}
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACineCameraActor::StaticClass(), FoundActors);
-	if (!FoundActors.IsEmpty() && FoundActors[0])
+	if (!CineCameraActor)
 	{
-		CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
-	}
-	
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("CineLookAtActor"), FoundActors);
-	if (!FoundActors.IsEmpty() && FoundActors[0])
-	{
-		CineLookAtActor = Cast<AActor>(FoundActors[0]);
+		FoundActors.Empty();
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACineCameraActor::StaticClass(), FoundActors);
+		if (!FoundActors.IsEmpty() && FoundActors[0])
+		{
+			CineCameraActor = Cast<ACineCameraActor>(FoundActors[0]);
+		}
 	}
 
-	ChangeState(EResonatorState::Normal);
-	ChangeLocomotionGait(ELocomotionGait::Run);
-	DodgeTime = 0.5f;
-
-	if (!DashGaugeComponent)
+	if (!CineLookAtActor)
 	{
-		return;
+		FoundActors.Empty();
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("CineLookAtActor"), FoundActors);
+		if (!FoundActors.IsEmpty() && FoundActors[0])
+		{
+			CineLookAtActor = Cast<AActor>(FoundActors[0]);
+		}
 	}
-	
-	UUserWidget* WidgetObject =	DashGaugeComponent->GetUserWidgetObject();
-	UWWDashBarWidget* DashWidget =	Cast<UWWDashBarWidget>(WidgetObject);
+}
 
-	if (!DashWidget)
-	{
-		UE_LOG(LogTemp, Error, TEXT("DashWidget NULL"));
-		return;
-	}
-
+void AResonator::InitializeUIComponents()
+{
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	if (!PlayerStat)
 	{
 		return;
 	}
 
-	PlayerStat->OnDashChanged.AddUObject(DashWidget,&UWWDashBarWidget::UpdataWorldDash);
+	PlayerStat->OnDashChanged.AddUObject(this, &AResonator::UpdateDashGaugeUI);
+}
+
+void AResonator::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitializeCinematicActors();
+	InitializeUIComponents();
+
+	ChangeState(EResonatorState::Normal);
+	ChangeLocomotionGait(ELocomotionGait::Run);
+	DodgeTime = 0.5f;
 }
 
 void AResonator::Tick(float DeltaSeconds)
 {
 	TickCamera(DeltaSeconds);
+	TickUIWidget(DeltaSeconds);
 
 	switch (CurrentState)
 	{
+	case EResonatorState::Normal:
+		TickNormal(DeltaSeconds);
+		break;
 	case EResonatorState::Attack:
 		TickAttack(DeltaSeconds);
 		break;
 	}
 
 	TickLocomotionGait(DeltaSeconds);
-	
-	CurrentLocation = DashGaugeComponent->GetComponentLocation();
-	TargetLocation = GetActorLocation() + Camera->GetRightVector()* 80.0f + Camera->GetUpVector()* 20.0f;
-	NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.0f);
-	DashGaugeComponent->SetWorldLocation(NewLocation);
 }
 
 void AResonator::TickCamera(float DeltaSeconds)
 {
+	AController* OwingController = GetController();
+	if (!OwingController)
+	{
+		return;
+	}
+
 	if (bApplyZMotionToCamera)
 	{
 		float ZOffset = GetMesh()->GetSocketLocation(TEXT("Bip001")).Z - GetActorLocation().Z - 50.0f;
@@ -174,14 +245,41 @@ void AResonator::TickCamera(float DeltaSeconds)
 	if (bIsLockOn && LockOnTarget)
 	{
 		FVector ToTarget = LockOnTarget->GetActorLocation() - GetActorLocation();
-		FRotator TargetRot = ToTarget.Rotation();
-		TargetRot.Roll = 0.0f;
-		TargetRot.Pitch = FMath::Clamp(TargetRot.Pitch, 0.0f, 20.0f) - 20.0f;
+		AMonster* monster = Cast<AMonster>(LockOnTarget);
+		if (ToTarget.Length() > LockOnDetectRadius || (monster && monster->bIsDead))
+		{
+			monster->hideLockOnMonster();
 
-		FRotator CurrentRot = GetController()->GetControlRotation();
-		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
+			bIsLockOn = false;
+			LockOnTarget = nullptr;
+		}
+		else
+		{
+			FRotator TargetRot = ToTarget.Rotation();
+			TargetRot.Roll = 0.0f;
+			TargetRot.Pitch = FMath::Clamp(TargetRot.Pitch, 0.0f, 20.0f) - 20.0f;
+			FRotator CurrentRot = OwingController->GetControlRotation();
+			FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaSeconds, 1.0f);
+			OwingController->SetControlRotation(NewRot);
+		}
+	}
+}
 
-		GetController()->SetControlRotation(NewRot);
+void AResonator::TickNormal(float DeltaSeconds)
+{
+	if (!GetController())
+	{
+		if (!IsHidden())
+		{
+			DeactivateByConcerto();
+		}
+
+		return;
+	}
+
+	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
+	{
+		bHasDashedInAir = false;
 	}
 }
 
@@ -210,6 +308,14 @@ void AResonator::TickLocomotionGait(float DeltaSeconds)
 	}
 }
 
+void AResonator::TickUIWidget(float DeltaSeconds)
+{
+	CurrentLocation = DashGaugeComponent->GetComponentLocation();
+	TargetLocation = GetActorLocation() + Camera->GetRightVector() * 70.0f + Camera->GetUpVector() * -30.0f;
+	NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaSeconds, 8.0f);
+	DashGaugeComponent->SetWorldLocation(NewLocation);
+}
+
 void AResonator::ChangeState(const EResonatorState NextState)
 {
 	CurrentState = NextState;
@@ -228,6 +334,25 @@ void AResonator::ChangeLocomotionGait(const ELocomotionGait NextLocomotionGait)
 	}
 
 	CurrentLocomotionGait = NextLocomotionGait;
+}
+
+void AResonator::DeactivateByConcerto()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance())
+	{
+		AnimInst->StopAllMontages(0.0f);
+		Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+	}
+
+	BeginConcertoGhostTrailEffect();
+}
+
+void AResonator::SetCameraLag(bool bNewValue)
+{
+	SpringArm->bEnableCameraLag = bNewValue;
+	SpringArm->bEnableCameraRotationLag = bNewValue;
 }
 
 void AResonator::Move(const FInputActionValue& Value)
@@ -279,42 +404,75 @@ void AResonator::Look(const FInputActionValue& Value)
 
 void AResonator::Lock()
 {
+	LockOnTarget = nullptr;
+
 	TArray<FHitResult> OutHitResults;
-
-	const float DetectRadius = 3000.0f;
-
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
-
-	FVector Start = GetActorLocation();
-	FVector End = Start;
-
-	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(DetectRadius), Params);
+	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, GetActorLocation(), GetActorLocation(), FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(LockOnDetectRadius), Params);
 
 	if (!bHitDetected)
 	{
+		bIsLockOn = false;
+		if (AMonster* monster = Cast<AMonster>(LockOnTarget))
+		{
+			monster->hideLockOnMonster();
+		}
+
 		return;
 	}
 
-	bIsLockOn = !bIsLockOn;
-	if (bIsLockOn)
+	ICombatTeamInterface* MyTeamActor = Cast<ICombatTeamInterface>(this);
+	if (!MyTeamActor)
 	{
-		LockOnTarget = OutHitResults[0].GetActor();
-		AMonster* monster = Cast<AMonster>(LockOnTarget);
-		if (monster)
+		bIsLockOn = false;
+		if (AMonster* monster = Cast<AMonster>(LockOnTarget))
+		{
+			monster->hideLockOnMonster();
+		}
+
+		return;
+	}
+
+	for (const FHitResult& HitResult : OutHitResults)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		if (!IsValid(HitActor))
+		{
+			continue;
+		}
+
+		ICombatTeamInterface* HitTeamActor = Cast<ICombatTeamInterface>(HitActor);
+		if (!HitTeamActor)
+		{
+			continue;
+		}
+
+		if (HitTeamActor->GetTeamType() == MyTeamActor->GetTeamType())
+		{
+			continue;
+		}
+
+		LockOnTarget = HitActor;
+		break;
+	}
+
+	bIsLockOn = !bIsLockOn;
+	if (bIsLockOn && LockOnTarget)
+	{
+		if (AMonster* monster = Cast<AMonster>(LockOnTarget))
 		{
 			monster->showLockOnMonster();
-
 			UPlayerStatComponent* playerStat = Cast< UPlayerStatComponent>(Stat);
 			playerStat->LockOnUI();
 		}
 	}
 	else
 	{
-		AMonster* monster = Cast<AMonster>(LockOnTarget);
-		if (monster)
+		if (AMonster* monster = Cast<AMonster>(LockOnTarget))
 		{
 			monster->hideLockOnMonster();
 		}
+
 		LockOnTarget = nullptr;
 	}
 }
@@ -346,6 +504,16 @@ void AResonator::Jump()
 
 void AResonator::Dash()
 {
+	bHasCurrentDashInput = true;
+	GetWorldTimerManager().ClearTimer(DodgeTimer);
+	GetWorldTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
+
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	if (!PlayerStat || PlayerStat->GetCurrentDash() <= 0.75f)
+	{
+		return;
+	}
+
 	if (CurrentState != EResonatorState::Normal)
 	{
 		return;
@@ -356,21 +524,15 @@ void AResonator::Dash()
 		return;
 	}
 
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	if (!PlayerStat)
+	if (GetMovementComponent()->IsFalling() || GetMovementComponent()->IsFlying())
 	{
-		return;
-	}
-	if (PlayerStat->GetCurrentDash() <= 1.f)
-	{
-		return;
-	}
+		if (!CanAirDash())
+		{
+			return;
+		}
 
-	bHasCurrentDashInput = true;
-	GetWorldTimerManager().ClearTimer(DodgeTimer);
-	GetWorldTimerManager().SetTimer(DodgeTimer, this, &AResonator::OnFinishedDodgeTimer, DodgeTime, false);
-
-	PlayerStat->ApplyDash();
+		bHasDashedInAir = true;
+	}
 
 	TryCancelAttackMontageByNewInput();
 
@@ -378,6 +540,8 @@ void AResonator::Dash()
 	SetRotationByMoveInput();
 
 	PlayDashMontage();
+
+	UseDashGauge();
 }
 
 void AResonator::Dodge()
@@ -390,29 +554,8 @@ void AResonator::Dodge()
 	
 	SpawnGhostTrailEffect();
 	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
-}
 
-void AResonator::DamagedTest()
-{
-	Stat->ApplyDamage(2);
-}
-
-void AResonator::RGaugeUp()
-{
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.2f);
-}
-
-void AResonator::OpenUI()
-{
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ShowUI();
-}
-
-void AResonator::CloseUI()
-{
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->HideUI();
+	UseDashGauge();
 }
 
 void AResonator::Attack()
@@ -443,7 +586,7 @@ void AResonator::Skill()
 	SetAttackRotationByMoveInput();
 
 	PlayAnimMontage(SkillMontage, 1.5f);
-	Weapon->GetAnimInstance()->StopAllMontages(0.0f);
+	Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->SkillE();
@@ -462,6 +605,7 @@ void AResonator::Burst()
 		return;
 	}
 
+	InitializeCinematicActors();
 	if (!SequenceActor || !CineCameraActor || !CineLookAtActor)
 	{
 		return;
@@ -476,6 +620,22 @@ void AResonator::Burst()
 	Weapon->GetAnimInstance()->Montage_Play(WeaponBurstMontage, 1.0f);
 	PlayBurstCinematic();
 	PlayerStat->SetRGauge(0.0f);
+}
+
+void AResonator::ConcertoAttack()
+{
+	ChangeState(EResonatorState::Attack);
+	SetAttackRotationByMoveInput();
+
+	PlayAnimMontage(ConcertoAttackMontage, 1.5f);
+	Weapon->GetAnimInstance()->Montage_Play(ConcertoAttackMontage, 1.5f);
+}
+
+void AResonator::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AActor* HitActor, const FHitResult& HitResult, bool& bDidShakeCamera)
+{
+	Super::OnAttackSucceeded(DamagedActors, HitActor, HitResult, bDidShakeCamera);
+
+	RGaugeUp();
 }
 
 float AResonator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -508,7 +668,6 @@ void AResonator::ProcessAttack()
 			return;
 		}
 
-		RGaugeUp();
 		BeginComboAttack();
 		return;
 	}
@@ -527,8 +686,14 @@ void AResonator::ProcessAttack()
 		return;
 	}
 
+	CurrentAttackCombo = 0;
 	bHasNextComboCommand = true;
 	CheckAttackComboInput();
+}
+
+bool AResonator::CanAirDash()
+{
+	return !bHasDashedInAir;
 }
 
 void AResonator::PlayDashMontage()
@@ -577,12 +742,14 @@ void AResonator::PlayDodgeMontage()
 	{
 		PlayAnimMontage(DodgeMontage, 1.5f);
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
+		GetWeaponMeshComponent()->GetAnimInstance()->StopAllMontages(0.0f);
 	}
 	else
 	{
 		PlayAnimMontage(DodgeMontage, 1.5f);
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, DodgeMontage);
 		AnimInstance->Montage_JumpToSection(TEXT("Back"), DodgeMontage);
+		GetWeaponMeshComponent()->GetAnimInstance()->StopAllMontages(0.0f);
 	}
 }
 
@@ -697,6 +864,7 @@ void AResonator::SetAttackComboTimer()
 	float ComboEffectTime = (AttackComboData->EffectiveFrameCount[ComboIndex] / AttackComboData->FrameRate / AttackSpeedRate);
 	if (ComboEffectTime > 0)
 	{
+		GetWorldTimerManager().ClearTimer(AttackComboTimer);
 		GetWorldTimerManager().SetTimer(AttackComboTimer, this, &AResonator::CheckAttackComboInput, ComboEffectTime, false);
 	}
 }
@@ -706,6 +874,8 @@ void AResonator::CheckAttackComboInput()
 	AttackComboTimer.Invalidate();
 	if (!bHasNextComboCommand)
 	{
+		UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+		PlayerStat->ChangeSkillIcon(0);
 		return;
 	}
 
@@ -713,8 +883,6 @@ void AResonator::CheckAttackComboInput()
 	{
 		CurrentAttackCombo = 1;
 	}
-	
-	RGaugeUp();
 
 	ChangeState(EResonatorState::Attack);
 	SetAttackRotationByMoveInput();
@@ -732,6 +900,20 @@ void AResonator::CheckAttackComboInput()
 	PlayerStat->PlaySkillIconAnimation();
 }
 
+void AResonator::BeginConcertoGhostTrailEffect()
+{
+	SpawnGhostTrailEffect();
+	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
+	GetWorldTimerManager().SetTimer(GhostTrailEffectSpawnTimer, this, &AResonator::SpawnGhostTrailEffect, 0.05f, true);
+	GetWorldTimerManager().ClearTimer(ConcertoBlendTimer);
+	GetWorldTimerManager().SetTimer(ConcertoBlendTimer, this, &AResonator::OnConcertoBlendEnded, 0.3f);
+}
+
+void AResonator::OnConcertoBlendEnded()
+{
+	GetWorldTimerManager().ClearTimer(GhostTrailEffectSpawnTimer);
+}
+
 void AResonator::OnDashMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ChangeLocomotionGait(ELocomotionGait::Sprint);
@@ -746,6 +928,8 @@ void AResonator::OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterrupted)
 {
 	CurrentAttackCombo = 0;
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ChangeSkillIcon(CurrentAttackCombo);
 }
 
 void AResonator::OnBurstCinematicEnded()
@@ -753,4 +937,60 @@ void AResonator::OnBurstCinematicEnded()
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->ShowUI();
 	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
+}
+
+void AResonator::DamagedTest()
+{
+	Stat->ApplyDamage(2);
+}
+
+void AResonator::RGaugeUp()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.05f);
+}
+
+void AResonator::OpenUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->ShowUI();
+}
+
+void AResonator::CloseUI()
+{
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	PlayerStat->HideUI();
+}
+
+void AResonator::UseDashGauge()
+{
+	if (UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat))
+	{
+		PlayerStat->ApplyDash();
+	}
+}
+
+void AResonator::UpdateDashGaugeUI(float NewDash)
+{
+	if (!DashGaugeComponent)
+	{
+		return;
+	}
+
+	UWWDashBarWidget* DashWidget = Cast<UWWDashBarWidget>(DashGaugeComponent->GetUserWidgetObject());
+
+	if (!DashWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DashWidget NULL"));
+		return;
+	}
+
+	if (GetController() && !SequenceActor->GetSequencePlayer()->IsPlaying())
+	{
+		DashWidget->UpdataWorldDash(NewDash);
+	}
+	else
+	{
+		DashWidget->HideWorldDash();
+	}
 }

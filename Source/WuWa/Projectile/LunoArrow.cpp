@@ -1,5 +1,6 @@
 #include "Projectile/LunoArrow.h"
 #include "Physics/WWCollision.h"
+#include "Character/WWCharacter.h"
 
 #include "Engine/DamageEvents.h"
 #include "Components/SphereComponent.h"
@@ -125,27 +126,7 @@ bool ALunoArrow::CheckAttackHit()
 			continue;
 		}
 
-		DamagedActors.Add(HitActor);
-
-		if (AttackHitEffect)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-		}
-
-		if (!bDidShakeCamera)
-		{
-			APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
-			if (PC && CameraShakeClass)
-			{
-				bDidShakeCamera = true;
-				PC->ClientStartCameraShake(CameraShakeClass);
-			}
-		}
-
-		const float AttackDamage = 1.0f;
-
-		FDamageEvent DamageEvent;
-		HitActor->TakeDamage(AttackDamage, DamageEvent, GetInstigatorController(), this);
+		Cast<AWWCharacter>(GetInstigator())->OnAttackSucceeded(DamagedActors, HitActor, HitResult, bDidShakeCamera);
 	}
 
 	return true;

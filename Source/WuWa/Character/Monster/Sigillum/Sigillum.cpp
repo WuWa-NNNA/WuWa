@@ -17,7 +17,7 @@ ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
-	Stat->SetMaxHP(1000);
+	Stat->SetMaxHP(5000);
 }
 
 
@@ -36,25 +36,6 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 		Weapon->SetMaterial(3, HiddenMaterial);
 		Weapon->SetMaterial(4, HiddenMaterial);
 	}
-}
-
-
-void ASigillum::SetDead()
-{
-	bIsDead = true;
-
-	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-	{
-		AnimInstance->Montage_Stop(0.0f);
-	}
-
-	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
-	{
-		MoveComp->StopMovementImmediately();
-		MoveComp->DisableMovement();
-	}
-
-	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
