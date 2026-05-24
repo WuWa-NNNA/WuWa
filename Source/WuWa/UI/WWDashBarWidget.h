@@ -18,6 +18,7 @@ public :
 	virtual void NativeConstruct() override;
 
 	void UpdataWorldDash(float NewCurrentDash);
+	void HideWorldDash();
 
 protected :
 

@@ -23,6 +23,11 @@ public:
 	AMonster(const FObjectInitializer& ObjectInitializer);
 	USkeletalMeshComponent* GetWeapon() { return Weapon; }
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat")
+	bool bIsDead = false;
+
+	void SetDead();
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

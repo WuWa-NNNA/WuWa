@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
 #include "Stat/Player/LunoStatComponent.h"
@@ -51,6 +52,24 @@ void ALuno::BeginPlay()
 	ChangeLunoState(ELunoState::Half);
 }
 
+void ALuno::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (CurrentLunoState == ELunoState::Crescent)
+	{
+		if (GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Flying)
+		{
+			GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
+		}
+
+		if (!GetWeaponMeshComponent()->IsVisible())
+		{
+			GetWeaponMeshComponent()->SetVisibility(true);
+		}
+	}
+}
+
 void ALuno::ChangeLunoState(ELunoState NextLunoState)
 {
 	switch (CurrentLunoState)
@@ -59,7 +78,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(false);
-		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Falling;
 		GetCharacterMovement()->Velocity = FVector::ZeroVector;
 		break;
 	}
@@ -73,7 +92,7 @@ void ALuno::ChangeLunoState(ELunoState NextLunoState)
 		break;
 	case ELunoState::Crescent:
 		GetWeaponMeshComponent()->SetVisibility(true);
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
 		Cast<ULunoStatComponent>(Stat)->SetCrescentTimer();
 		break;
 	}
@@ -128,6 +147,16 @@ void ALuno::Skill()
 	}
 
 	Super::Skill();
+}
+
+bool ALuno::CanAirDash()
+{
+	if (CurrentLunoState == ELunoState::Crescent)
+	{
+		return true;
+	}
+
+	return Super::CanAirDash();
 }
 
 void ALuno::PlayDashMontage()
@@ -189,5 +218,14 @@ void ALuno::PlayDodgeMontage()
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
 		AnimInstance->Montage_JumpToSection(TEXT("Back"), Montage);
 		WeaponAnimInstance->Montage_Play(WeaponMotage, 1.5f);
+	}
+}
+
+void ALuno::SpawnAttackHitEffect(const FHitResult& HitResult)
+{
+	if (AttackHitEffect)
+	{
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackHitEffect, HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
+		SpawnedEffect->SetVariableFloat(TEXT("User._Size"), 2.0f);
 	}
 }

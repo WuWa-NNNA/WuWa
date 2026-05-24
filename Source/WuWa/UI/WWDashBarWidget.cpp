@@ -9,10 +9,13 @@ void UWWDashBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	DashGaugeImage = Cast<UImage>(GetWidgetFromName(TEXT("UDashGaugeImage")));
-	ensure(DashGaugeImage);
+	if (!DashGaugeImage)
+	{
+		DashGaugeImage = Cast<UImage>(GetWidgetFromName(TEXT("UDashGaugeImage")));
+		ensure(DashGaugeImage);
+	}
 
-	if (DashGaugeImage)
+	if (DashGaugeImage && !DashGaugeMaterial)
 	{
 		UMaterialInterface* BaseMaterial = DashGaugeImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashGaugeImage->GetBrush().GetResourceObject()) : nullptr;
 		if (BaseMaterial)
@@ -21,6 +24,7 @@ void UWWDashBarWidget::NativeConstruct()
 			DashGaugeImage->SetBrushFromMaterial(DashGaugeMaterial);
 		}
 	}
+
 	MaxDash = 10;
 }
 
@@ -35,11 +39,11 @@ void UWWDashBarWidget::UpdataWorldDash(float NewCurrentDash)
 
 		if (DashPercent >= 1)
 		{
-			DashGaugeImage->SetVisibility(ESlateVisibility::Collapsed);
+			DashGaugeImage->SetVisibility(ESlateVisibility::Hidden);
 		}
 		else
 		{
-			DashGaugeImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			DashGaugeImage->SetVisibility(ESlateVisibility::Visible);
 		}
 
 		if (DashPercent < 0.4)
@@ -50,6 +54,13 @@ void UWWDashBarWidget::UpdataWorldDash(float NewCurrentDash)
 		{
 			DashGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FVector3d(0.381326f, 0.327778f, 0.102242f));
 		}
+	}
+}
 
+void UWWDashBarWidget::HideWorldDash()
+{
+	if (DashGaugeImage)
+	{
+		DashGaugeImage->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
