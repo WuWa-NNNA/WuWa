@@ -198,6 +198,9 @@ void AWWPlayerController::SpawnResonators()
 		PossessResonator->SetActorHiddenInGame(false);
 		PossessResonator->SetActorEnableCollision(true);
 	}
+	Concerto2();
+	Concerto1();
+
 }
 
 void AWWPlayerController::CreateHUDWidget()

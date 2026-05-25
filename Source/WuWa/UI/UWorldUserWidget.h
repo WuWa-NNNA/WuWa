@@ -74,6 +74,9 @@ public :
 	UFUNCTION()
 	void UpdatePartyIcons(int32 partynumber);
 
+	UFUNCTION()
+	void UpdatePartySkillIcons(int32 partynumber);
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
@@ -83,6 +86,15 @@ protected :
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> RBarImage;
+	
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> RSkillIconImage;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> ESkillIconImage;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> BaseSkillIcon;
 
 	UPROPERTY()
 	TObjectPtr<class UMaterialInstanceDynamic> DashGaugeMaterial;
@@ -93,8 +105,7 @@ protected :
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> LevelText;
 
-	UPROPERTY()
-	TObjectPtr<class UImage> SkillImage;
+
 
 	UPROPERTY()
 	TObjectPtr<class UImage> ESkillKeyImage;
@@ -144,8 +155,6 @@ protected :	// 파티원 아이콘
 	UPROPERTY()
 	TObjectPtr<class UImage> PartyIconButton1;
 
-
-
 	UPROPERTY()
 	TObjectPtr<class UImage> PartyIcon2;
 	UPROPERTY()
@@ -153,9 +162,9 @@ protected :	// 파티원 아이콘
 	UPROPERTY()
 	TObjectPtr<class UImage> PartyIconButton2;
 
-
-
-
+public :
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UDataTable> SkillDataTable;
 public :
 	void UpdateAllVisuals(class UPlayerStatComponent* Stat);
 

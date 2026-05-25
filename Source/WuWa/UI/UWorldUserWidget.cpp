@@ -12,9 +12,20 @@
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "Misc/OutputDeviceNull.h"
 
+#include "Data/WWSkillIconData.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1.0f;
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DataTableObj(TEXT("/Game/PCH/Data/SkillIconData.SkillIconData"));
+
+	if (DataTableObj.Succeeded())
+	{
+		UE_LOG(LogTemp, Log, TEXT("DataTableObj Succese"));
+
+		SkillDataTable = DataTableObj.Object;
+	}
 }
 
 void UUWorldUserWidget::NativeOnInitialized()
@@ -23,7 +34,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
-	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
 	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("W_ESkillKeyImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
@@ -45,7 +55,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 
 	ensure(HPProgressBar);
 	ensure(LevelText);
-	ensure(SkillImage);
 	ensure(EHideImage);
 	ensure(RHideImage);
 	ensure(ESkillKeyImage);
@@ -63,16 +72,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 	ensure(PartyIcon2);
 	ensure(Party_WBP_TOUCH2);
 	ensure(PartyIconButton2);
-
-	//if (DashBarImage)
-	//{
-	//	UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
-	//	if (BaseMaterial)
-	//	{
-	//		DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-	//		DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
-	//	}
-	//}
 
 	if (RBarImage)
 	{
@@ -107,11 +106,13 @@ void UUWorldUserWidget::NativeOnInitialized()
 	Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
 	Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 
-	UE_LOG(LogTemp,Log, TEXT("UMG NativeOnInitialized"));
+	//UE_LOG(LogTemp,Log, TEXT("UMG NativeOnInitialized"));
 
 	PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);
 	PartyIconButton2->SetVisibility(ESlateVisibility::Visible);
 	TransformationGauge->SetVisibility(ESlateVisibility::Visible);
+
+
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -149,7 +150,9 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
-	ChangeIconSprite = NewIcon;
+	//ChangeIconSprite = NewIcon;
+	BaseSkillIcon->SetBrushFromAtlasInterface(NewIcon);
+	UE_LOG(LogTemp, Log, TEXT("UpdateSkillIcon %s : "), *NewIcon->GetName());
 }
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
@@ -304,4 +307,50 @@ void UUWorldUserWidget::UpdatePartyIcons(int32 partynumber)
 	default:
 		break;
 	}
+	UpdatePartySkillIcons(partynumber);
+}
+
+void UUWorldUserWidget::UpdatePartySkillIcons(int32 partynumber)
+{
+	if(!SkillDataTable)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SkillDataTable is null"));
+		return;
+	}
+
+	FName RowNameE;
+	FName RowNameR;
+	FName RowNameBase;
+	if (partynumber == 1)
+	{
+		RowNameE = TEXT("Luno_E");
+		RowNameR = TEXT("Luno_R");
+		RowNameBase = TEXT("Luno_Normal_1");
+
+	}
+	else if (partynumber == 2)
+	{
+		RowNameE = TEXT("Chisa_E");
+		RowNameR = TEXT("Chisa_R");
+		RowNameBase = TEXT("Chisa_Normal_1");
+	}
+
+	FWWSkillIconData* SkillDataE = SkillDataTable->FindRow<FWWSkillIconData>(RowNameE, TEXT("UpdatePartySkillIcons"));
+	FWWSkillIconData* SkillDataR = SkillDataTable->FindRow<FWWSkillIconData>(RowNameR, TEXT("UpdatePartySkillIcons"));
+	FWWSkillIconData* SkillDataBase = SkillDataTable->FindRow<FWWSkillIconData>(RowNameBase, TEXT("UpdatePartySkillIcons"));
+
+
+	UPaperSprite* SpriteE = SkillDataE->SkillIcon.LoadSynchronous();
+	UPaperSprite* SpriteR = SkillDataR->SkillIcon.LoadSynchronous();
+	UPaperSprite* SpriteBase = SkillDataBase->SkillIcon.LoadSynchronous();
+
+	if (!SpriteE && ! SpriteR && !SpriteBase)
+	{
+		UE_LOG(LogTemp, Warning,TEXT("Sprite Load Failed"));
+		return;
+	}
+	ESkillIconImage->SetBrushFromAtlasInterface(SpriteE);
+	RSkillIconImage->SetBrushFromAtlasInterface(SpriteR);
+	BaseSkillIcon->SetBrushFromAtlasInterface(SpriteBase);
+
 }
