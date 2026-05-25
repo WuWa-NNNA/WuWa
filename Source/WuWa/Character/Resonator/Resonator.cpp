@@ -105,25 +105,21 @@ void AResonator::ConcertoIn(AResonator* Other)
 		DashGaugeComponent->SetWorldLocation(Other->DashGaugeComponent->GetComponentLocation());
 	}
 
-	if (Other->CurrentState == EResonatorState::Normal)
+	if (bIsLockOn && LockOnTarget)
 	{
-		SetActorTransform(Other->GetActorTransform());
+		const float Radius = 250.f;
+		const float RandomAngle = FMath::RandRange(0.f, 360.f);
+		const FVector Offset = FRotator(0.f, RandomAngle, 0.f).Vector() * Radius;
+		SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
+		ConcertoAttack();
 	}
 	else
 	{
-		if (bIsLockOn && LockOnTarget)
+		SetActorTransform(Other->GetActorTransform());
+		if (Other->CurrentState != EResonatorState::Normal)
 		{
-			const float Radius = 250.f;
-			const float RandomAngle = FMath::RandRange(0.f, 360.f);
-			const FVector Offset = FRotator(0.f, RandomAngle, 0.f).Vector() * Radius;
-			SetActorLocation(LockOnTarget->GetActorLocation() + Offset);
+			ConcertoAttack();
 		}
-		else
-		{
-			SetActorTransform(Other->GetActorTransform());
-		}
-
-		ConcertoAttack();
 	}
 
 	BeginConcertoGhostTrailEffect();
@@ -755,6 +751,11 @@ void AResonator::PlayDodgeMontage()
 
 void AResonator::PlayBurstCinematic()
 {
+	if (!BurstSequence)
+	{
+		return;
+	}
+
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->HideUI();
 
@@ -934,9 +935,15 @@ void AResonator::OnAttackMontageEnded(UAnimMontage* TargetMontage, bool bInterru
 
 void AResonator::OnBurstCinematicEnded()
 {
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->ShowUI();
-	Cast<APlayerController>(GetController())->SetViewTargetWithBlend(this, 0.0f);
+	if (UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat))
+	{
+		PlayerStat->ShowUI();
+	}
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->SetViewTargetWithBlend(this, 0.0f);
+	}
 }
 
 void AResonator::DamagedTest()
