@@ -3,3 +3,6 @@
 
 #include "Character/Resonator/Chisa/Chisa.h"
 
+AChisa::AChisa(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+}

@@ -89,6 +89,8 @@ void AResonator::ConcertoOut()
 
 void AResonator::ConcertoIn(AResonator* Other)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ConcertoIn"));
+
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 
@@ -100,7 +102,10 @@ void AResonator::ConcertoIn(AResonator* Other)
 	if (PlayerStat && OtherPlayerStat)
 	{
 		float DashValue = OtherPlayerStat->GetCurrentDash();
+
+		PlayerStat->ChangeParty();
 		PlayerStat->SetCurrentDash(DashValue);
+
 		UpdateDashGaugeUI(DashValue);
 		DashGaugeComponent->SetWorldLocation(Other->DashGaugeComponent->GetComponentLocation());
 	}

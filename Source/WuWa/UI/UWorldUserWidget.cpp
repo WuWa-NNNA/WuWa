@@ -17,9 +17,9 @@ UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer
 	MaxHp = -1.0f;
 }
 
-void UUWorldUserWidget::NativeConstruct()
+void UUWorldUserWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
@@ -36,6 +36,13 @@ void UUWorldUserWidget::NativeConstruct()
 	WBP_TOUCH3 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch3")));
 	WBP_TOUCH4 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch4")));
 
+	PartyIcon1 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIcon1")));
+	Party_WBP_TOUCH1 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Party_WBP_TOUCH1")));
+	PartyIconButton1 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIconButton1")));
+	PartyIcon2 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIcon2")));
+	Party_WBP_TOUCH2 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Party_WBP_TOUCH2")));
+	PartyIconButton2 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIconButton2")));
+
 	ensure(HPProgressBar);
 	ensure(LevelText);
 	ensure(SkillImage);
@@ -50,16 +57,22 @@ void UUWorldUserWidget::NativeConstruct()
 	ensure(WBP_TOUCH2);
 	ensure(WBP_TOUCH3);
 	ensure(WBP_TOUCH4);
+	ensure(PartyIcon1);
+	ensure(Party_WBP_TOUCH1);
+	ensure(PartyIconButton1);
+	ensure(PartyIcon2);
+	ensure(Party_WBP_TOUCH2);
+	ensure(PartyIconButton2);
 
-	if (DashBarImage)
-	{
-		UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
-		if (BaseMaterial)
-		{
-			DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-			DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
-		}
-	}
+	//if (DashBarImage)
+	//{
+	//	UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
+	//	if (BaseMaterial)
+	//	{
+	//		DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+	//		DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
+	//	}
+	//}
 
 	if (RBarImage)
 	{
@@ -91,7 +104,14 @@ void UUWorldUserWidget::NativeConstruct()
 	WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH3->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH4->SetVisibility(ESlateVisibility::Hidden);
+	Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
+	Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 
+	UE_LOG(LogTemp,Log, TEXT("UMG NativeOnInitialized"));
+
+	PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);
+	PartyIconButton2->SetVisibility(ESlateVisibility::Visible);
+	TransformationGauge->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -262,4 +282,26 @@ void UUWorldUserWidget::TriggerTouchBurstAnimation()
 	FString FunctionName = TEXT("OnInteration");
 	FOutputDeviceNull ar;
 	WBP_TOUCH4->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
+}
+
+void UUWorldUserWidget::UpdatePartyIcons(int32 partynumber)
+{
+	UE_LOG(LogTemp, Log, TEXT("party : %d"), partynumber);
+	switch (partynumber)
+	{
+	case 1: // 유노
+		TriggerTouchAnimation(Party_WBP_TOUCH2);
+		PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);		//1번 비활성화
+		PartyIconButton2->SetVisibility(ESlateVisibility::Visible);		//2번 활성화
+		TransformationGauge->SetVisibility(ESlateVisibility::Visible);
+		break;
+	case 2: // 치사
+		TriggerTouchAnimation(Party_WBP_TOUCH1);
+		PartyIconButton1->SetVisibility(ESlateVisibility::Visible);
+		PartyIconButton2->SetVisibility(ESlateVisibility::Hidden);
+		TransformationGauge->SetVisibility(ESlateVisibility::Hidden);
+		break;
+	default:
+		break;
+	}
 }

@@ -298,4 +298,7 @@ public :
 private:
 	void UseDashGauge();
 	void UpdateDashGaugeUI(float NewDash);
+
+//public:
+//	uint32 PartyNumber;
 };

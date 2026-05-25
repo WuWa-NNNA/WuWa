@@ -17,7 +17,7 @@ class WUWA_API UUWorldUserWidget : public UWWUserWidget
 public :
 	UUWorldUserWidget(const FObjectInitializer& ObjectInitializer);
 protected :
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 
 public :
 	FORCEINLINE void SetMaxHp(float NewMaxHP) { MaxHp = NewMaxHP; }
@@ -71,12 +71,15 @@ public :
 	UFUNCTION()
 	void TriggerTouchBurstAnimation();
 
+	UFUNCTION()
+	void UpdatePartyIcons(int32 partynumber);
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UImage> DashBarImage;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UImage> DashBarImage;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> RBarImage;
@@ -132,6 +135,26 @@ protected : // 보스
 
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> BossParryBar;
+
+protected :	// 파티원 아이콘
+	UPROPERTY()
+	TObjectPtr<class UImage> PartyIcon1;
+	UPROPERTY()
+	TObjectPtr<class UUserWidget> Party_WBP_TOUCH1;
+	UPROPERTY()
+	TObjectPtr<class UImage> PartyIconButton1;
+
+
+
+	UPROPERTY()
+	TObjectPtr<class UImage> PartyIcon2;
+	UPROPERTY()
+	TObjectPtr<class UUserWidget> Party_WBP_TOUCH2;
+	UPROPERTY()
+	TObjectPtr<class UImage> PartyIconButton2;
+
+
+
 
 public :
 	void UpdateAllVisuals(class UPlayerStatComponent* Stat);
