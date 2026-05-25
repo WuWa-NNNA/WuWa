@@ -21,6 +21,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -37,8 +38,12 @@ protected:
 	virtual void Skill() override;
 
 protected:
+	virtual bool CanAirDash() override;
 	virtual void PlayDashMontage() override;
 	virtual void PlayDodgeMontage() override;
+
+protected:
+	virtual void SpawnAttackHitEffect(const FHitResult& HitResult) override;
 
 public:
 	FORCEINLINE ELunoState GetCurrentLunoState() const { return CurrentLunoState; }

@@ -34,7 +34,7 @@ void AWWCharacter::CheckAttackHit(const FAttackHitData& AttackHitData, TSet<TObj
 
 	bool bHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, SweepStart, SweepEnd, FQuat::Identity, CCHANNEL_WWACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
 
-	UE_LOG(LogTemp, Warning, TEXT("Direction: %s, Range: %f"), *AttackHitData.Direction.ToString(), AttackRange);
+	//UE_LOG(LogTemp, Warning, TEXT("Direction: %s, Range: %f"), *AttackHitData.Direction.ToString(), AttackRange);
 #if ENABLE_DRAW_DEBUG
 	const float CapsuleHalfHeight = AttackRange * 0.5f;
 	FColor DrawColor = bHitDetected ? FColor::Green : FColor::Red;
@@ -86,7 +86,7 @@ void AWWCharacter::OnAttackSucceeded(TSet<TObjectPtr<AActor>>& DamagedActors, AA
 {
 	DamagedActors.Add(HitActor);
 
-	const float AttackDamage = 1.0f;
+	const float AttackDamage = 10.0f;
 
 	FDamageEvent DamageEvent;
 	float ActualDamage = HitActor->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
