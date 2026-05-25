@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "Engine/Texture2D.h"
+#include "PaperSprite.h"
 #include "WWSkillIconData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -28,7 +28,7 @@ public:
 
 	// 스킬 아이콘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UTexture2D> SkillIcon;
+	TSoftObjectPtr<UPaperSprite> SkillIcon;	
 
 	// 쿨타임
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

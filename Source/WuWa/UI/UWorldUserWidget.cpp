@@ -290,13 +290,13 @@ void UUWorldUserWidget::UpdatePartyIcons(int32 partynumber)
 	switch (partynumber)
 	{
 	case 1: // 유노
-		TriggerTouchAnimation(Party_WBP_TOUCH2);
+		TriggerTouchAnimation(Party_WBP_TOUCH1);
 		PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);		//1번 비활성화
 		PartyIconButton2->SetVisibility(ESlateVisibility::Visible);		//2번 활성화
 		TransformationGauge->SetVisibility(ESlateVisibility::Visible);
 		break;
 	case 2: // 치사
-		TriggerTouchAnimation(Party_WBP_TOUCH1);
+		TriggerTouchAnimation(Party_WBP_TOUCH2);
 		PartyIconButton1->SetVisibility(ESlateVisibility::Visible);
 		PartyIconButton2->SetVisibility(ESlateVisibility::Hidden);
 		TransformationGauge->SetVisibility(ESlateVisibility::Hidden);
