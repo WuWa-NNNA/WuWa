@@ -31,9 +31,6 @@ protected:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UFUNCTION()
-	void AnimNotify_AN_EndDiveAttack();
-
-	UFUNCTION()
 	void AnimNotify_AN_CheckParalysis();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
