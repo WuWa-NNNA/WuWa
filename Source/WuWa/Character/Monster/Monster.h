@@ -83,6 +83,5 @@ public :
 	UFUNCTION(BlueprintCallable)
 	void DamagedTestBoss();
 
-	// IParringTimingInterface을(를) 통해 상속됨
-	void SetIsParringTiming(bool InIsParringTiming) override;
+	void SetIsParringTiming_Implementation(bool InIsParringTiming) override;
 };

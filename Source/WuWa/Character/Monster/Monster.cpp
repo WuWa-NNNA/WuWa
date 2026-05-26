@@ -112,7 +112,7 @@ void AMonster::DamagedTestBoss()
 	Stat->SetHp(CurrentHP);
 }
 
-void AMonster::SetIsParringTiming(bool InIsParringTiming)
+void AMonster::SetIsParringTiming_Implementation(bool InIsParringTiming)
 {
 	bIsBeingParringTiming = InIsParringTiming;
 }
