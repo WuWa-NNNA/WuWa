@@ -162,6 +162,13 @@ protected :	// 파티원 아이콘
 	UPROPERTY()
 	TObjectPtr<class UImage> PartyIconButton2;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> PartyHpBar1;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> PartyHpBar2;
+
+	int32 CurrentPartyNumber;
+
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UDataTable> SkillDataTable;

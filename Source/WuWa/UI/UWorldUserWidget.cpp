@@ -26,6 +26,7 @@ UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer
 
 		SkillDataTable = DataTableObj.Object;
 	}
+	CurrentPartyNumber = 0;
 }
 
 void UUWorldUserWidget::NativeOnInitialized()
@@ -111,16 +112,26 @@ void UUWorldUserWidget::NativeOnInitialized()
 	PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);
 	PartyIconButton2->SetVisibility(ESlateVisibility::Visible);
 	TransformationGauge->SetVisibility(ESlateVisibility::Visible);
-
-
+	
+	PartyHpBar1->SetPercent(1);
+	PartyHpBar2->SetPercent(1);
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
 {
+	UE_LOG(LogTemp, Log, TEXT("HP : %f"), NewCurrentHp);
 	ensure(MaxHp > 0.0f);
 	if (HPProgressBar)
 	{
 		HPProgressBar->SetPercent(NewCurrentHp / MaxHp);
+	}
+	if (CurrentPartyNumber == 1)
+	{
+		PartyHpBar1->SetPercent(NewCurrentHp / MaxHp);
+	}
+	if (CurrentPartyNumber == 2)
+	{
+		PartyHpBar2->SetPercent(NewCurrentHp / MaxHp);
 	}
 
 }
@@ -297,12 +308,14 @@ void UUWorldUserWidget::UpdatePartyIcons(int32 partynumber)
 		PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);		//1번 비활성화
 		PartyIconButton2->SetVisibility(ESlateVisibility::Visible);		//2번 활성화
 		TransformationGauge->SetVisibility(ESlateVisibility::Visible);
+		Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 		break;
 	case 2: // 치사
 		TriggerTouchAnimation(Party_WBP_TOUCH2);
 		PartyIconButton1->SetVisibility(ESlateVisibility::Visible);
 		PartyIconButton2->SetVisibility(ESlateVisibility::Hidden);
 		TransformationGauge->SetVisibility(ESlateVisibility::Hidden);
+		Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
 		break;
 	default:
 		break;
@@ -321,6 +334,7 @@ void UUWorldUserWidget::UpdatePartySkillIcons(int32 partynumber)
 	FName RowNameE;
 	FName RowNameR;
 	FName RowNameBase;
+	CurrentPartyNumber = partynumber;
 	if (partynumber == 1)
 	{
 		RowNameE = TEXT("Luno_E");
