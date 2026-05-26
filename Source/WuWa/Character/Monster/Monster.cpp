@@ -108,7 +108,10 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryingHitEffect, GetActorLocation(), FRotator::ZeroRotator, FVector(2.0f, 2.0f, 2.0f));
 			}
 		}
-		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+		if (CanPlayHitReaction())
+		{
+			AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
+		}
 	}
 
 	return ActualDamage;

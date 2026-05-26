@@ -52,6 +52,7 @@ public :
 
 protected:
 	bool bIsBeingParringTiming = false;
+	virtual bool CanPlayHitReaction() const { return true; }
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
