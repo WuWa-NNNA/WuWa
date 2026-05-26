@@ -16,5 +16,6 @@ void USigillumStatComponent::BeginPlay()
 void USigillumStatComponent::SetParryGauge(float ApplyParryGauge)
 {
 	ParryGauge = ApplyParryGauge;
+	OnParry.Broadcast(ParryGauge);
 }
 
