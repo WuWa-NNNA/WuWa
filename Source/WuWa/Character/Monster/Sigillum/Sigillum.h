@@ -31,6 +31,13 @@ protected:
 protected:
 	void ChangeToParalysis();
 
+public: // timestop attack 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat|TimeStop")
+	void OnTimeStopSpaceBegin();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Combat|TimeStop")
+	void OnTimeStopSpaceEnd();
+
 private: // montage;
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ParalysisMontage;
