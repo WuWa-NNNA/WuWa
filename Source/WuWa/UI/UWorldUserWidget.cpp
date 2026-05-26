@@ -200,6 +200,7 @@ void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat
 
 	BossStat->OnHpChagned.RemoveAll(this);
 	BossStat->OnHpChagned.AddUObject(this, &UUWorldUserWidget::Damaged);
+	BossStat->OnParry.AddUObject(this, &UUWorldUserWidget::UpdateBossParyGauge);
 	UE_LOG(LogTemp, Log, TEXT("Succed InitializeBossUISetting"));
 }
 
@@ -366,4 +367,10 @@ void UUWorldUserWidget::UpdatePartySkillIcons(int32 partynumber)
 	RSkillIconImage->SetBrushFromAtlasInterface(SpriteR);
 	BaseSkillIcon->SetBrushFromAtlasInterface(SpriteBase);
 
+}
+
+void UUWorldUserWidget::UpdateBossParyGauge(float gauge)
+{
+	UE_LOG(LogTemp, Log, TEXT("parry %f"), gauge);
+	BossParryBar->SetPercent(gauge);
 }

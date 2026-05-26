@@ -77,6 +77,10 @@ public :
 	UFUNCTION()
 	void UpdatePartySkillIcons(int32 partynumber);
 
+public :
+	UFUNCTION()
+	void UpdateBossParyGauge(float gauge);
+
 protected :
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HPProgressBar;
