@@ -13,6 +13,7 @@
 #include "Stat/Monster/MonsterStatComponent.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 
 AMonster::AMonster(const FObjectInitializer& ObjectInitializer)
@@ -100,6 +101,13 @@ float AMonster::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	AAIController* AICon = Cast<AAIController>(GetController());
 	if (bIsBeingParringTiming && AICon && AICon->GetBlackboardComponent())
 	{
+		if (ParryingHitEffect)
+		{
+			for (int i = 0; i < 5; ++i)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParryingHitEffect, GetActorLocation(), FRotator::ZeroRotator, FVector(2.0f, 2.0f, 2.0f));
+			}
+		}
 		AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsStaggered"), true);
 	}
 
