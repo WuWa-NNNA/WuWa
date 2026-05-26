@@ -6,7 +6,7 @@
 #include "Stat/Monster/MonsterStatComponent.h"
 #include "SigillumStatComponent.generated.h"
 
-//Todo : 패리게이지 깍이는 거 델리게이트 만들기
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnParryDelegate, float);
 
 /**
  * 
@@ -17,6 +17,9 @@ class WUWA_API USigillumStatComponent : public UMonsterStatComponent
 	GENERATED_BODY()
 public :
 	USigillumStatComponent();
+
+
+	FOnParryDelegate OnParry;
 
 	virtual void BeginPlay() override;
 
