@@ -76,6 +76,7 @@ public :
 	void PlaySkillIconAnimation();
 
 	FORCEINLINE float GetRecoveryDash() { return RecoveryRate; }
+	FORCEINLINE void SetRecoveryDash(float NewValue) { RecoveryRate = NewValue; }
 
 public :
 	UFUNCTION(BlueprintCallable, Category = "Skill")
