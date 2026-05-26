@@ -17,44 +17,21 @@ class WUWA_API ASigillum : public AMonster
 	
 public:
 	ASigillum(const FObjectInitializer& ObjectInitializer);
-	void ResetDiveAttackMovement();
 	virtual void OnConstruction(const FTransform& Transform) override;
-	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
-
-protected:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void EvadeAndAttack();
-	void DiveAttack();
-	void ChangeToParalysis();
-
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	class UMaterialInterface* HiddenMaterial;
+	UAnimMontage* GetParalysisMontage() const { return ParalysisMontage; }
 
-private: // dive
-	bool bIsDiveAttacking = false;
-	FTimerHandle TimerHandle_Dive;
-	void PlayAirMontage();
 
-private: // inputaction
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> EvadeAndAttackAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> DiveAttackAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> ParalysisAction;
+protected:
+	void ChangeToParalysis();
 
 private: // montage;
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UAnimMontage> EvadeAndAttackMontage;
-
-	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UAnimMontage> DiveAttackMontage;
-
-	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ParalysisMontage;
 
+private:
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 };

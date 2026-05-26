@@ -88,4 +88,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Party", meta = (AllowPrivateAccess = "true"))
 	FTransform ResonatorSpawnTransform2;
 
+private:
+	uint32 PartyNumber;
+
 };

@@ -15,6 +15,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 
 	coolTime_E = 1.0f;
 	coolTime_R = 5.0f;
+	partyNumber = 0;
 }
 
 void UPlayerStatComponent::BeginPlay()
@@ -142,4 +143,9 @@ void UPlayerStatComponent::ShowUI()
 void UPlayerStatComponent::LockOnUI()
 {
 	OnLockOn.Broadcast();
+}
+
+void UPlayerStatComponent::ChangeParty()
+{
+	OnPartyChanged.Broadcast(partyNumber);
 }

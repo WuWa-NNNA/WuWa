@@ -31,16 +31,10 @@ public:
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void Attack();
 	virtual void BeginPlay() override;
 
 private:
 	virtual void Tick(float DeltaSeconds) override;
-
-private:
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void Jump();
 
 private:
 
@@ -56,7 +50,7 @@ public :
 	void showLockOnMonster();
 	void hideLockOnMonster();
 
-private:
+protected:
 	bool bIsBeingParringTiming = false;
 
 private:
@@ -76,19 +70,6 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> Weapon;
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> MoveAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> LookAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> JumpAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> AttackAction;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))

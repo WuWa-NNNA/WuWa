@@ -60,15 +60,6 @@ void AMonster::SetupPlayerInputComponent(class UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (EnhancedInputComponent)
-	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMonster::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMonster::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMonster::Jump);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMonster::Attack);
-	}
-
 }
 
 void AMonster::Tick(float DeltaSeconds)
@@ -77,53 +68,6 @@ void AMonster::Tick(float DeltaSeconds)
 }
 
 
-void AMonster::Move(const FInputActionValue& Value)
-{
-	FVector2D Movement = Value.Get<FVector2D>();
-
-	FRotator Rotation = GetControlRotation();
-	FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
-
-	FVector ForwardVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	FVector RightVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	FVector NewMoveInputDirection = ForwardVector * Movement.Y + RightVector * Movement.X;
-	if (NewMoveInputDirection.IsNearlyZero())
-	{
-		return;
-	}
-
-	CurrentMoveInputDirection = NewMoveInputDirection.GetSafeNormal();
-	AddMovementInput(CurrentMoveInputDirection);
-
-}
-
-void AMonster::Look(const FInputActionValue& Value)
-{
-	FVector2D RotationValue = Value.Get<FVector2D>();
-
-	AddControllerYawInput(RotationValue.X);
-	AddControllerPitchInput(-RotationValue.Y);
-}
-
-
-void AMonster::Jump()
-{
-
-	if (GetVelocity().Length() > 50.0f)
-	{
-		PlayAnimMontage(JumpMontage);
-	}
-}
-
-void AMonster::Attack()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage)
-	{
-		AnimInstance->Montage_Play(AttackMontage);
-	}
-}
 
 void AMonster::BeginPlay()
 {

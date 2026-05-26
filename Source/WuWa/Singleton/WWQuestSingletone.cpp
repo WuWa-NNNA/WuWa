@@ -2,7 +2,7 @@
 
 
 #include "WWQuestSingletone.h"
-#include "QuestData/WWQuestData.h"
+#include "Data/WWQuestData.h"
 #include "Algo/Transform.h"
 
 UWWQuestSingletone::UWWQuestSingletone()

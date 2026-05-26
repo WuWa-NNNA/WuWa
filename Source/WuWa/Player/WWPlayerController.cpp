@@ -71,7 +71,8 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 
 		if (PlayerStat)
 		{
-			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
+			PlayerStat->OnPartyChanged.RemoveAll(MainHUDWidget);
+
 			PlayerStat->FOnSkillEStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::SkillCoolEActive);
 			PlayerStat->OnBaseSkillchange.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillIcon);
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
@@ -80,7 +81,10 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnLockOn.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchLockOnAnimation);
 			PlayerStat->OnPlayIconAnimation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBaseAttackAnimation);
 			PlayerStat->OnPlayIcon4Animation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBurstAnimation);
-			
+			PlayerStat->OnPartyChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdatePartyIcons);
+			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
+
+
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
 			MainHUDWidget->UpdateRGauge(PlayerStat->GetRGauge());
@@ -109,7 +113,8 @@ void AWWPlayerController::OnUnPossess()
 			PlayerStat->OnREnd.RemoveAll(MainHUDWidget);
 			PlayerStat->OnLockOn.RemoveAll(MainHUDWidget);
 			PlayerStat->OnPlayIconAnimation.RemoveAll(MainHUDWidget);
-			PlayerStat->OnPlayIcon4Animation.RemoveAll(MainHUDWidget);
+			PlayerStat->OnPlayIcon4Animation.RemoveAll(MainHUDWidget);	
+			PlayerStat->OnHpChagned.RemoveAll(MainHUDWidget);
 		}
 
 		if (ULunoStatComponent* LunoStat =
@@ -196,6 +201,9 @@ void AWWPlayerController::SpawnResonators()
 		PossessResonator->SetActorHiddenInGame(false);
 		PossessResonator->SetActorEnableCollision(true);
 	}
+	Concerto2();
+	Concerto1();
+
 }
 
 void AWWPlayerController::CreateHUDWidget()
@@ -204,6 +212,8 @@ void AWWPlayerController::CreateHUDWidget()
 	{
 		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("MainHUDWidget is null. Creating HUD Widget."));
+
 
 	MainHUDWidget = CreateWidget<UUWorldUserWidget>(this, HUDWidgetClass);
 	if (MainHUDWidget)
