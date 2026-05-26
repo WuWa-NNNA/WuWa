@@ -26,6 +26,9 @@ public:
 
 
 protected:
+	virtual bool CanPlayHitReaction() const override;
+
+protected:
 	void ChangeToParalysis();
 
 private: // montage;
