@@ -6,18 +6,20 @@
 
 void UANS_ParringTiming::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
-	IParringTimingInterface* Monster = Cast<IParringTimingInterface>(MeshComp->GetOwner());
-	if (Monster)
+	AActor* OwnerActor = MeshComp->GetOwner();
+	IParringTimingInterface* Monster = Cast<IParringTimingInterface>(OwnerActor);
+	if (OwnerActor && Monster)
 	{
-		Monster->SetIsParringTiming(true);
+		IParringTimingInterface::Execute_SetIsParringTiming(OwnerActor, true);
 	}
 }
 
 void UANS_ParringTiming::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	IParringTimingInterface* Monster = Cast<IParringTimingInterface>(MeshComp->GetOwner());
-	if (Monster)
+	AActor* OwnerActor = MeshComp->GetOwner();
+	IParringTimingInterface* Monster = Cast<IParringTimingInterface>(OwnerActor);
+	if (OwnerActor && Monster)
 	{
-		Monster->SetIsParringTiming(false);
+		IParringTimingInterface::Execute_SetIsParringTiming(OwnerActor, false);
 	}
 }
