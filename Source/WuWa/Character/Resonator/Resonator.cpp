@@ -326,9 +326,11 @@ void AResonator::ChangeLocomotionGait(const ELocomotionGait NextLocomotionGait)
 	{
 	case ELocomotionGait::Run:
 		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+		Cast<UPlayerStatComponent>(Stat)->SetRecoveryDash(0.8f);
 		break;
 	case ELocomotionGait::Sprint:
 		GetCharacterMovement()->MaxWalkSpeed = 750.0f;
+		Cast<UPlayerStatComponent>(Stat)->SetRecoveryDash(-0.1f);
 		break;
 	}
 
@@ -957,7 +959,7 @@ void AResonator::DamagedTest()
 void AResonator::RGaugeUp()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.01f);
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.02f);
 }
 
 void AResonator::OpenUI()

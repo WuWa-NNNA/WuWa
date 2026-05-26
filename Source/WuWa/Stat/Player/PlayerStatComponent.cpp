@@ -11,7 +11,7 @@ UPlayerStatComponent::UPlayerStatComponent()
 	MaxDash = 10.f;
 	CurrentDash = MaxDash;
 
-	RecoveryRate = 0.6f;
+	RecoveryRate = 0.8f;
 
 	coolTime_E = 1.0f;
 	coolTime_R = 5.0f;

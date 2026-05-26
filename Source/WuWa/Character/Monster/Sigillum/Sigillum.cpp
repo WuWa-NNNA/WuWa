@@ -9,6 +9,8 @@
 #include "InputTriggers.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "AIController.h"
 
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "UI/UWorldUserWidget.h"
@@ -45,6 +47,12 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 	}
 }
 
+bool ASigillum::CanPlayHitReaction() const
+{
+	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
+	return SigillumStat && SigillumStat->GetParryGauge() > 0.f;
+}
+
 void ASigillum::ChangeToParalysis()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -56,12 +64,25 @@ void ASigillum::ChangeToParalysis()
 
 float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
-
+	AAIController* AICon = Cast<AAIController>(GetController());
+	
 	if (bIsBeingParringTiming)
 	{
-		SigillumStat->SetParryGauge(FMath::Clamp(SigillumStat->GetParryGauge() - 0.1f, 0.f, 1.f));
+		float Gauge = FMath::Clamp(SigillumStat->GetParryGauge() - 0.1f, 0.f, 1.f);
+		SigillumStat->SetParryGauge(Gauge);
+
+		if (Gauge == 0)
+		{
+			if (!(AICon->GetBlackboardComponent()->GetValueAsBool(FName("IsParalysis"))) && AICon && AICon->GetBlackboardComponent())
+			{
+				AICon->GetBlackboardComponent()->SetValueAsBool(FName("IsParalysis"), true);
+			}
+		}
 	}
+
+	bool IsSuperDamageTime = SigillumStat->GetParryGauge() == 0;
+	float Damage = Super::TakeDamage(IsSuperDamageTime ? DamageAmount * 100 : DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	return Damage;
 }
