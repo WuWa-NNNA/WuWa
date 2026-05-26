@@ -35,7 +35,7 @@ public :
 	void UpdateSkillIcon(class UPaperSprite* NewIcon);
 
 	UFUNCTION()
-	void SkillCoolEActive(float a);
+	void UpdateEGauge(float a);
 
 	UFUNCTION()
 	void SkillCoolEDisable();
@@ -51,6 +51,9 @@ public :
 	
 	UFUNCTION()
 	void ChangedTransformationGauge(float Gauge);
+
+	UFUNCTION()
+	void EStartEfect();
 
 public :
 	UFUNCTION()
@@ -100,16 +103,20 @@ protected :
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> BaseSkillIcon;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> ECoolTxt;
+
 	UPROPERTY()
 	TObjectPtr<class UMaterialInstanceDynamic> DashGaugeMaterial;
 
 	UPROPERTY()
 	TObjectPtr<class UMaterialInstanceDynamic> RGaugeMaterial;
+
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> EGaugeMaterial;
 	
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> LevelText;
-
-
 
 	UPROPERTY()
 	TObjectPtr<class UImage> ESkillKeyImage;
@@ -120,8 +127,8 @@ protected :
 	UPROPERTY()
 	float BossMaxHp;
 
-	UPROPERTY()
-	TObjectPtr<class UImage> EHideImage;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> EBarImage;
 
 	UPROPERTY()
 	TObjectPtr<class UImage> RHideImage;
@@ -139,7 +146,7 @@ protected :
 	TObjectPtr<UUserWidget> WBP_TOUCH3;
 
 	UPROPERTY()
-	TObjectPtr<UUserWidget> WBP_TOUCH4;
+	TObjectPtr<class UWWTouchWidget> WBP_TOUCH4;
 
 protected : // 보스
 	UPROPERTY()

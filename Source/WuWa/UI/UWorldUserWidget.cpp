@@ -14,6 +14,7 @@
 
 #include "Data/WWSkillIconData.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "WWTouchWidget.h"
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1.0f;
@@ -35,7 +36,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
-	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
 	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("W_ESkillKeyImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
 	BossName = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
@@ -45,7 +45,7 @@ void UUWorldUserWidget::NativeOnInitialized()
 	WBP_TOUCH1 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch1")));
 	WBP_TOUCH2 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch2")));
 	WBP_TOUCH3 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch3")));
-	WBP_TOUCH4 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch4")));
+	WBP_TOUCH4 = Cast<UWWTouchWidget>(GetWidgetFromName(TEXT("W_Touch4")));
 
 	PartyIcon1 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIcon1")));
 	Party_WBP_TOUCH1 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Party_WBP_TOUCH1")));
@@ -56,7 +56,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 
 	ensure(HPProgressBar);
 	ensure(LevelText);
-	ensure(EHideImage);
 	ensure(RHideImage);
 	ensure(ESkillKeyImage);
 	ensure(BossName);
@@ -84,6 +83,16 @@ void UUWorldUserWidget::NativeOnInitialized()
 		}
 	}
 
+	if (EBarImage)
+	{
+		UMaterialInterface* BaseMaterial = EBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(EBarImage->GetBrush().GetResourceObject()) : nullptr;
+		if (BaseMaterial)
+		{
+			EGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+			EBarImage->SetBrushFromMaterial(EGaugeMaterial);
+		}
+	}
+
 	AActor* TargetActor = OwningActor ? OwningActor : GetOwningPlayerPawn();
 	if (TargetActor)
 	{
@@ -91,7 +100,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 		if (PlayerStatComp)
 		{
 			MaxHp = PlayerStatComp->GetMaxHP();
-			//MaxDash = PlayerStatComp->GetMaxDash();
 			UpdateHpBar(PlayerStatComp->GetCurrentHP());
 			UpdateLevel(PlayerStatComp->GetLevel());
 		}
@@ -106,8 +114,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 	WBP_TOUCH4->SetVisibility(ESlateVisibility::Hidden);
 	Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
 	Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
-
-	//UE_LOG(LogTemp,Log, TEXT("UMG NativeOnInitialized"));
 
 	PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);
 	PartyIconButton2->SetVisibility(ESlateVisibility::Visible);
@@ -160,23 +166,42 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
-	//ChangeIconSprite = NewIcon;
 	BaseSkillIcon->SetBrushFromAtlasInterface(NewIcon);
 	//UE_LOG(LogTemp, Log, TEXT("UpdateSkillIcon %s : "), *NewIcon->GetName());
 }
 
-void UUWorldUserWidget::SkillCoolEActive(float a)
+void UUWorldUserWidget::UpdateEGauge(float currenGauge)
 {
-	EHideImage->SetVisibility(ESlateVisibility::Visible);
-	ESkillKeyImage->SetVisibility(ESlateVisibility::Hidden);
-	TriggerTouchAnimation(WBP_TOUCH3);
+	if (currenGauge <= 0)
+	{
+		if (CurrentPartyNumber == 1)
+		{
+		}
+		if (CurrentPartyNumber == 2)
+		{
+			EBarImage->SetVisibility(ESlateVisibility::Hidden);
+			ESkillKeyImage->SetVisibility(ESlateVisibility::Visible);
+		}
+		EGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), 0);
+		ECoolTxt->SetText(FText::FromString(FString::Printf(TEXT(""))));
+		return;
+	}
+	else
+	{
+		EBarImage->SetVisibility(ESlateVisibility::Visible);
+		EGaugeMaterial->SetScalarParameterValue(TEXT("Progress"), currenGauge / 10);
+		ECoolTxt->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), currenGauge)));
+		ESkillKeyImage->SetVisibility(ESlateVisibility::Hidden);
+		UE_LOG(LogTemp, Warning,TEXT("%f"), currenGauge / 10);
+	}
 }
 
 void UUWorldUserWidget::SkillCoolEDisable()
 {
-	EHideImage->SetVisibility(ESlateVisibility::Hidden);
+	UE_LOG(LogTemp, Log, TEXT("SkillCoolEDisable"));
 	ESkillKeyImage->SetVisibility(ESlateVisibility::Visible);
 
+	EBarImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
@@ -226,6 +251,21 @@ void UUWorldUserWidget::Damaged(float damaged)
 void UUWorldUserWidget::ChangedTransformationGauge(float Gauge)
 {
 	TransformationGauge->SetPercent(Gauge);
+}
+
+void UUWorldUserWidget::EStartEfect()
+{
+	if (!WBP_TOUCH3)
+	{
+		return;
+	}
+	if (WBP_TOUCH3->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		WBP_TOUCH3->SetVisibility(ESlateVisibility::Visible);
+	}
+	FString FunctionName = TEXT("OnInteration");
+	FOutputDeviceNull ar;
+	WBP_TOUCH3->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
 }
 
 void UUWorldUserWidget::HUDVisible()
@@ -341,12 +381,16 @@ void UUWorldUserWidget::UpdatePartySkillIcons(int32 partynumber)
 		RowNameR = TEXT("Luno_R");
 		RowNameBase = TEXT("Luno_Normal_1");
 
+		RGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"), FLinearColor(0.226966f, 1.000000f, 0.752942f, 1.000000f));
+		WBP_TOUCH4->ChangeImageColor(FLinearColor(0.226966f, 1.000000f, 0.752942f, 1.000000f));
 	}
 	else if (partynumber == 2)
 	{
 		RowNameE = TEXT("Chisa_E");
 		RowNameR = TEXT("Chisa_R");
 		RowNameBase = TEXT("Chisa_Normal_1");
+		RGaugeMaterial->SetVectorParameterValue(TEXT("Ba_Color"),FLinearColor(1.000000f, 0.533277f, 0.814847, 1.000000f));
+		WBP_TOUCH4->ChangeImageColor(FLinearColor(1.000000f, 0.533277f, 0.814847, 1.000000f));
 	}
 
 	FWWSkillIconData* SkillDataE = SkillDataTable->FindRow<FWWSkillIconData>(RowNameE, TEXT("UpdatePartySkillIcons"));

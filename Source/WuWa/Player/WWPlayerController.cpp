@@ -44,6 +44,9 @@ void AWWPlayerController::BeginPlay()
 
 	SpawnResonators();
 	CreateHUDWidget();
+
+	Concerto2();
+	Concerto1();
 }
 
 void AWWPlayerController::SetInputMappingContext(EInputType InNewInputType)
@@ -73,7 +76,7 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 		{
 			PlayerStat->OnPartyChanged.RemoveAll(MainHUDWidget);
 
-			PlayerStat->FOnSkillEStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::SkillCoolEActive);
+			PlayerStat->FOnSkillEStart.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateEGauge);
 			PlayerStat->OnBaseSkillchange.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateSkillIcon);
 			PlayerStat->OnRGaugaChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateRGauge);
 			PlayerStat->OnRSart.AddUObject(MainHUDWidget, &UUWorldUserWidget::HUDHidden);
@@ -83,7 +86,7 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnPlayIcon4Animation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBurstAnimation);
 			PlayerStat->OnPartyChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdatePartyIcons);
 			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
-
+			PlayerStat->OnSkillEStart2.AddUObject(MainHUDWidget, &UUWorldUserWidget::EStartEfect);
 
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
@@ -115,6 +118,7 @@ void AWWPlayerController::OnUnPossess()
 			PlayerStat->OnPlayIconAnimation.RemoveAll(MainHUDWidget);
 			PlayerStat->OnPlayIcon4Animation.RemoveAll(MainHUDWidget);	
 			PlayerStat->OnHpChagned.RemoveAll(MainHUDWidget);
+			PlayerStat->OnSkillEStart2.RemoveAll(MainHUDWidget);
 		}
 
 		if (ULunoStatComponent* LunoStat =
@@ -201,9 +205,6 @@ void AWWPlayerController::SpawnResonators()
 		PossessResonator->SetActorHiddenInGame(false);
 		PossessResonator->SetActorEnableCollision(true);
 	}
-	Concerto2();
-	Concerto1();
-
 }
 
 void AWWPlayerController::CreateHUDWidget()

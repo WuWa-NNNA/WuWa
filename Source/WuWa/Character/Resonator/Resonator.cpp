@@ -580,6 +580,12 @@ void AResonator::Skill()
 	{
 		return;
 	}
+	
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	if (!PlayerStat->SkillE())
+	{
+		return;
+	}
 
 	TryCancelAttackMontageByNewInput();
 
@@ -589,8 +595,6 @@ void AResonator::Skill()
 	PlayAnimMontage(SkillMontage, 1.5f);
 	Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SkillE();
 }
 
 void AResonator::Burst()
@@ -959,7 +963,8 @@ void AResonator::DamagedTest()
 void AResonator::RGaugeUp()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.02f);
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.5f);
+	//Todo : 0.02 ¿ø·¡
 }
 
 void AResonator::OpenUI()
