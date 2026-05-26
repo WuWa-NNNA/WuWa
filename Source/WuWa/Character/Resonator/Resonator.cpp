@@ -89,8 +89,6 @@ void AResonator::ConcertoOut()
 
 void AResonator::ConcertoIn(AResonator* Other)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ConcertoIn"));
-
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 

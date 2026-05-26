@@ -119,7 +119,6 @@ void UUWorldUserWidget::NativeOnInitialized()
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
 {
-	UE_LOG(LogTemp, Log, TEXT("HP : %f"), NewCurrentHp);
 	ensure(MaxHp > 0.0f);
 	if (HPProgressBar)
 	{
@@ -163,7 +162,7 @@ void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
 	//ChangeIconSprite = NewIcon;
 	BaseSkillIcon->SetBrushFromAtlasInterface(NewIcon);
-	UE_LOG(LogTemp, Log, TEXT("UpdateSkillIcon %s : "), *NewIcon->GetName());
+	//UE_LOG(LogTemp, Log, TEXT("UpdateSkillIcon %s : "), *NewIcon->GetName());
 }
 
 void UUWorldUserWidget::SkillCoolEActive(float a)

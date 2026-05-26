@@ -82,7 +82,9 @@ void AWWPlayerController::OnPossess(APawn* InPawn)
 			PlayerStat->OnPlayIconAnimation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBaseAttackAnimation);
 			PlayerStat->OnPlayIcon4Animation.AddUObject(MainHUDWidget, &UUWorldUserWidget::TriggerTouchBurstAnimation);
 			PlayerStat->OnPartyChanged.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdatePartyIcons);
-			
+			PlayerStat->OnHpChagned.AddUObject(MainHUDWidget, &UUWorldUserWidget::UpdateHpBar);
+
+
 			MainHUDWidget->SetMaxHp(PlayerStat->GetMaxHP());
 			MainHUDWidget->UpdateHpBar(PlayerStat->GetCurrentHP());
 			MainHUDWidget->UpdateRGauge(PlayerStat->GetRGauge());
@@ -112,6 +114,7 @@ void AWWPlayerController::OnUnPossess()
 			PlayerStat->OnLockOn.RemoveAll(MainHUDWidget);
 			PlayerStat->OnPlayIconAnimation.RemoveAll(MainHUDWidget);
 			PlayerStat->OnPlayIcon4Animation.RemoveAll(MainHUDWidget);	
+			PlayerStat->OnHpChagned.RemoveAll(MainHUDWidget);
 		}
 
 		if (ULunoStatComponent* LunoStat =
