@@ -97,6 +97,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Montage", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage;
 
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraSystem> ParryingHitEffect;
 
 public :
 	UFUNCTION(BlueprintCallable)
