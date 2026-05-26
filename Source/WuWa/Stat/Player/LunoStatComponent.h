@@ -7,7 +7,6 @@
 #include "Character/Resonator/Luno/Luno.h"
 #include "LunoStatComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnBaseAttackDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeCrescentTimeDelegate, float /*currentDash*/);
 DECLARE_MULTICAST_DELEGATE(FOnBaseEndCrescentTimeDelegate);
 
@@ -32,7 +31,6 @@ class WUWA_API ULunoStatComponent : public UPlayerStatComponent
 public :
 	ULunoStatComponent();
 
-	FOnBaseAttackDelegate OnBaseAttack;
 	FOnChangeCrescentTimeDelegate OnChangeCrescentTime;
 	FOnBaseEndCrescentTimeDelegate OnBaseEndCrescentTime;
 

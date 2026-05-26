@@ -20,6 +20,8 @@ DECLARE_MULTICAST_DELEGATE(FOnLockOnDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnPlayIconAnimationDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnPlayIcon4AnimationDelegate);
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPartyChangedDelegate, int32 /*PartyNumber*/);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 
 class WUWA_API UPlayerStatComponent : public UWWStatComponent
@@ -49,6 +51,8 @@ public :
 	FOnLockOnDelegate OnLockOn;
 	FOnPlayIconAnimationDelegate OnPlayIconAnimation;
 	FOnPlayIcon4AnimationDelegate OnPlayIcon4Animation;
+
+	FOnPartyChangedDelegate OnPartyChanged;
 
 	FORCEINLINE float GetMaxDash() { return MaxDash; }
 	FORCEINLINE float GetLevel() { return Level; }
@@ -85,6 +89,10 @@ public :
 
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void LockOnUI();
+
+public :
+	UFUNCTION(BlueprintCallable, Category = "Party_UI")
+	void ChangeParty();
 	
 private :	
 	void SetDash(float NewDash);
@@ -110,4 +118,8 @@ private:
 	FTimerHandle RPossibleTimerHandle;
 
 	void PlayRAnimationLoop();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Party")
+	int32 partyNumber;
 };

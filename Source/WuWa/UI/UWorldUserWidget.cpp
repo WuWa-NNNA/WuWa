@@ -12,18 +12,29 @@
 #include "Stat/Monster/SigillumStatComponent.h"
 #include "Misc/OutputDeviceNull.h"
 
+#include "Data/WWSkillIconData.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 UUWorldUserWidget::UUWorldUserWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1.0f;
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DataTableObj(TEXT("/Game/PCH/Data/SkillIconData.SkillIconData"));
+
+	if (DataTableObj.Succeeded())
+	{
+		UE_LOG(LogTemp, Log, TEXT("DataTableObj Succese"));
+
+		SkillDataTable = DataTableObj.Object;
+	}
+	CurrentPartyNumber = 0;
 }
 
-void UUWorldUserWidget::NativeConstruct()
+void UUWorldUserWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpBar")));
 	LevelText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LevelText")));
-	SkillImage = Cast<UImage>(GetWidgetFromName(TEXT("Base_Icon")));
 	EHideImage = Cast<UImage>(GetWidgetFromName(TEXT("EHideImage")));
 	ESkillKeyImage = Cast<UImage>(GetWidgetFromName(TEXT("W_ESkillKeyImage")));
 	RHideImage = Cast<UImage>(GetWidgetFromName(TEXT("RHideImage")));
@@ -36,9 +47,15 @@ void UUWorldUserWidget::NativeConstruct()
 	WBP_TOUCH3 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch3")));
 	WBP_TOUCH4 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Touch4")));
 
+	PartyIcon1 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIcon1")));
+	Party_WBP_TOUCH1 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Party_WBP_TOUCH1")));
+	PartyIconButton1 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIconButton1")));
+	PartyIcon2 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIcon2")));
+	Party_WBP_TOUCH2 = Cast<UUserWidget>(GetWidgetFromName(TEXT("W_Party_WBP_TOUCH2")));
+	PartyIconButton2 = Cast<UImage>(GetWidgetFromName(TEXT("W_PartyIconButton2")));
+
 	ensure(HPProgressBar);
 	ensure(LevelText);
-	ensure(SkillImage);
 	ensure(EHideImage);
 	ensure(RHideImage);
 	ensure(ESkillKeyImage);
@@ -50,16 +67,12 @@ void UUWorldUserWidget::NativeConstruct()
 	ensure(WBP_TOUCH2);
 	ensure(WBP_TOUCH3);
 	ensure(WBP_TOUCH4);
-
-	if (DashBarImage)
-	{
-		UMaterialInterface* BaseMaterial = DashBarImage->GetBrush().GetResourceObject() ? Cast<UMaterialInterface>(DashBarImage->GetBrush().GetResourceObject()) : nullptr;
-		if (BaseMaterial)
-		{
-			DashGaugeMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-			DashBarImage->SetBrushFromMaterial(DashGaugeMaterial);
-		}
-	}
+	ensure(PartyIcon1);
+	ensure(Party_WBP_TOUCH1);
+	ensure(PartyIconButton1);
+	ensure(PartyIcon2);
+	ensure(Party_WBP_TOUCH2);
+	ensure(PartyIconButton2);
 
 	if (RBarImage)
 	{
@@ -91,7 +104,17 @@ void UUWorldUserWidget::NativeConstruct()
 	WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH3->SetVisibility(ESlateVisibility::Hidden);
 	WBP_TOUCH4->SetVisibility(ESlateVisibility::Hidden);
+	Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
+	Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
 
+	//UE_LOG(LogTemp,Log, TEXT("UMG NativeOnInitialized"));
+
+	PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);
+	PartyIconButton2->SetVisibility(ESlateVisibility::Visible);
+	TransformationGauge->SetVisibility(ESlateVisibility::Visible);
+	
+	PartyHpBar1->SetPercent(1);
+	PartyHpBar2->SetPercent(1);
 }
 
 void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
@@ -100,6 +123,14 @@ void UUWorldUserWidget::UpdateHpBar(float NewCurrentHp)
 	if (HPProgressBar)
 	{
 		HPProgressBar->SetPercent(NewCurrentHp / MaxHp);
+	}
+	if (CurrentPartyNumber == 1)
+	{
+		PartyHpBar1->SetPercent(NewCurrentHp / MaxHp);
+	}
+	if (CurrentPartyNumber == 2)
+	{
+		PartyHpBar2->SetPercent(NewCurrentHp / MaxHp);
 	}
 
 }
@@ -129,7 +160,9 @@ void UUWorldUserWidget::UpdateRGauge(float currenGauge)
 
 void UUWorldUserWidget::UpdateSkillIcon(UPaperSprite* NewIcon)
 {
-	ChangeIconSprite = NewIcon;
+	//ChangeIconSprite = NewIcon;
+	BaseSkillIcon->SetBrushFromAtlasInterface(NewIcon);
+	//UE_LOG(LogTemp, Log, TEXT("UpdateSkillIcon %s : "), *NewIcon->GetName());
 }
 
 void UUWorldUserWidget::SkillCoolEActive(float a)
@@ -262,4 +295,75 @@ void UUWorldUserWidget::TriggerTouchBurstAnimation()
 	FString FunctionName = TEXT("OnInteration");
 	FOutputDeviceNull ar;
 	WBP_TOUCH4->CallFunctionByNameWithArguments(*FunctionName, ar, nullptr, true);
+}
+
+void UUWorldUserWidget::UpdatePartyIcons(int32 partynumber)
+{
+	UE_LOG(LogTemp, Log, TEXT("party : %d"), partynumber);
+	switch (partynumber)
+	{
+	case 1: // 유노
+		TriggerTouchAnimation(Party_WBP_TOUCH1);
+		PartyIconButton1->SetVisibility(ESlateVisibility::Hidden);		//1번 비활성화
+		PartyIconButton2->SetVisibility(ESlateVisibility::Visible);		//2번 활성화
+		TransformationGauge->SetVisibility(ESlateVisibility::Visible);
+		Party_WBP_TOUCH2->SetVisibility(ESlateVisibility::Hidden);
+		break;
+	case 2: // 치사
+		TriggerTouchAnimation(Party_WBP_TOUCH2);
+		PartyIconButton1->SetVisibility(ESlateVisibility::Visible);
+		PartyIconButton2->SetVisibility(ESlateVisibility::Hidden);
+		TransformationGauge->SetVisibility(ESlateVisibility::Hidden);
+		Party_WBP_TOUCH1->SetVisibility(ESlateVisibility::Hidden);
+		break;
+	default:
+		break;
+	}
+	UpdatePartySkillIcons(partynumber);
+}
+
+void UUWorldUserWidget::UpdatePartySkillIcons(int32 partynumber)
+{
+	if(!SkillDataTable)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SkillDataTable is null"));
+		return;
+	}
+
+	FName RowNameE;
+	FName RowNameR;
+	FName RowNameBase;
+	CurrentPartyNumber = partynumber;
+	if (partynumber == 1)
+	{
+		RowNameE = TEXT("Luno_E");
+		RowNameR = TEXT("Luno_R");
+		RowNameBase = TEXT("Luno_Normal_1");
+
+	}
+	else if (partynumber == 2)
+	{
+		RowNameE = TEXT("Chisa_E");
+		RowNameR = TEXT("Chisa_R");
+		RowNameBase = TEXT("Chisa_Normal_1");
+	}
+
+	FWWSkillIconData* SkillDataE = SkillDataTable->FindRow<FWWSkillIconData>(RowNameE, TEXT("UpdatePartySkillIcons"));
+	FWWSkillIconData* SkillDataR = SkillDataTable->FindRow<FWWSkillIconData>(RowNameR, TEXT("UpdatePartySkillIcons"));
+	FWWSkillIconData* SkillDataBase = SkillDataTable->FindRow<FWWSkillIconData>(RowNameBase, TEXT("UpdatePartySkillIcons"));
+
+
+	UPaperSprite* SpriteE = SkillDataE->SkillIcon.LoadSynchronous();
+	UPaperSprite* SpriteR = SkillDataR->SkillIcon.LoadSynchronous();
+	UPaperSprite* SpriteBase = SkillDataBase->SkillIcon.LoadSynchronous();
+
+	if (!SpriteE && ! SpriteR && !SpriteBase)
+	{
+		UE_LOG(LogTemp, Warning,TEXT("Sprite Load Failed"));
+		return;
+	}
+	ESkillIconImage->SetBrushFromAtlasInterface(SpriteE);
+	RSkillIconImage->SetBrushFromAtlasInterface(SpriteR);
+	BaseSkillIcon->SetBrushFromAtlasInterface(SpriteBase);
+
 }

@@ -100,7 +100,10 @@ void AResonator::ConcertoIn(AResonator* Other)
 	if (PlayerStat && OtherPlayerStat)
 	{
 		float DashValue = OtherPlayerStat->GetCurrentDash();
+
+		PlayerStat->ChangeParty();
 		PlayerStat->SetCurrentDash(DashValue);
+
 		UpdateDashGaugeUI(DashValue);
 		DashGaugeComponent->SetWorldLocation(Other->DashGaugeComponent->GetComponentLocation());
 	}

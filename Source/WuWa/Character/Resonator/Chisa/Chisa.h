@@ -14,4 +14,6 @@ class WUWA_API AChisa : public AResonator
 {
 	GENERATED_BODY()
 	
+	AChisa(const FObjectInitializer& ObjectInitializer);
+
 };

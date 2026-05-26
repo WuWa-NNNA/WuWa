@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "QuestData/WWQuestData.h"
+#include "Data/WWQuestData.h"
 #include "WWQuestSingletone.generated.h"
 
 /**
