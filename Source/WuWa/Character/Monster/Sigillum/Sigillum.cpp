@@ -18,6 +18,13 @@ ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 	Stat->SetMaxHP(5000);
+
+	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
+
+	if (SigillumStat)
+	{
+		SigillumStat->SetParryGauge(1.f);
+	}
 }
 
 
@@ -38,44 +45,6 @@ void ASigillum::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void ASigillum::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (EnhancedInputComponent)
-	{
-		EnhancedInputComponent->BindAction(EvadeAndAttackAction, ETriggerEvent::Started, this, &ASigillum::EvadeAndAttack);
-		EnhancedInputComponent->BindAction(DiveAttackAction, ETriggerEvent::Started, this, &ASigillum::DiveAttack);
-		EnhancedInputComponent->BindAction(ParalysisAction, ETriggerEvent::Started, this, &ASigillum::ChangeToParalysis);
-	}
-}
-
-
-void ASigillum::EvadeAndAttack()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && EvadeAndAttackMontage)
-	{
-		AnimInstance->Montage_Play(EvadeAndAttackMontage);
-	}
-}
-void ASigillum::DiveAttack()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-
-	if (bIsDiveAttacking) return;
-
-	if (AnimInstance && DiveAttackMontage && MovementComp)
-	{
-		bIsDiveAttacking = true; 
-		LaunchCharacter(FVector(0.f, 0.f, 5000.f), true, true);
-
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_Dive, this, &ASigillum::PlayAirMontage, 0.3f, false);
-	}
-}
-
 void ASigillum::ChangeToParalysis()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -85,18 +54,14 @@ void ASigillum::ChangeToParalysis()
 	}
 }
 
-void ASigillum::PlayAirMontage()
+float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	GetMesh()->GetAnimInstance()->Montage_Play(DiveAttackMontage);
-}
+	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
 
-void ASigillum::ResetDiveAttackMovement()
-{
-	UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-	if (MovementComp)
+	if (bIsBeingParringTiming)
 	{
-		bIsDiveAttacking = false; 
-		MovementComp->SetMovementMode(MOVE_Falling);
+		SigillumStat->SetParryGauge(FMath::Clamp(SigillumStat->GetParryGauge() - 0.1f, 0.f, 1.f));
 	}
+	return Damage;
 }

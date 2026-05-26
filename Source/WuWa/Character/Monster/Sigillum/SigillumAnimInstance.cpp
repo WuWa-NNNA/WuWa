@@ -39,18 +39,7 @@ void USigillumAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 }
 
-void USigillumAnimInstance::AnimNotify_AN_EndDiveAttack()
-{
-	if (Movement)
-	{
-		Movement->SetMovementMode(MOVE_Falling);
-	}
 
-	if (Owner)
-	{
-		Owner->ResetDiveAttackMovement();
-	}
-}
 
 void USigillumAnimInstance::AnimNotify_AN_CheckParalysis()
 {
