@@ -31,6 +31,9 @@ protected :
 	UPROPERTY()
 	TObjectPtr<class UMaterialInstanceDynamic> LoadingImageaterial;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> txt;
+
 private :
 	FTimerHandle BreakTimerHandle;
 

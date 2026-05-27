@@ -3,6 +3,7 @@
 
 #include "WWLoadingBreakWidget.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void UWWLoadingBreakWidget::NativeConstruct()
 {
@@ -40,13 +41,17 @@ void UWWLoadingBreakWidget::StartBreak()
 
 void UWWLoadingBreakWidget::UpdateBreak()
 {
+	txt->SetVisibility(ESlateVisibility::Hidden);
+
 	if (CurrentProgress < 0.3)
 	{
 		CurrentProgress += 0.05f;
 	}
-	else if(CurrentProgress > 0.7)
+	else if(CurrentProgress >= 0.3)
 	{
-		CurrentProgress += 0.06f;
+		UE_LOG(LogTemp, Log, TEXT("»ç¶óÁ®¾ä´ï"));
+		CurrentProgress += 0.1f;
+
 	}
 	else
 	{

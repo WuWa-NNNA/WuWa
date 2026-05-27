@@ -963,8 +963,7 @@ void AResonator::DamagedTest()
 void AResonator::RGaugeUp()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.5f);
-	//Todo : 0.02 ¿ø·¡
+	PlayerStat->SetRGauge(PlayerStat->GetRGauge() + 0.02f);
 }
 
 void AResonator::OpenUI()
