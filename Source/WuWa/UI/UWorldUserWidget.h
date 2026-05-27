@@ -180,6 +180,13 @@ protected :	// 파티원 아이콘
 
 	int32 CurrentPartyNumber;
 
+protected :
+	//UPROPERTY()
+	//TObjectPtr<class UImage> PartyIconButton2;
+
+	//UPROPERTY()
+	//TObjectPtr<class UTextBlock> LevelText;
+
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UDataTable> SkillDataTable;
