@@ -19,7 +19,7 @@ ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
-	Stat->SetMaxHP(2500.0f);
+	Stat->SetMaxHP(3000.0f);
 
 	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
 

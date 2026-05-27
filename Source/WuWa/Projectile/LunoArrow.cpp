@@ -21,16 +21,21 @@ ALunoArrow::ALunoArrow()
 
 	ArrowEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ArrowEffect"));
 	ArrowEffect->SetupAttachment(RootComponent);
-	ArrowEffect->SetVariableBool(TEXT("User.AudioOn"), false);
-	ArrowEffect->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
-	ArrowEffect->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
-	ArrowEffect->SetVariableFloat(TEXT("User._Size"), 1.0f);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 6000.0f;
 	ProjectileMovement->MaxSpeed = 6000.0f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->ProjectileGravityScale = 0.0f;
+}
+
+void ALunoArrow::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ArrowEffect->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
+	ArrowEffect->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
+	ArrowEffect->SetVariableFloat(TEXT("User._Size"), 1.0f);
 }
 
 void ALunoArrow::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -64,7 +69,6 @@ void ALunoArrow::SpawnHitEffect(bool bHasTargetDamaged)
 	{
 		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitEffect_Block, SpawnLocation);
 		SpawnedEffect->SetVariableFloat(TEXT("User._Size"), 3.0f);
-		SpawnedEffect->SetVariableBool(TEXT("User.AudioOn"), false);
 	}
 }
 
