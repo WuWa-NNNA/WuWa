@@ -7,6 +7,7 @@
 
 #include "Sigillum.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBossHpZeroSignature);
 /**
  * 
  */
@@ -16,6 +17,10 @@ class WUWA_API ASigillum : public AMonster
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnBossHpZeroSignature OnBossHpZero;
+
+public :
 	ASigillum(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
 

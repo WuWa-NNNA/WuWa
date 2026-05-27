@@ -19,6 +19,8 @@ class WUWA_API AWWPlayerController : public APlayerController
 public:
 	AWWPlayerController();
 
+public :
+	TObjectPtr<class UUWorldUserWidget> GetMainHUDWidget() { return MainHUDWidget; }
 protected:
 	virtual void SetupInputComponent() override;
 

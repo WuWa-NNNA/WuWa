@@ -295,6 +295,9 @@ public :
 	UFUNCTION(BlueprintCallable, Category = "test")
 	void CloseUI();
 
+	UFUNCTION(BlueprintCallable, Category = "test")
+	void CloseBossUI();
+
 private:
 	void UseDashGauge();
 	void UpdateDashGaugeUI(float NewDash);
