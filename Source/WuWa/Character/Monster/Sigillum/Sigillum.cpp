@@ -19,7 +19,7 @@ ASigillum::ASigillum(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USigillumStatComponent>(TEXT("Stat")))
 {
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
-	Stat->SetMaxHP(5000);
+	Stat->SetMaxHP(100);
 
 	USigillumStatComponent* SigillumStat = Cast<USigillumStatComponent>(Stat);
 
@@ -83,6 +83,14 @@ float ASigillum::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 
 	bool IsSuperDamageTime = SigillumStat->GetParryGauge() == 0;
 	float Damage = Super::TakeDamage(IsSuperDamageTime ? DamageAmount * 100 : DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (SigillumStat && SigillumStat->GetCurrentHP() <= 0.f)
+	{
+		if (OnBossHpZero.IsBound())
+		{
+			OnBossHpZero.Broadcast();
+		}
+	}
 
 	return Damage;
 }

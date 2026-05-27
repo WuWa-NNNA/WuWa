@@ -22,6 +22,7 @@
 #include "Character/Monster/Monster.h"
 #include "UI/WWDashBarWidget.h"
 #include "Player/WWPlayerController.h"
+//#include "Engine/World.h"
 
 const float LockOnDetectRadius = 3000.0f;
 
@@ -976,6 +977,12 @@ void AResonator::CloseUI()
 {
 	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
 	PlayerStat->HideUI();
+}
+
+void AResonator::CloseBossUI()
+{
+	AWWPlayerController* pc = Cast<AWWPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->GetMainHUDWidget()->HideBossUI();
 }
 
 void AResonator::UseDashGauge()

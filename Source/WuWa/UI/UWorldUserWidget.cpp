@@ -213,11 +213,9 @@ void UUWorldUserWidget::UpdateAllVisuals(UPlayerStatComponent* Stat)
 
 void UUWorldUserWidget::InitializeBossUISetting(USigillumStatComponent* BossStat)
 {
-
 	BossHpBar->SetVisibility(ESlateVisibility::Visible);
 	BossName->SetVisibility(ESlateVisibility::Visible);
 	BossParryBar->SetVisibility(ESlateVisibility::Visible);
-
 
 	BossMaxHp = BossStat->GetMaxHP();
 	BossHpBar->SetPercent(BossStat->GetCurrentHP() / BossMaxHp);
