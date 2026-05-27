@@ -13,9 +13,10 @@ UPlayerStatComponent::UPlayerStatComponent()
 
 	RecoveryRate = 0.8f;
 
-	coolTime_E = 1.0f;
+	coolTime_E = 10.0f;
 	coolTime_R = 5.0f;
 	partyNumber = 0;
+	CurrentCoolE = 0;
 }
 
 void UPlayerStatComponent::BeginPlay()
@@ -52,7 +53,6 @@ void UPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	{
 		GetWorld()->GetTimerManager().ClearTimer(RPossibleTimerHandle);
 	}
-
 }
 
 void UPlayerStatComponent::PlayRAnimationLoop()
@@ -75,6 +75,11 @@ void UPlayerStatComponent::SetRGauge(float guage)
 bool UPlayerStatComponent::IsRPossible()
 {
 	return (RGauge >= 1.0f);
+}
+
+bool UPlayerStatComponent::IsEPossible()
+{
+	return (CurrentCoolE <= 0.0f);
 }
 
 void UPlayerStatComponent::ApplyDash()
@@ -119,9 +124,23 @@ void UPlayerStatComponent::PlaySkillIconAnimation()
 	OnPlayIconAnimation.Broadcast();
 }
 
-void UPlayerStatComponent::SkillE()
+bool UPlayerStatComponent::SkillE()
 {
-	FOnSkillEStart.Broadcast(coolTime_E);
+	if (!IsEPossible())
+	{
+		return false;
+	}
+	CurrentCoolE = coolTime_E;
+	UE_LOG(LogTemp, Log, TEXT("SkillE"));
+	OnSkillEStart2.Broadcast();
+	GetWorld()->GetTimerManager().SetTimer(
+		EPossibleTimerHandle,
+		this,
+		&UPlayerStatComponent::UpdatedESkillCool,
+		0.1f,
+		true
+	);
+	return true;
 }
 
 void UPlayerStatComponent::SetDash(float NewDash)
@@ -145,7 +164,14 @@ void UPlayerStatComponent::LockOnUI()
 	OnLockOn.Broadcast();
 }
 
+void UPlayerStatComponent::UpdatedESkillCool()
+{
+	CurrentCoolE = FMath::Clamp(CurrentCoolE - 0.1f, 0.0f, coolTime_E);
+	FOnSkillEStart.Broadcast(CurrentCoolE);
+}
+
 void UPlayerStatComponent::ChangeParty()
 {
 	OnPartyChanged.Broadcast(partyNumber);
+	OnDashChanged.Broadcast(CurrentDash);
 }

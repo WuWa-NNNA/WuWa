@@ -8,6 +8,8 @@
 #include "PlayerStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkillEStartDelegate, float);
+DECLARE_MULTICAST_DELEGATE(FOnSkillEStartDelegate2);
+
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDashChangedDelegate, float /*currentDash*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBaseSkillchangeDelegate,class UPaperSprite* /*skillIcon*/);
@@ -39,6 +41,8 @@ protected:
 
 public :
 	FOnSkillEStartDelegate FOnSkillEStart;
+	FOnSkillEStartDelegate2 OnSkillEStart2;
+
 	//FOnSkillRStartDelegate FOnSkillRStart;
 	FOnDashChangedDelegate OnDashChanged;
 
@@ -66,6 +70,7 @@ public :
 	FORCEINLINE void SetRGauge(float guage);
 
 	bool IsRPossible();
+	bool IsEPossible();
 
 	void ApplyDash();
 
@@ -80,7 +85,7 @@ public :
 
 public :
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	void SkillE();
+	bool SkillE();
 
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void HideUI();
@@ -91,6 +96,8 @@ public :
 	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
 	void LockOnUI();
 
+	UFUNCTION(BlueprintCallable, Category = "Skill_UI")
+	void UpdatedESkillCool();
 public :
 	UFUNCTION(BlueprintCallable, Category = "Party_UI")
 	void ChangeParty();
@@ -110,13 +117,19 @@ private :
 	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
 	float RGauge = 0.0f;
 
+	UPROPERTY(VisibleInstanceOnly, Category = "Stat")
+	float CurrentCoolE;
+
 	bool bWasRPossible = false;
+	bool bWasEPossible = false;
 public :
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TArray<TObjectPtr<class UPaperSprite>> NormalAttackIcons;
 
 private:
 	FTimerHandle RPossibleTimerHandle;
+	FTimerHandle EPossibleTimerHandle;
+
 
 	void PlayRAnimationLoop();
 

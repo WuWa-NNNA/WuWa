@@ -580,6 +580,12 @@ void AResonator::Skill()
 	{
 		return;
 	}
+	
+	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
+	if (!PlayerStat->SkillE())
+	{
+		return;
+	}
 
 	TryCancelAttackMontageByNewInput();
 
@@ -589,8 +595,6 @@ void AResonator::Skill()
 	PlayAnimMontage(SkillMontage, 1.5f);
 	Weapon->GetAnimInstance()->Montage_Play(WeaponSkillMontage, 1.5f);
 
-	UPlayerStatComponent* PlayerStat = Cast<UPlayerStatComponent>(Stat);
-	PlayerStat->SkillE();
 }
 
 void AResonator::Burst()
