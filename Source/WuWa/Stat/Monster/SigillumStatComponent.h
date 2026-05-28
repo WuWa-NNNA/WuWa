@@ -24,7 +24,7 @@ public :
 	virtual void BeginPlay() override;
 
 	FORCEINLINE float GetParryGauge() { return ParryGauge; }
-	FORCEINLINE void SetParryGauge(float ApplyParryGauge);
+	void SetParryGauge(float ApplyParryGauge);
 
 private :
 	float ParryGauge;

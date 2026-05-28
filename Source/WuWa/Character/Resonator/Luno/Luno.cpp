@@ -23,31 +23,29 @@ ALuno::ALuno(const FObjectInitializer& ObjectInitializer)
 
 	ArrowStartEffect1 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ArrowStartEffect1"));
 	ArrowStartEffect1->SetupAttachment(GetMesh(), TEXT("ArrowStart"));
-	ArrowStartEffect1->SetVariableBool(TEXT("User.AudioOn"), false);
-	ArrowStartEffect1->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
-	ArrowStartEffect1->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
-	ArrowStartEffect1->SetVariableFloat(TEXT("User._Size"), 1.0f);
 	ArrowStartEffect1->SetVisibility(false);
 
 	ArrowStartEffect2 = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ArrowStartEffect2"));
 	ArrowStartEffect2->SetupAttachment(GetMesh(), TEXT("ArrowStart"));
-	ArrowStartEffect2->SetVariableBool(TEXT("User.AudioOn"), false);
-	ArrowStartEffect2->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
-	ArrowStartEffect2->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
-	ArrowStartEffect2->SetVariableFloat(TEXT("User._Size"), 1.0f);
 	ArrowStartEffect2->SetVisibility(false);
 
 	WeaponTrail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponTrail"));
 	WeaponTrail->SetupAttachment(GetWeaponMeshComponent());
-	WeaponTrail->SetVariableBool(TEXT("User.AudioOn"), false);
-	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
-	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 	WeaponTrail->SetVisibility(false);
 }
 
 void ALuno::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ArrowStartEffect1->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
+	ArrowStartEffect1->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
+	ArrowStartEffect1->SetVariableFloat(TEXT("User._Size"), 1.0f);
+	ArrowStartEffect2->SetVariableBool(TEXT("User.NoLaunchVFX"), false);
+	ArrowStartEffect2->SetVariableFloat(TEXT("User.ColorHue"), 0.85f);
+	ArrowStartEffect2->SetVariableFloat(TEXT("User._Size"), 1.0f);
+	WeaponTrail->SetVariableFloat(TEXT("User._ColorHue"), 0.35f);
+	WeaponTrail->SetVariableFloat(TEXT("User._Size"), 1.5f);
 
 	ChangeLunoState(ELunoState::Half);
 }
